@@ -1,4 +1,4 @@
-#include "bwt.h"
+#include "../headers/bwt.h"
 
 ResultBwt *bwtTransformation(String text)
 {

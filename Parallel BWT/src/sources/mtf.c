@@ -1,4 +1,4 @@
-#include "mtf.h"
+#include "../headers/mtf.h"
 
 #define SIZE_SYMBOLS_LIST 256
 

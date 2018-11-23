@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "uthash.h"
+#include "../extern/uthash.h"
 
 typedef char* String;
 typedef struct Node Node;

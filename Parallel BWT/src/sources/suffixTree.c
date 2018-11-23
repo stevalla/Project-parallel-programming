@@ -1,5 +1,6 @@
-#include "suffixTree.h"
-#include "bwt.h"
+#include "../headers/suffixTree.h"
+
+#include "../headers/bwt.h"
 
 Node *buildSuffixTree(String text, int *phases)
 {

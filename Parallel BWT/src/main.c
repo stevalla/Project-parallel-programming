@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "suffixTree.h"
-#include "bwt.h"
-#include "mtf.h"
+#include "./headers/bwt.h"
+#include "./headers/mtf.h"
+#include "./headers/suffixTree.h"
 
 #define MAX_LENGTH 2000
 
