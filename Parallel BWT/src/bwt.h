@@ -9,11 +9,20 @@
 #include "suffixTree.h"
 
 
-String bwtTransformation(String);
+//Hold the bwt text and the index of the original string in the bwt
+typedef struct ResultBwt
+{
+	String text;
+	int index;
+
+} ResultBwt;
+
+
+ResultBwt *bwtTransformation(String);
 
 void createSuffixArray(Node *, int *, int[], String);
 
-String getBWT(String, Node *);
+ResultBwt *getBWT(String, Node *);
 
 int sortNodesByFirstLetter(HashChildren *, HashChildren *);
 

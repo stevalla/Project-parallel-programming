@@ -137,7 +137,7 @@ Node *createInternalNode(ActivePoint *ap,
 	//Create new leaf from the internal node
 	createLeaf(endLeaf, internalNode, root, text);
 
-	printf("Rule 2 - Create internal node: %c\n", text[internalNode->start]);
+//	printf("Rule 2 - Create internal node: %c\n", text[internalNode->start]);
 
 	return internalNode;
 }
@@ -155,7 +155,7 @@ void createLeaf(int *endLeaf, Node *parent, Node *root, String text)
 {
 	Node *child = createNode(*endLeaf, endLeaf, root);
 	addNewChild(child, parent, text);
-	printf("Rule 2 continue - Create leaf: %c\n", text[child->start]);
+//	printf("Rule 2 continue - Create leaf: %c\n", text[child->start]);
 }
 
 //Free the hash table that contains the children of a node

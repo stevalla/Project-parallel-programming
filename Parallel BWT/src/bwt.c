@@ -1,6 +1,6 @@
 #include "bwt.h"
 
-String bwtTransformation(String text)
+ResultBwt *bwtTransformation(String text)
 {
 
 	int phases = 0;
@@ -9,29 +9,37 @@ String bwtTransformation(String text)
 	return getBWT(text, suffixTree);
 }
 
-String getBWT(String text, Node *root)
+ResultBwt *getBWT(String text, Node *root)
 {
 	int len = strlen(text);
 	int suffixArray[len];
 	int i;
-	String bwtText;
+	ResultBwt *result;
 
 	for(i=0; i<len; i++)
 		suffixArray[i] = -1;
 
-	i=0;
+	i = 0;
+	result = (ResultBwt *) malloc(sizeof(ResultBwt));
+	result->text = (String) malloc(sizeof(text));
+
 	createSuffixArray(root, &i, suffixArray, text);
 
-	bwtText = (String) malloc(sizeof(text));
 	for(i=0; i<len; i++) {
 		int index = suffixArray[i];
+
+		//Store the BWT text
 		if(index == 0)
-			bwtText[i] = text[strlen(text) - 1];
+			result->text[i] = text[strlen(text) - 1];
 		else
-			bwtText[i] = text[suffixArray[i] - 1];
+			result->text[i] = text[suffixArray[i] - 1];
+
+		//Store the row of the original string
+		if(text[strlen(text)] == text[suffixArray[i] - 1])
+			result->index = i;
 	}
 
-	return bwtText;
+	return result;
 }
 
 //Lexicographic DFS traversal to create the suffix array

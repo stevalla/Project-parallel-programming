@@ -8,7 +8,8 @@
 typedef char* String;
 
 //Linked list containing the table of symbols
-typedef struct ListOfSymbols {
+typedef struct ListOfSymbols
+{
 
 	int symbol;
 	struct ListOfSymbols *next;
@@ -22,25 +23,26 @@ typedef struct ListOfSymbols {
  * of symbols. This make easier perform the move
  * to front operation on the linked list of symbols.
  */
-typedef struct MtfAux {
+typedef struct MtfAux
+{
 
 	int pos;
 	ListOfSymbols *prev;
 
-}MtfAux;
+} MtfAux;
 
 
 MtfAux *search(ListOfSymbols *, int, MtfAux *);
 
-int *mtfEncoding(String);
+unsigned char *mtfEncoding(String, int);
 
 ListOfSymbols *moveToFrontElement(ListOfSymbols *, MtfAux *);
+
+ListOfSymbols *moveToFrontElement2(ListOfSymbols *symbols, MtfAux *mtfAux);
 
 ListOfSymbols *initListOfSymbols();
 
 void freeListOfSymbols(ListOfSymbols *);
-
-void printList(ListOfSymbols *);
 
 
 #endif
