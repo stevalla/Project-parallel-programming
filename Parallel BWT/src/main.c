@@ -4,15 +4,21 @@
 
 #include "suffixTree.h"
 #include "bwt.h"
+#include "mtf.h"
 
 #define MAX_LENGTH 2000
 
 int main(int argc, char *argv[]) {
 
-	char text[MAX_LENGTH] = "mississippi";
+	char text[MAX_LENGTH] = "zzzzzzyyyyyxxxxwwwvvu";
 
-	String bwtText = bwtTransformation(text);
+	//BWT transformation
+//	String bwtText = bwtTransformation(text);
 
-	printf("%s\n", bwtText);
+	//Move to front coding
+	int *mtfText = mtfEncoding(text);
+	int i;
+	for(i=0; i<strlen(text); i++)
+		printf("%d\n", mtfText[i]);
 	return 0;
 }

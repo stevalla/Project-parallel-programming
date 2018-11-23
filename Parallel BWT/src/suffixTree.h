@@ -71,6 +71,5 @@ void deleteNode(Node *);
 
 HashChildren *findChildren(ActivePoint *, String);
 
-//void printfEdgeLength(Node *, String);
 
 #endif
