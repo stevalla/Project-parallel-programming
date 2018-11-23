@@ -4,21 +4,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "uthash.h"
 
-#define MAX_LENGTH 2000
+#include "uthash.h"
 
 typedef char* String;
 typedef struct Node Node;
 
 //To maintain the list of children of each node.
-typedef struct HashNode
+typedef struct HashChildren
 {
-    int id;                    /* key is the index of the first letter of the label*/
-    Node *node;
+    char firstLetter[1];	   /* key */
+    Node *node;				   /* value */
     UT_hash_handle hh;         /* makes this structure hash table */
 
-} HashNode;
+} HashChildren;
 
 struct Node
 {
@@ -29,7 +28,7 @@ struct Node
 
 	int suffixIndex;
 
-	HashNode *children;
+	HashChildren *children;
 };
 
 //These three variables define the current active point
@@ -41,9 +40,10 @@ typedef struct ActivePoint
 
 } ActivePoint;
 
-void buildSuffixTree(String);
 
-void applyExtensions(String, int, int, ActivePoint *, Node *, Node *);
+Node *buildSuffixTree(String, int *);
+
+void applyExtensions(String, int *, int *, ActivePoint *, Node *, Node *);
 
 int getEdgeLen(Node *);
 
@@ -55,8 +55,22 @@ void updateAP(ActivePoint *, Node *, int, int);
 
 int walkDown(ActivePoint *, Node *);
 
-void checkSuffixLinkNeeded(ActivePoint *, Node *);
+void checkSuffixLinkNeeded(Node *, Node *, Node *);
 
+Node *createInternalNode(ActivePoint *, Node *, HashChildren *, int *, String);
 
+void createLeaf(int *, Node *, Node *, String);
+
+void addSuffixIndex(Node *, int, String);
+
+void addNewChild(Node *, Node *, String);
+
+void deleteChildren(HashChildren *);
+
+void deleteNode(Node *);
+
+HashChildren *findChildren(ActivePoint *, String);
+
+//void printfEdgeLength(Node *, String);
 
 #endif
