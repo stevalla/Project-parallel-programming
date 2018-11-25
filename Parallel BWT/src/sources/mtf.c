@@ -1,29 +1,27 @@
 #include "../headers/mtf.h"
 
-#define SIZE_SYMBOLS_LIST 256
+#define SIZE_SYMBOLS_LIST 255
 
-Ascii mtfEncoding(Ascii text, int index, int option)
+short *mtfEncoding(short *inputText, int option, size_t inputLen)
 {
+	//Variables
 	int i;
-	int len = strlen((String)text);
 	ListOfSymbols *symbols;
-	Ascii mtfText;
-	MtfAux *mtfAux;
-
-	mtfText = (Ascii) malloc(sizeof(unsigned char)*len+1);
-	mtfAux = (MtfAux *) malloc(sizeof(MtfAux));
+	short *mtfOutput = (short *) malloc(sizeof(short)*inputLen);
+	MtfAux *mtfAux = (MtfAux *) malloc(sizeof(MtfAux));
 
 	symbols = initListOfSymbols();
-	mtfAux = search(symbols, 'a', mtfAux);
 
-	for(i=0; i<len; i++) {
-		if(i == index) {
-			mtfText[i] = (unsigned char)255;
+	for(i=0; i<inputLen; i++) {
+
+		//The sentinel character is not moved on
+		if(inputText[i] > 255) {
+			mtfOutput[i] = 257;
 			continue;
 		}
 
-		mtfAux = search(symbols, text[i], mtfAux);
-		mtfText[i] = (unsigned char)mtfAux->pos;
+		mtfAux = search(symbols, inputText[i], mtfAux);
+		mtfOutput[i] = mtfAux->pos;
 
 		if(option == 1)
 			symbols = moveToFrontElement(symbols, mtfAux);
@@ -34,7 +32,7 @@ Ascii mtfEncoding(Ascii text, int index, int option)
 	free(mtfAux);
 	freeListOfSymbols(symbols);
 
-	return mtfText;
+	return mtfOutput;
 }
 
 MtfAux *search(ListOfSymbols *symbols, int byte, MtfAux *mtfAux)

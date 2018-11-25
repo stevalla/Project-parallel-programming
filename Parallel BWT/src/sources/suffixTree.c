@@ -2,14 +2,13 @@
 
 #include "../headers/bwt.h"
 
-Node *buildSuffixTree(Ascii text, int *phases)
+Node *buildSuffixTree(short *input, int *phases, size_t inputLen)
 {
 	//Variables
 	ActivePoint *ap = (ActivePoint *) malloc(sizeof(ActivePoint));
 	Node *root;
 	int remainder = 0;	//Counts how many suffixes we still need to insert
 	int labelLen = 0;
-	int textLen;
 	int *endLeaf = phases;
 	int *endRoot = (int *) malloc(sizeof(int));
 
@@ -23,18 +22,16 @@ Node *buildSuffixTree(Ascii text, int *phases)
 	ap->activeLen = 0;
 
 	//Append the sentinel
-	initText(text);
+	initText(input, inputLen);
 
-	textLen = strlen((String)text);
-	for(*phases=0; *phases<textLen; (*phases)++) {
-
+	for(*phases=0; *phases<=inputLen; (*phases)++) {
 		remainder++;
-		applyExtensions(text, &remainder, endLeaf, ap, root);
+		applyExtensions(input, &remainder, endLeaf, ap, root);
 	}
 
 	(*endLeaf)--;
 
-	addSuffixIndex(root, labelLen, text);
+	addSuffixIndex(root, labelLen, input, inputLen);
 
 	free(ap);
 
@@ -55,18 +52,18 @@ Node *createNode(int start, int *end, Node *root)
 	return node;
 }
 
-HashChildren *findChildren(ActivePoint *ap, Ascii text)
+HashChildren *findChildren(ActivePoint *ap, short *inputText)
 {
 	HashChildren *hashChild;
 	int key;
 
-	key = (int)text[ap->activeEdge];
+	key = (int)inputText[ap->activeEdge];
 	HASH_FIND_INT(ap->activeNode->children, &key, hashChild);
 
 	return hashChild;
 }
 
-void applyExtensions(Ascii text,
+void applyExtensions(short *inputText,
 					 int *remainder,
 					 int *endLeaf,
 					 ActivePoint *ap,
@@ -81,12 +78,12 @@ void applyExtensions(Ascii text,
 		if(ap->activeLen == 0)
 			ap->activeEdge = *endLeaf;
 
-		hashChild = findChildren(ap, text);
+		hashChild = findChildren(ap, inputText);
 
 		if(hashChild == NULL) {
 
 			//Apply rule 2 and create a new leaf
-			createLeaf(endLeaf, ap->activeNode, root, text);
+			createLeaf(endLeaf, ap->activeNode, root, inputText);
 			checkSuffixLinkNeeded(ap->activeNode, newest, root);
 
 		} else {
@@ -99,7 +96,7 @@ void applyExtensions(Ascii text,
 
 
 			//Rule 3
-			if(text[child->start + ap->activeLen] == text[*endLeaf]) {
+			if(inputText[child->start + ap->activeLen] == inputText[*endLeaf]) {
 				ap->activeLen++;
 				checkSuffixLinkNeeded(ap->activeNode, newest, root);
 				break;	//Move on to next phase
@@ -109,7 +106,8 @@ void applyExtensions(Ascii text,
 			 * Rule 2 apply to an internal node,
 			 * activePoint in the middle of an edge.
 			 */
-			Node *internalNode = createInternalNode(ap, root, hashChild, endLeaf, text);
+			Node *internalNode = createInternalNode(ap, root, hashChild,
+					endLeaf, inputText);
 			checkSuffixLinkNeeded(internalNode, newest, root);
 			newest = internalNode;
 
@@ -124,7 +122,7 @@ Node *createInternalNode(ActivePoint *ap,
 						 Node *root,
 						 HashChildren *hashChild,
 						 int *endLeaf,
-						 Ascii text)
+						 short *inputText)
 {
 	Node *oldChild = hashChild->node;
 	int *endInternalNode = (int *) malloc(sizeof(int));
@@ -138,28 +136,28 @@ Node *createInternalNode(ActivePoint *ap,
 
 	//Attach the old child to the internal node and the last one to its parent
 	hashChild->node->start += ap->activeLen;
-	hashChild->firstChar[0] = (int)text[hashChild->node->start];
-	addNewChild(internalNode, ap->activeNode, text);
+	hashChild->firstChar = inputText[hashChild->node->start];
+	addNewChild(internalNode, ap->activeNode, inputText);
 	HASH_ADD_INT(internalNode->children, firstChar, hashChild);
 
 	//Create new leaf from the internal node
-	createLeaf(endLeaf, internalNode, root, text);
+	createLeaf(endLeaf, internalNode, root, inputText);
 
 	return internalNode;
 }
 
-void addNewChild(Node *child, Node *parent, Ascii text)
+void addNewChild(Node *child, Node *parent, short *inputText)
 {
 	HashChildren *hash = (HashChildren *) malloc(sizeof(HashChildren));
 	hash->node = child;
-	hash->firstChar[0] = (int)text[child->start];
+	hash->firstChar = inputText[child->start];
 	HASH_ADD_INT(parent->children, firstChar, hash);
 }
 
-void createLeaf(int *endLeaf, Node *parent, Node *root, Ascii text)
+void createLeaf(int *endLeaf, Node *parent, Node *root, short *inputText)
 {
 	Node *child = createNode(*endLeaf, endLeaf, root);
-	addNewChild(child, parent, text);
+	addNewChild(child, parent, inputText);
 }
 
 //Free the hash table that contains the children of a node
@@ -227,18 +225,19 @@ void updateAP(ActivePoint *ap, Node *root, int phases, int remainder)
 }
 
 //DFS traversal to set the suffix indexes of the leaves
-void addSuffixIndex(Node *node, int labelLen, Ascii text)
+void addSuffixIndex(Node *node, int labelLen, short *inputText, size_t inputLen)
 {
 	HashChildren *hashChild;
 	int num_children = HASH_COUNT(node->children);
 
 	if(num_children == 0) {
-		node->suffixIndex = strlen((String)text) - labelLen;
+		node->suffixIndex = (inputLen + 1) - labelLen;
 		return;
 	}
 
 	for(hashChild=node->children; hashChild!=NULL; hashChild=hashChild->hh.next)
-		addSuffixIndex(hashChild->node, labelLen + getEdgeLen(hashChild->node), text);
+		addSuffixIndex(hashChild->node,
+				labelLen + getEdgeLen(hashChild->node), inputText, inputLen);
 }
 
 
@@ -248,7 +247,7 @@ int getEdgeLen(Node *node)
 }
 
 //Add a sentinel at the end of the text for the transformation
-void initText(Ascii text)
+void initText(short *text, size_t len)
 {
-	text[strlen((String)text)] = -1;
+	text[len] = 257;
 }

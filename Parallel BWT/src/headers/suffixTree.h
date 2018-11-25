@@ -8,13 +8,12 @@
 #include "../extern/uthash.h"
 
 typedef char* String;
-typedef unsigned char* Ascii;
 typedef struct Node Node;
 
 //To maintain the list of children of each node.
 typedef struct HashChildren
 {
-    int firstChar[1];	    /* key */
+    short firstChar;	    			/* key */
     Node *node;				   			/* value */
     UT_hash_handle hh;         			/* makes this structure hash table */
 
@@ -42,13 +41,13 @@ typedef struct ActivePoint
 } ActivePoint;
 
 
-Node *buildSuffixTree(Ascii, int *);
+Node *buildSuffixTree(short *, int *, size_t);
 
-void applyExtensions(Ascii, int *, int *, ActivePoint *, Node *);
+void applyExtensions(short *, int *, int *, ActivePoint *, Node *);
 
 int getEdgeLen(Node *);
 
-void initText(Ascii);
+void initText(short *, size_t);
 
 Node *createNode(int, int *, Node *);
 
@@ -58,19 +57,19 @@ int walkDown(ActivePoint *, Node *);
 
 void checkSuffixLinkNeeded(Node *, Node *, Node *);
 
-Node *createInternalNode(ActivePoint *, Node *, HashChildren *, int *, Ascii);
+Node *createInternalNode(ActivePoint *, Node *, HashChildren *, int *, short *);
 
-void createLeaf(int *, Node *, Node *, Ascii);
+void createLeaf(int *, Node *, Node *, short *);
 
-void addSuffixIndex(Node *, int, Ascii);
+void addSuffixIndex(Node *, int, short *, size_t);
 
-void addNewChild(Node *, Node *, Ascii);
+void addNewChild(Node *, Node *, short *);
 
 void deleteChildren(HashChildren *);
 
 void deleteNode(Node *);
 
-HashChildren *findChildren(ActivePoint *, Ascii);
+HashChildren *findChildren(ActivePoint *, short *);
 
 
 #endif

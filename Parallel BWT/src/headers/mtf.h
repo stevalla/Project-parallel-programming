@@ -5,13 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 typedef char* String;
-typedef unsigned char* Ascii;
 
 //Linked list containing the table of symbols
 typedef struct ListOfSymbols
 {
-
 	int symbol;
 	struct ListOfSymbols *next;
 
@@ -26,7 +25,6 @@ typedef struct ListOfSymbols
  */
 typedef struct MtfAux
 {
-
 	int pos;
 	ListOfSymbols *prev;
 
@@ -35,11 +33,11 @@ typedef struct MtfAux
 
 MtfAux *search(ListOfSymbols *, int, MtfAux *);
 
-Ascii mtfEncoding(Ascii, int, int);
+short *mtfEncoding(short *, int, size_t);
 
 ListOfSymbols *moveToFrontElement(ListOfSymbols *, MtfAux *);
 
-ListOfSymbols *moveToFrontElement2(ListOfSymbols *symbols, MtfAux *mtfAux);
+ListOfSymbols *moveToFrontElement2(ListOfSymbols *, MtfAux *);
 
 ListOfSymbols *initListOfSymbols();
 

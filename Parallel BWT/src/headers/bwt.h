@@ -9,22 +9,20 @@
 #include "suffixTree.h"
 
 
-typedef unsigned char* Ascii;
-
 //Hold the bwt text and the index of the original string in the bwt
 typedef struct ResultBwt
 {
-	unsigned char *text;
+	short *text;
 	int index;
 
 } ResultBwt;
 
 
-ResultBwt *bwtTransformation(Ascii);
+ResultBwt *bwtTransformation(short *, size_t);
 
-void createSuffixArray(Node *, int *, int[], Ascii);
+void createSuffixArray(Node *, int *, int[], short *);
 
-ResultBwt *getBWT(Ascii, Node *);
+ResultBwt *getBWT(short *, Node *, size_t);
 
 int sortNodesByFirstChar(HashChildren *, HashChildren *);
 

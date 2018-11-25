@@ -5,39 +5,16 @@
 #include "./headers/bwt.h"
 #include "./headers/mtf.h"
 #include "./headers/suffixTree.h"
+#include "./headers/zle.h"
 
 #define MAX_LENGTH 2000
 
-//Converting from ascii to hex
-unsigned int *phex(unsigned char* string, long len)
-{
-    int i;
-
-    //Allocate memory for array
-    unsigned int * hex = (unsigned int *)malloc(sizeof(unsigned int) * len);
-    for (i = 0; i < len; ++i) {
-        //no special conversion needed
-        hex[i] = string[i];
-    }
-
-    //Return array with hexadecimal representation for each character in string
-    return hex;
-}
-
-void printMtfResult(unsigned char *mtfText, int size)
+void printResult(short *mtfText, int size)
 {
 	int i;
 
-	//For decimal
-	printf("MTF text:\n\t");
-	for(i=0; i<size+1; i++)
+	for(i=0; i<size; i++)
 		printf("%d ", mtfText[i]);
-	printf("\n");
-
-	//For hexadecimal example
-	printf("MTF output hex:\n\t");
-	for(i=0; i<size+1; i++)
-		printf("%x ", mtfText[i]);
 	printf("\n");
 
 }
@@ -45,58 +22,101 @@ void printMtfResult(unsigned char *mtfText, int size)
 int main(int argc, char *argv[])
 {
 
-	int i;
+	//Variables
 	unsigned char text[MAX_LENGTH] = "abracadabraabracadabra";
-	unsigned char hexText[MAX_LENGTH];
-	unsigned char *mtfText = NULL;
-	unsigned char *mtfText2 = NULL;
-	unsigned *hex;
-	int len = strlen((String)text);
+	unsigned char bwtText[MAX_LENGTH];
+//	unsigned char *zleText = NULL;
 
-	if(len > 2000) {
+	short bwtInput[MAX_LENGTH];
+	short *mtfOutput;
+	short *mtfOutput2;
+	int inputLen = strlen((String)text);
+	int i, bwtLen;
+
+	mtfOutput = (short *) malloc(sizeof(short)*(inputLen+2));
+	mtfOutput2 = (short *) malloc(sizeof(short)*(inputLen+2));
+
+	if(inputLen > 2000) {
 		printf("Size too big.\n");
 		return 0;
 	}
 
-	//For decimal
+	/************************************************************************
+	 * INPUT
+	 ************************************************************************/
+	for(i=0; i<inputLen; i++)
+		bwtInput[i] = text[i];
+
 	printf("Input string:\n\t%s\n", text);
 
-	//For hexadecimal example
-	hex = phex(text, len);
-	printf("Input hex:\n\t");
-	for(i=0; i<len; i++) {
-		hexText[i] = hex[i];
-		printf("%x ", hexText[i]);
-	}
-	printf("\n");
+	printf("Input:\n\t");
+	printResult(bwtInput, inputLen);
 
-	//BWT transformation
-	ResultBwt *bwtResult = bwtTransformation(text);
-	int bwtLen = strlen((String)bwtResult->text);
+	/************************************************************************
+	 * BWT TRANSFORMATION
+	 ************************************************************************/
+	ResultBwt *bwtResult = bwtTransformation(bwtInput, inputLen);
 
-	bwtResult->text[bwtLen] = (unsigned char)bwtResult->index;
+	bwtResult->text[inputLen + 1] = (unsigned char)bwtResult->index;
+	bwtLen = inputLen + 2;
 
-	//For decimal
-	printf("BWT output:\n\ttext: %s\tindex: %d\n", bwtResult->text, bwtResult->index);
-
-	//For hexadecimal example
-	printf("BWT output hex:\n\t");
+	//String BWT output
 	for(i=0; i<bwtLen; i++)
-		printf("%x ", bwtResult->text[i]);
-	printf("\n");
+		bwtText[i] = bwtResult->text[i];
 
-	//Move to front coding
-	mtfText = mtfEncoding(bwtResult->text, bwtResult->index, 1);
-	mtfText2 = mtfEncoding(bwtResult->text, bwtResult->index, 2);
+	printf("BWT output string:\n\ttext: %s\tindex: %d\n", bwtText, bwtResult->index);
 
+	//BWT output in decimal
+	printf("BWT output:\n\t");
+	printResult(bwtResult->text, bwtLen);
+
+	/************************************************************************
+	 * MTF TRANSFORMATION
+	 ************************************************************************/
+	mtfOutput = mtfEncoding(bwtResult->text, 1, bwtLen);
+	mtfOutput2 = mtfEncoding(bwtResult->text, 2, bwtLen);
+
+	printf("MTF output:\n\t");
+	printResult(mtfOutput, bwtLen);
+	printf("MTF-2:\n\t");
+	printResult(mtfOutput2, bwtLen);
+
+	/************************************************************************
+	 * ZLE ENCODING
+	 ************************************************************************/
+////	zleText = zleEncoding(mtfText);
+//
+//	int zleLen = strlen((String)zleText);
+//
+//	//For decimal
+//	printf("ZLE output text:\n\t");
+//	for(i=0; i<zleLen; i++)
+//		printf("%d ", zleText[i]);
+//	printf("\n");
+//
+//	//For hexadecimal example
+//	printf("ZLE output hex:\n\t");
+//	for(i=0; i<zleLen; i++)
+//		printf("%x ", zleText[i]);
+//	printf("\n");
+
+
+	/************************************************************************
+	 * ARITHMETIC ENCODING
+	 ************************************************************************/
+
+
+
+	/************************************************************************
+	 * FREE MEMORY
+	 ************************************************************************/
 	free(bwtResult->text);
 	free(bwtResult);
 
-	printMtfResult(mtfText, bwtLen);
-	printMtfResult(mtfText2, bwtLen);
+	free(mtfOutput);
+	free(mtfOutput2);
 
-	free(mtfText);
-	free(mtfText2);
+//	free(zleText);
 
 	return 0;
 }

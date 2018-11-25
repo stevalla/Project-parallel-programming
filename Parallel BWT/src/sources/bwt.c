@@ -1,49 +1,50 @@
 #include "../headers/bwt.h"
 
-ResultBwt *bwtTransformation(Ascii text)
+ResultBwt *bwtTransformation(short *input, size_t inputLen)
 {
-
 	int phases = 0;
-	Node *suffixTree = buildSuffixTree(text, &phases);
+	Node *suffixTree = buildSuffixTree(input, &phases, inputLen);
 
-	return getBWT(text, suffixTree);
+	return getBWT(input, suffixTree, inputLen);
 }
 
-ResultBwt *getBWT(Ascii text, Node *root)
+ResultBwt *getBWT(short *inputText, Node *root, size_t inputLen)
 {
-	int len = strlen((String)text);
-	int suffixArray[len];
+	int *suffixArray = (int *) malloc(sizeof(int)*(inputLen+1));
 	int i;
 	ResultBwt *result;
 
-	for(i=0; i<len; i++)
+	// TODO
+	for(i=0; i<inputLen; i++)
 		suffixArray[i] = -1;
 
 	i = 0;
 	result = (ResultBwt *) malloc(sizeof(ResultBwt));
-	result->text = (Ascii ) malloc(sizeof(unsigned char)*len + 1);
+	result->text = (short *) malloc(sizeof(short)*(inputLen+2));
 
-	createSuffixArray(root, &i, suffixArray, text);
+	createSuffixArray(root, &i, suffixArray, inputText);
 
-	for(i=0; i<len; i++) {
+	for(i=0; i<=inputLen; i++) {
 		int index = suffixArray[i];
 
 		//Store the BWT text
 		if(index == 0)
-			result->text[i] = text[len - 1];
+			result->text[i] = inputText[inputLen];
 		else
-			result->text[i] = text[suffixArray[i] - 1];
+			result->text[i] = inputText[suffixArray[i] - 1];
 
 		//Store the row of the original string
-		if(text[len] == text[suffixArray[i] - 1])
+		if(inputText[inputLen] == result->text[i])
 			result->index = i;
 	}
+
+	free(suffixArray);
 
 	return result;
 }
 
 //Lexicographic DFS traversal to create the suffix array
-void createSuffixArray(Node *node, int *i, int suffixArray[], Ascii text)
+void createSuffixArray(Node *node, int *i, int suffixArray[], short *inputText)
 {
 	HashChildren *hashChild;
 	int num_children = HASH_COUNT(node->children);
@@ -58,14 +59,14 @@ void createSuffixArray(Node *node, int *i, int suffixArray[], Ascii text)
 	HASH_SORT(node->children, sortNodesByFirstChar);
 
 	for(hashChild=node->children; hashChild!=NULL; hashChild=hashChild->hh.next)
-		createSuffixArray(hashChild->node, i, suffixArray, text);
+		createSuffixArray(hashChild->node, i, suffixArray, inputText);
 
 	deleteNode(node);
 }
 
 int sortNodesByFirstChar(HashChildren *el1, HashChildren *el2)
 {
-	if(el1->firstChar[0] < el2->firstChar[0])			return -1;
-	else if(el1->firstChar[0] > el2->firstChar[0])		return  1;
-	else 												return  0;
+	if(el1->firstChar < el2->firstChar)			return -1;
+	else if(el1->firstChar > el2->firstChar)	return  1;
+	else 										return  0;
 }
