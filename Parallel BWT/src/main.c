@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 	unsigned char text[MAX_LENGTH] = "abracadabraabracadabra";
 	unsigned char hexText[MAX_LENGTH];
 	unsigned char *mtfText = NULL;
+	unsigned char *mtfText2 = NULL;
 	unsigned *hex;
 	int len = strlen((String)text);
 
@@ -83,13 +84,17 @@ int main(int argc, char *argv[])
 	printf("\n");
 
 	//Move to front coding
-	mtfText = mtfEncoding(bwtResult->text, bwtResult->index);
+	mtfText = mtfEncoding(bwtResult->text, bwtResult->index, 1);
+	mtfText2 = mtfEncoding(bwtResult->text, bwtResult->index, 2);
+
 	free(bwtResult->text);
 	free(bwtResult);
 
 	printMtfResult(mtfText, len+1);
+	printMtfResult(mtfText2, len+1);
 
 	free(mtfText);
+	free(mtfText2);
 
 	return 0;
 }

@@ -2,7 +2,7 @@
 
 #define SIZE_SYMBOLS_LIST 256
 
-Ascii mtfEncoding(Ascii text, int index)
+Ascii mtfEncoding(Ascii text, int index, int option)
 {
 	int i;
 	int len = strlen((String)text);
@@ -17,14 +17,18 @@ Ascii mtfEncoding(Ascii text, int index)
 	mtfAux = search(symbols, 'a', mtfAux);
 
 	for(i=0; i<len; i++) {
-//		if(i == index) {
-//			mtfText[i] = (unsigned char)255;
-//			continue;
-//		}
+		if(i == index) {
+			mtfText[i] = (unsigned char)255;
+			continue;
+		}
 
 		mtfAux = search(symbols, text[i], mtfAux);
 		mtfText[i] = (unsigned char)mtfAux->pos;
-		symbols = moveToFrontElement(symbols, mtfAux);
+
+		if(option == 1)
+			symbols = moveToFrontElement(symbols, mtfAux);
+		else
+			symbols = moveToFrontElement2(symbols, mtfAux);
 	}
 
 	free(mtfAux);

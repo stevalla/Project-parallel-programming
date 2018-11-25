@@ -35,7 +35,7 @@ typedef struct MtfAux
 
 MtfAux *search(ListOfSymbols *, int, MtfAux *);
 
-Ascii mtfEncoding(Ascii, int);
+Ascii mtfEncoding(Ascii, int, int);
 
 ListOfSymbols *moveToFrontElement(ListOfSymbols *, MtfAux *);
 
