@@ -6,6 +6,7 @@
 #include <string.h>
 
 typedef char* String;
+typedef unsigned char* Ascii;
 
 //Linked list containing the table of symbols
 typedef struct ListOfSymbols
@@ -34,7 +35,7 @@ typedef struct MtfAux
 
 MtfAux *search(ListOfSymbols *, int, MtfAux *);
 
-unsigned char *mtfEncoding(String, int);
+Ascii mtfEncoding(Ascii, int);
 
 ListOfSymbols *moveToFrontElement(ListOfSymbols *, MtfAux *);
 

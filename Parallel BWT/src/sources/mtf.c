@@ -2,25 +2,25 @@
 
 #define SIZE_SYMBOLS_LIST 256
 
-unsigned char *mtfEncoding(String text, int index)
+Ascii mtfEncoding(Ascii text, int index)
 {
 	int i;
-	int len = strlen(text);
+	int len = strlen((String)text);
 	ListOfSymbols *symbols;
-	unsigned char *mtfText;
+	Ascii mtfText;
 	MtfAux *mtfAux;
 
-	mtfText = (unsigned char *) malloc(sizeof(unsigned char)*strlen(text));
+	mtfText = (Ascii) malloc(sizeof(unsigned char)*len+1);
 	mtfAux = (MtfAux *) malloc(sizeof(MtfAux));
 
 	symbols = initListOfSymbols();
 	mtfAux = search(symbols, 'a', mtfAux);
 
 	for(i=0; i<len; i++) {
-		if(i == index) {
-			mtfText[i] = (unsigned char)255;
-			continue;
-		}
+//		if(i == index) {
+//			mtfText[i] = (unsigned char)255;
+//			continue;
+//		}
 
 		mtfAux = search(symbols, text[i], mtfAux);
 		mtfText[i] = (unsigned char)mtfAux->pos;

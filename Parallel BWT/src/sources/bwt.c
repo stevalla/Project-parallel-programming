@@ -1,6 +1,6 @@
 #include "../headers/bwt.h"
 
-ResultBwt *bwtTransformation(String text)
+ResultBwt *bwtTransformation(Ascii text)
 {
 
 	int phases = 0;
@@ -9,9 +9,9 @@ ResultBwt *bwtTransformation(String text)
 	return getBWT(text, suffixTree);
 }
 
-ResultBwt *getBWT(String text, Node *root)
+ResultBwt *getBWT(Ascii text, Node *root)
 {
-	int len = strlen(text);
+	int len = strlen((String)text);
 	int suffixArray[len];
 	int i;
 	ResultBwt *result;
@@ -21,7 +21,7 @@ ResultBwt *getBWT(String text, Node *root)
 
 	i = 0;
 	result = (ResultBwt *) malloc(sizeof(ResultBwt));
-	result->text = (String) malloc(sizeof(text));
+	result->text = (Ascii ) malloc(sizeof(unsigned char)*len);
 
 	createSuffixArray(root, &i, suffixArray, text);
 
@@ -30,12 +30,12 @@ ResultBwt *getBWT(String text, Node *root)
 
 		//Store the BWT text
 		if(index == 0)
-			result->text[i] = text[strlen(text) - 1];
+			result->text[i] = text[len - 1];
 		else
 			result->text[i] = text[suffixArray[i] - 1];
 
 		//Store the row of the original string
-		if(text[strlen(text)] == text[suffixArray[i] - 1])
+		if(text[len] == text[suffixArray[i] - 1])
 			result->index = i;
 	}
 
@@ -43,7 +43,7 @@ ResultBwt *getBWT(String text, Node *root)
 }
 
 //Lexicographic DFS traversal to create the suffix array
-void createSuffixArray(Node *node, int *i, int suffixArray[], String text)
+void createSuffixArray(Node *node, int *i, int suffixArray[], Ascii text)
 {
 	HashChildren *hashChild;
 	int num_children = HASH_COUNT(node->children);
@@ -55,7 +55,7 @@ void createSuffixArray(Node *node, int *i, int suffixArray[], String text)
 		return;
 	}
 
-	HASH_SORT(node->children, sortNodesByFirstLetter);
+	HASH_SORT(node->children, sortNodesByFirstChar);
 
 	for(hashChild=node->children; hashChild!=NULL; hashChild=hashChild->hh.next)
 		createSuffixArray(hashChild->node, i, suffixArray, text);
@@ -63,9 +63,9 @@ void createSuffixArray(Node *node, int *i, int suffixArray[], String text)
 	deleteNode(node);
 }
 
-int sortNodesByFirstLetter(HashChildren *el1, HashChildren *el2)
+int sortNodesByFirstChar(HashChildren *el1, HashChildren *el2)
 {
-	if(el1->firstLetter[0] < el2->firstLetter[0])			return -1;
-	else if(el1->firstLetter[0] > el2->firstLetter[0])		return  1;
-	else 													return  0;
+	if(el1->firstChar[0] < el2->firstChar[0])			return -1;
+	else if(el1->firstChar[0] > el2->firstChar[0])		return  1;
+	else 												return  0;
 }
