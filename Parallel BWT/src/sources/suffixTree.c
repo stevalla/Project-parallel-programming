@@ -250,5 +250,5 @@ int getEdgeLen(Node *node)
 //Add a sentinel at the end of the text for the transformation
 void initText(Ascii text)
 {
-	text[strlen((String)text)] = '$';
+	text[strlen((String)text)] = -1;
 }

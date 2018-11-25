@@ -30,13 +30,13 @@ void printMtfResult(unsigned char *mtfText, int size)
 
 	//For decimal
 	printf("MTF text:\n\t");
-	for(i=0; i<size; i++)
+	for(i=0; i<size+1; i++)
 		printf("%d ", mtfText[i]);
 	printf("\n");
 
 	//For hexadecimal example
 	printf("MTF output hex:\n\t");
-	for(i=0; i<size; i++)
+	for(i=0; i<size+1; i++)
 		printf("%x ", mtfText[i]);
 	printf("\n");
 
@@ -74,6 +74,8 @@ int main(int argc, char *argv[])
 	ResultBwt *bwtResult = bwtTransformation(text);
 	int bwtLen = strlen((String)bwtResult->text);
 
+	bwtResult->text[bwtLen] = (unsigned char)bwtResult->index;
+
 	//For decimal
 	printf("BWT output:\n\ttext: %s\tindex: %d\n", bwtResult->text, bwtResult->index);
 
@@ -90,8 +92,8 @@ int main(int argc, char *argv[])
 	free(bwtResult->text);
 	free(bwtResult);
 
-	printMtfResult(mtfText, len+1);
-	printMtfResult(mtfText2, len+1);
+	printMtfResult(mtfText, bwtLen);
+	printMtfResult(mtfText2, bwtLen);
 
 	free(mtfText);
 	free(mtfText2);

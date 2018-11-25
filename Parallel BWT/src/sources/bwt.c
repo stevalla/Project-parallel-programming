@@ -21,7 +21,7 @@ ResultBwt *getBWT(Ascii text, Node *root)
 
 	i = 0;
 	result = (ResultBwt *) malloc(sizeof(ResultBwt));
-	result->text = (Ascii ) malloc(sizeof(unsigned char)*len);
+	result->text = (Ascii ) malloc(sizeof(unsigned char)*len + 1);
 
 	createSuffixArray(root, &i, suffixArray, text);
 
