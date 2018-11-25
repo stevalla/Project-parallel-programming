@@ -14,10 +14,6 @@ ResultBwt *getBWT(short *inputText, Node *root, size_t inputLen)
 	int i;
 	ResultBwt *result;
 
-	// TODO
-	for(i=0; i<inputLen; i++)
-		suffixArray[i] = -1;
-
 	i = 0;
 	result = (ResultBwt *) malloc(sizeof(ResultBwt));
 	result->text = (short *) malloc(sizeof(short)*(inputLen+2));
