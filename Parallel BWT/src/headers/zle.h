@@ -6,12 +6,19 @@
 #include <string.h>
 #include <math.h>
 
-typedef unsigned char* Ascii;
 
+typedef struct ZeroRun
+{
+	int len;
+	short *encoded;
 
-Ascii zleEncoding(Ascii, int);
+} ZeroRun;
 
-int encodeZeroRun(int);
+ZeroRun *zleEncoding(short *, int);
+
+void countZeroRun(double, short *, int *);
+
+short *decToBin(int, int);
 
 
 #endif

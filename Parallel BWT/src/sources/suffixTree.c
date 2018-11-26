@@ -63,7 +63,7 @@ HashChildren *findChildren(ActivePoint *ap, short *inputText)
 	return hashChild;
 }
 
-void applyExtensions(short *inputText,
+void applyExtensions(short *input,
 					 int *remainder,
 					 int *endLeaf,
 					 ActivePoint *ap,
@@ -78,12 +78,12 @@ void applyExtensions(short *inputText,
 		if(ap->activeLen == 0)
 			ap->activeEdge = *endLeaf;
 
-		hashChild = findChildren(ap, inputText);
+		hashChild = findChildren(ap, input);
 
 		if(hashChild == NULL) {
 
 			//Apply rule 2 and create a new leaf
-			createLeaf(endLeaf, ap->activeNode, root, inputText);
+			createLeaf(endLeaf, ap->activeNode, root, input);
 			checkSuffixLinkNeeded(ap->activeNode, newest, root);
 
 		} else {
@@ -96,7 +96,7 @@ void applyExtensions(short *inputText,
 
 
 			//Rule 3
-			if(inputText[child->start + ap->activeLen] == inputText[*endLeaf]) {
+			if(input[child->start + ap->activeLen] == input[*endLeaf]) {
 				ap->activeLen++;
 				checkSuffixLinkNeeded(ap->activeNode, newest, root);
 				break;	//Move on to next phase
@@ -107,7 +107,7 @@ void applyExtensions(short *inputText,
 			 * activePoint in the middle of an edge.
 			 */
 			Node *internalNode = createInternalNode(ap, root, hashChild,
-					endLeaf, inputText);
+					endLeaf, input);
 			checkSuffixLinkNeeded(internalNode, newest, root);
 			newest = internalNode;
 
@@ -249,5 +249,5 @@ int getEdgeLen(Node *node)
 //Add a sentinel at the end of the text for the transformation
 void initText(short *text, size_t len)
 {
-	text[len] = 257;
+	text[len] = 256;
 }

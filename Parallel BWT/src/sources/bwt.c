@@ -8,7 +8,7 @@ ResultBwt *bwtTransformation(short *input, size_t inputLen)
 	return getBWT(input, suffixTree, inputLen);
 }
 
-ResultBwt *getBWT(short *inputText, Node *root, size_t inputLen)
+ResultBwt *getBWT(short *input, Node *root, size_t inputLen)
 {
 	int *suffixArray = (int *) malloc(sizeof(int)*(inputLen+1));
 	int i;
@@ -18,19 +18,19 @@ ResultBwt *getBWT(short *inputText, Node *root, size_t inputLen)
 	result = (ResultBwt *) malloc(sizeof(ResultBwt));
 	result->text = (short *) malloc(sizeof(short)*(inputLen+2));
 
-	createSuffixArray(root, &i, suffixArray, inputText);
+	createSuffixArray(root, &i, suffixArray, input);
 
 	for(i=0; i<=inputLen; i++) {
 		int index = suffixArray[i];
 
 		//Store the BWT text
 		if(index == 0)
-			result->text[i] = inputText[inputLen];
+			result->text[i] = input[inputLen];
 		else
-			result->text[i] = inputText[suffixArray[i] - 1];
+			result->text[i] = input[suffixArray[i] - 1];
 
 		//Store the row of the original string
-		if(inputText[inputLen] == result->text[i])
+		if(input[inputLen] == result->text[i])
 			result->index = i;
 	}
 

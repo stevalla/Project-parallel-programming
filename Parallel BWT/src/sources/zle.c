@@ -1,51 +1,73 @@
 #include "../headers/zle.h"
 
+#define MAX_LENGTH 2000
 #define LOG2E 1.44269504089
 
-Ascii zleEncoding(Ascii text, int lenText)
+ZeroRun *zleEncoding(short *input, int lenText)
 {
 	//Variables
-	int i, j, runLen;
-	Ascii output = (Ascii) malloc(lenText);
+	int j, runLen, totalLen;
+	short output[MAX_LENGTH];
+	ZeroRun *result;
 
 	//Initialization
+	totalLen = 0;
 	runLen = 0;
-	i = 0;
 	j = 0;
 
-	while(lenText != 0) {
+	while(lenText > 0) {
 
-		if(text[j] != '0' && runLen != 0) { 		//End of zeros run
+		if(input[j] != 0 && runLen != 0) { 			//End of zeros run
 
-			output[i++] = encodeZeroRun(runLen);
-			output[i++] = text[j] + 1;
+			countZeroRun(runLen + 1, &output[0], &totalLen);
+
+			output[totalLen++] = input[j] + 1;
 			runLen = 0;								//Restart the zeros counter
 
-		} else if(text[j] != '0')   				//No run
-				output[i++] = text[j] + 1;
+		} else if(input[j] != 0)     				//No run
+			output[totalLen++] = input[j] + 1;
+
 		else										//Zeros run
 			runLen++;
+
 		j++;
 		lenText--;
 	}
 
-	return output;
+	if(runLen != 0)
+		countZeroRun(runLen + 1, &output[0], &totalLen);
+
+	result = (ZeroRun *) malloc(sizeof(ZeroRun));
+	result->encoded = output;
+	result->len = totalLen;
+
+	return result;
 }
 
-int encodeZeroRun(int len)
+void countZeroRun(double runLen, short *output, int *totalLen)
 {
-//	int binarySize = (log(len) * LOG2E) + 1;
-//	char binary[binarySize];
-//	int index = 0;
-//
-//	while(len > 1) {
-//
-//		binary[index++] = (len % 2);
-//		len /= 2;
-//	}
-//
-//	return 0;
+	int k;
+	short *zeroRun;
 
+	int binarySize = (log(runLen) * LOG2E) + 1;
 
+	zeroRun = decToBin(runLen, binarySize);
 
+	for(k=0; k<binarySize-1; k++)
+		output[(*totalLen)++] = zeroRun[k];
+
+	free(zeroRun);
+}
+
+short *decToBin(int runLen, int size)
+{
+	short *binary = (short *) malloc(sizeof(short)*(size-1));
+	int index = 0;
+
+	while(runLen > 1) {
+		binary[index++] = (runLen % 2);
+		runLen /= 2;
+	}
+
+	return binary;
 }

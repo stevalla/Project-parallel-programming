@@ -8,6 +8,7 @@
 #include "./headers/zle.h"
 
 #define MAX_LENGTH 2000
+#define LOG2E 1.44269504089
 
 void printResult(short *mtfText, int size)
 {
@@ -25,11 +26,11 @@ int main(int argc, char *argv[])
 	//Variables
 	unsigned char text[MAX_LENGTH] = "abracadabraabracadabra";
 	unsigned char bwtText[MAX_LENGTH];
-//	unsigned char *zleText = NULL;
 
 	short bwtInput[MAX_LENGTH];
 	short *mtfOutput;
 	short *mtfOutput2;
+	ZeroRun *zleOutput;
 	int inputLen = strlen((String)text);
 	int i, bwtLen;
 
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
 		printf("Size too big.\n");
 		return 0;
 	}
+
 
 	/************************************************************************
 	 * INPUT
@@ -52,6 +54,7 @@ int main(int argc, char *argv[])
 	printf("Input:\n\t");
 	printResult(bwtInput, inputLen);
 
+
 	/************************************************************************
 	 * BWT TRANSFORMATION
 	 ************************************************************************/
@@ -60,15 +63,14 @@ int main(int argc, char *argv[])
 	bwtResult->text[inputLen + 1] = (unsigned char)bwtResult->index;
 	bwtLen = inputLen + 2;
 
-	//String BWT output
 	for(i=0; i<bwtLen; i++)
 		bwtText[i] = bwtResult->text[i];
 
 	printf("BWT output string:\n\ttext: %s\tindex: %d\n", bwtText, bwtResult->index);
 
-	//BWT output in decimal
 	printf("BWT output:\n\t");
 	printResult(bwtResult->text, bwtLen);
+
 
 	/************************************************************************
 	 * MTF TRANSFORMATION
@@ -81,24 +83,14 @@ int main(int argc, char *argv[])
 	printf("MTF-2:\n\t");
 	printResult(mtfOutput2, bwtLen);
 
+
 	/************************************************************************
 	 * ZLE ENCODING
 	 ************************************************************************/
-////	zleText = zleEncoding(mtfText);
-//
-//	int zleLen = strlen((String)zleText);
-//
-//	//For decimal
-//	printf("ZLE output text:\n\t");
-//	for(i=0; i<zleLen; i++)
-//		printf("%d ", zleText[i]);
-//	printf("\n");
-//
-//	//For hexadecimal example
-//	printf("ZLE output hex:\n\t");
-//	for(i=0; i<zleLen; i++)
-//		printf("%x ", zleText[i]);
-//	printf("\n");
+	zleOutput = zleEncoding(mtfOutput, bwtLen);
+
+	printf("ZLE output:\n\t");
+	printResult(zleOutput->encoded, zleOutput->len);
 
 
 	/************************************************************************
@@ -116,7 +108,7 @@ int main(int argc, char *argv[])
 	free(mtfOutput);
 	free(mtfOutput2);
 
-//	free(zleText);
+	free(zleOutput);
 
 	return 0;
 }

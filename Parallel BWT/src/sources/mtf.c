@@ -16,7 +16,7 @@ short *mtfEncoding(short *inputText, int option, size_t inputLen)
 
 		//The sentinel character is not moved on
 		if(inputText[i] > 255) {
-			mtfOutput[i] = 257;
+			mtfOutput[i] = inputText[i];
 			continue;
 		}
 
