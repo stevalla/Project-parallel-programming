@@ -6,6 +6,7 @@
 #include "./headers/mtf.h"
 #include "./headers/suffixTree.h"
 #include "./headers/zle.h"
+#include "./headers/arith.h"
 
 #define MAX_LENGTH 2000
 #define LOG2E 1.44269504089
@@ -96,8 +97,10 @@ int main(int argc, char *argv[])
 	/************************************************************************
 	 * ARITHMETIC ENCODING
 	 ************************************************************************/
+	printf("\n\n\n%d %d %d\n", sizeof(long), sizeof(int), sizeof(short));
 
-
+	int bit = 1;
+	printf("\n\n\n%d\n", !bit);
 
 	/************************************************************************
 	 * FREE MEMORY

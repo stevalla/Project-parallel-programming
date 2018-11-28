@@ -249,5 +249,5 @@ int getEdgeLen(Node *node)
 //Add a sentinel at the end of the text for the transformation
 void initText(short *text, size_t len)
 {
-	text[len] = 256;
+	text[len] = 257;
 }
