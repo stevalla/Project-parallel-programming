@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
-#define POW_2(N)			(1 << (N))
+#include "util.h"
+
 #define BUF_BITS			(8 * sizeof(unsigned char))
-#define MAX_CHUNK_SIZE      (5 * 1048576)
+
 /*
  * Number of bits to represent arithmetic values.
  * This value is exact and the maximum is
@@ -51,17 +53,6 @@ typedef struct Encoder
 
 } Encoder;
 
-typedef struct Decoder
-{
-	unsigned valueBits;
-	unsigned value;
-	unsigned fin;
-	unsigned low;
-	unsigned high;
-	unsigned range;
-
-} Decoder;
-
 typedef struct IOBuffer
 {
 	unsigned char buf;
@@ -104,8 +95,6 @@ void updateModel(Model *const, const unsigned);
 
 void findInterval(Interval *const, Model *const, const unsigned);
 
-unsigned findChar(Decoder *const, Interval *const, Model *const);
-
 /*
  * Output functions
  */
@@ -119,28 +108,6 @@ void outputBits(Encoder *const, const unsigned,
 
 void outputBit(IOBuffer *const, const unsigned, IOHelper *);
 
-void updateInterval(Decoder *const, IOBuffer *const,
-		IOHelper *const);
 
-/*
- * Decoder functions
- */
-void initDecoder(Decoder *const);
-
-unsigned char *decodingRoutine(unsigned char *const);
-
-unsigned decodeSymbol(Decoder *const, Model *const, Interval *const,
-					  IOBuffer *const, IOHelper *const);
-
-unsigned inputBit(Decoder *const, IOBuffer *const,
-				  IOHelper *const);
-
-static inline
-unsigned scaleFrequencies(const unsigned v,
-						  const unsigned range,
-						  const unsigned scale)
-{
-	return (((unsigned)v + 1) * scale - 1) / range;
-}
 
 #endif

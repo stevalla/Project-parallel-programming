@@ -2,12 +2,12 @@
 
 #define LOG2E 1.44269504089
 
-ZeroRun *zleEncoding(unsigned char *const input, const size_t inputLen)
+Text *zleEncoding(unsigned char *const input, const size_t inputLen)
 {
 	//Variables
 	size_t len, runLen;
 	unsigned char *output;
-	ZeroRun *result;
+	Text *result;
 
 	//Initialization
 	len = 0;
@@ -33,7 +33,7 @@ ZeroRun *zleEncoding(unsigned char *const input, const size_t inputLen)
 
 		} else if(input[j] == 0xFF) {				//ch = 255
 			output[len++] = 0xFF;
-			output[len++] = 0x00;
+			output[len++] = 0x01;
 
 		} else
 			output[len++] = input[j] + 1;
@@ -43,8 +43,8 @@ ZeroRun *zleEncoding(unsigned char *const input, const size_t inputLen)
 	if(runLen != 0)
 		countZeroRun(runLen + 1, &output[0], &len);
 
-	result = (ZeroRun *) malloc(sizeof(ZeroRun));
-	result->encoded = output;
+	result = (Text *) malloc(sizeof(Text));
+	result->text = output;
 	result->len = len;
 
 	return result;

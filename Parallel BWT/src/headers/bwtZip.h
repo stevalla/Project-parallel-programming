@@ -8,15 +8,14 @@
 #include "../headers/bwt.h"
 #include "../headers/mtf.h"
 #include "../headers/zle.h"
+#include "../headers/unzle.h"
 #include "../headers/arith.h"
+#include "../headers/unarith.h"
 
-
-long fileSize(FILE *);
-
-unsigned char *readFile(FILE *, long);
 
 void bwtZip(unsigned char *const, const size_t);
 
 void printResult(unsigned char *const, const size_t);
+
 
 #endif

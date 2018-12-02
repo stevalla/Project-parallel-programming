@@ -6,15 +6,10 @@
 #include <string.h>
 #include <math.h>
 
+#include "util.h"
 
-typedef struct ZeroRun
-{
-	int len;
-	unsigned char *encoded;
 
-} ZeroRun;
-
-ZeroRun *zleEncoding(unsigned char *const, const size_t);
+Text *zleEncoding(unsigned char *const, const size_t);
 
 void countZeroRun(const double, unsigned char *const ,
 				  size_t *const);
