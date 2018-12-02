@@ -1,7 +1,7 @@
 #include "../headers/bwtZip.h"
 
 
-void bwtZip(Text *const input)
+Text *bwtZip(Text *const input)
 {
 
 	/***********************************************************************
@@ -36,37 +36,6 @@ void bwtZip(Text *const input)
 	printf("Arithmetic coding output:\n\t");
 	printResult(compressed->text, compressed->len);
 
-	/***********************************************************************
-	 * ARITHMETIC DECODING
-	 ***********************************************************************/
-	Text *decompressed = decodingRoutine(compressed);
-
-	printf("Arithmetic decoding output:\n\t");
-	printResult(decompressed->text, decompressed->len);
-
-	/***********************************************************************
-	 * ZLE DECODING
-	 ***********************************************************************/
-	Text *zleDecoded = zleDecoding(decompressed);
-
-	printf("ZLE decoding output:\n\t");
-	printResult(zleDecoded->text, zleDecoded->len);
-
-	/***********************************************************************
-	 * MTF REVERSE
-	 ***********************************************************************/
-	Text *mtfReverse = unmtf(zleDecoded);
-
-	printf("MTF reverse output:\n\t");
-	printResult(mtfReverse->text, mtfReverse->len);
-
-	/***********************************************************************
-	 * BWT REVERSE
-	************************************************************************/
-	Text *bwtReverse = unbwt(mtfReverse);
-
-	printf("BWT reverse output:\n\t");
-	printResult(bwtReverse->text, bwtReverse->len);
 
 	/************************************************************************
 	 * FREE MEMORY
@@ -78,14 +47,8 @@ void bwtZip(Text *const input)
 	free(mtfOutput);
 	free(zleOutput->text);
 	free(zleOutput);
-	free(compressed->text);
-	free(compressed);
-	free(decompressed->text);
-	free(decompressed);
-	free(zleDecoded->text);
-	free(zleDecoded);
-	free(bwtReverse->text);
-	free(bwtReverse);
+
+	return compressed;
 }
 
 void printResult(unsigned char *const text, const size_t size)

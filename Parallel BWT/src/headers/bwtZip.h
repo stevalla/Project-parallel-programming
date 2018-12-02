@@ -5,17 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../headers/bwt.h"
-#include "../headers/unbwt.h"
-#include "../headers/mtf.h"
-#include "../headers/unmtf.h"
-#include "../headers/zle.h"
-#include "../headers/unzle.h"
-#include "../headers/arith.h"
-#include "../headers/unarith.h"
+#include "bwt.h"
+#include "mtf.h"
+#include "zle.h"
+#include "arith.h"
 
 
-void bwtZip(Text *const);
+Text *bwtZip(Text *const);
 
 void printResult(unsigned char *const, const size_t);
 
