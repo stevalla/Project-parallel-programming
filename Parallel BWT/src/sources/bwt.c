@@ -1,31 +1,33 @@
 #include "../headers/bwt.h"
 
-unsigned char *bwtTransformation(unsigned char *const in,
-								 const size_t inputLen)
+Text *bwtTransformation(Text *const in)
 {
-	const size_t inLen = inputLen + 1;
+	const size_t bwtLen = in->len + 1;
 	int phases = 0;
 	short *input;
 
 	//Append the sentinel
-	input = initText(in, inLen);
+	input = initText(in->text, bwtLen);
 
-	Node *suffixTree = buildSuffixTree(input, &phases, inLen);
+	Node *suffixTree = buildSuffixTree(input, &phases, bwtLen);
 
-	return getBWT(input, suffixTree, inLen);
+	return getBWT(input, suffixTree, bwtLen);
 }
 
-unsigned char *getBWT(short *const input,
-				 	  Node *const root,
-					  const size_t inputLen)
+Text *getBWT(short *const input,
+			 Node *const root,
+			 const size_t inputLen)
 {
 	short *suffixArray;
 	int i, index;
-	unsigned char *result;
+	Text *output;
 
 	i = 0;
 	suffixArray = (short *) malloc(sizeof(short)*(inputLen));
-	result = (unsigned char *) malloc(sizeof(unsigned char)*(inputLen + 8));
+	output = (Text *) malloc(sizeof(Text));
+	output->len = inputLen + 8;
+	output->text = (unsigned char *)
+			malloc(sizeof(unsigned char)*(output->len));
 
 	createSuffixArray(root, &i, suffixArray, input);
 
@@ -34,21 +36,21 @@ unsigned char *getBWT(short *const input,
 
 		if(index == 0) {			//Index of the sentinel character
 
-			result[i + 8] = 0;		//Dummy character
-			encodeIndex(i, result, 4);
+			output->text[i + 8] = 0;		//Dummy character
+			encodeIndex(i, output->text, 4);
 
 		} else if(index == 1) {		//Index of first character
 
-			result[i + 8] = input[0];
-			encodeIndex(i, result, 0);
+			output->text[i + 8] = input[0];
+			encodeIndex(i, output->text, 0);
 
 		} else
-			result[i + 8] = input[index - 1];
+			output->text[i + 8] = input[index - 1];
 	}
 
 	free(suffixArray);
 
-	return result;
+	return output;
 }
 
 //Lexicographic DFS traversal to create the suffix array

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "util.h"
 
 //Linked list containing the table of symbols
 typedef struct SymbolsList
@@ -31,7 +32,7 @@ typedef struct MtfAux
 
 void search(SymbolsList *const, const unsigned char, MtfAux *const);
 
-unsigned char *mtf(unsigned char *const, const int, const size_t);
+Text *mtf(Text *const);
 
 SymbolsList *mvtElement(SymbolsList *const, MtfAux *const);
 

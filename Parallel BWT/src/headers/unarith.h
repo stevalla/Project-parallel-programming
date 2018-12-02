@@ -26,7 +26,7 @@ typedef struct Decoder
  */
 void initDecoder(Decoder *const);
 
-Text *decodingRoutine(unsigned char *const);
+Text *decodingRoutine(Text *const);
 
 unsigned decodeSymbol(Decoder *const, Model *const, Interval *const,
 					  IOBuffer *const, IOHelper *const);

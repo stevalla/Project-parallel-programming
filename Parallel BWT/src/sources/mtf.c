@@ -2,28 +2,23 @@
 
 #define SIZE_SYMBOLS_LIST 256
 
-unsigned char *mtf(unsigned char *const input,
-			  	   const int option,
-				   const size_t inputLen)
+Text *mtf(Text *const input)
 {
 	//Variables
-	int i;
 	SymbolsList *symbols;
-	unsigned char *output = (unsigned char *)
-							 malloc(sizeof(unsigned char)*inputLen);
+	Text *output = (Text *) malloc(sizeof(Text));
 	MtfAux mtfAux;
 
+	output->len = input->len;
+	output->text = (unsigned char *) malloc(sizeof(unsigned char)*input->len);
 	symbols = initListOfSymbols();
 
-	for(i=0; i<inputLen; i++) {
+	for(unsigned i=0; i<input->len; i++) {
 
-		search(symbols, input[i], &mtfAux);
-		output[i] = mtfAux.pos;
+		search(symbols, input->text[i], &mtfAux);
+		output->text[i] = mtfAux.pos;
 
-		if(option == 1)
-			symbols = mvtElement(symbols, &mtfAux);
-		else
-			symbols = mvtElement2(symbols, &mtfAux);
+		symbols = mvtElement(symbols, &mtfAux);
 	}
 
 	freeListOfSymbols(symbols);

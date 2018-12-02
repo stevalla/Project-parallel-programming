@@ -10,7 +10,7 @@ static const unsigned RANGE_THREE_FOURTH = (MAX_RANGE * 3) / 4;
 static const unsigned CONTINUATION_BIT = 0;
 static const unsigned EOS = 1 << (8 * sizeof(unsigned char));
 
-Text *decodingRoutine(unsigned char *const input)
+Text *decodingRoutine(Text *const input)
 {
 	Decoder *de;
 	Model *model;
@@ -24,7 +24,7 @@ Text *decodingRoutine(unsigned char *const input)
 	model = (Model *) malloc(sizeof(Model));
 	inBuf = (IOBuffer *) malloc(sizeof(IOBuffer));
 	in = (IOHelper *) malloc(sizeof(IOHelper));
-	in->text = input;
+	in->text = input->text;
 	in->index = 0;
 	o = (IOHelper *) malloc(sizeof(IOHelper));
 	o->index = 0;

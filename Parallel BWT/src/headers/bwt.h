@@ -7,14 +7,15 @@
 
 #include "../extern/uthash.h"
 #include "suffixTree.h"
+#include "util.h"
 
 
-unsigned char *bwtTransformation(unsigned char *const, const size_t);
+Text *bwtTransformation(Text *const);
 
 void createSuffixArray(Node *const, int *const,
 					   short *const, short *const);
 
-unsigned char *getBWT(short *const, Node *const, const size_t);
+Text *getBWT(short *const, Node *const, const size_t);
 
 int sortNodesByFirstChar(HashChildren *const, HashChildren *const);
 

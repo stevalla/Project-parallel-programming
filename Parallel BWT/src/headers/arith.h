@@ -79,7 +79,7 @@ typedef struct IOHelper
  */
 void initEncoder(Encoder *const);
 
-unsigned char *encodingRoutine(unsigned char *const, const size_t);
+Text *encodingRoutine(Text *const);
 
 void encodeSymbol(unsigned *const, unsigned *const,
 				  const unsigned, const Interval);

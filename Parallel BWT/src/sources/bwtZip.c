@@ -1,35 +1,29 @@
 #include "../headers/bwtZip.h"
 
 
-void bwtZip(unsigned char *const input, const size_t inputLen)
+void bwtZip(Text *const input)
 {
 
 	/***********************************************************************
-	 * BWT
+	 * BWT TRANSFORMATION
 	************************************************************************/
-	unsigned char *bwtResult = bwtTransformation(input, inputLen);
-
-	size_t bwtLen = inputLen + 9;
+	Text *bwtOutput = bwtTransformation(input);
 
 	printf("BWT output:\n\t");
-	printResult(bwtResult, bwtLen);
+	printResult(bwtOutput->text, bwtOutput->len);
 
 	/***********************************************************************
 	 * MTF TRANSFORMATION
 	 ***********************************************************************/
-	unsigned char *mtfOutput = mtf(bwtResult, 1, bwtLen);
-	unsigned char *mtfOutput2 = mtf(bwtResult, 2, bwtLen);
+	Text *mtfOutput = mtf(bwtOutput);
 
 	printf("MTF output:\n\t");
-	printResult(mtfOutput, bwtLen);
-	printf("MTF-2:\n\t");
-	printResult(mtfOutput2, bwtLen);
+	printResult(mtfOutput->text, mtfOutput->len);
 
 	/***********************************************************************
 	 * ZLE ENCODING
 	 ***********************************************************************/
-
-	Text *zleOutput = zleEncoding(mtfOutput, bwtLen);
+	Text *zleOutput = zleEncoding(mtfOutput);
 
 	printf("ZLE output:\n\t");
 	printResult(zleOutput->text, zleOutput->len);
@@ -37,12 +31,10 @@ void bwtZip(unsigned char *const input, const size_t inputLen)
 	/**********************************************************************
 	* ARITHMETIC ENCODING
 	***********************************************************************/
-	unsigned char *compressed =
-			encodingRoutine(zleOutput->text, zleOutput->len);
+	Text *compressed = encodingRoutine(zleOutput);
 
 	printf("Arithmetic coding output:\n\t");
-	printResult(compressed, inputLen-2);
-
+	printResult(compressed->text, compressed->len);
 
 	/***********************************************************************
 	 * ARITHMETIC DECODING
@@ -55,24 +47,47 @@ void bwtZip(unsigned char *const input, const size_t inputLen)
 	/***********************************************************************
 	 * ZLE DECODING
 	 ***********************************************************************/
-
 	Text *zleDecoded = zleDecoding(decompressed);
 
 	printf("ZLE decoding output:\n\t");
 	printResult(zleDecoded->text, zleDecoded->len);
 
+	/***********************************************************************
+	 * MTF REVERSE
+	 ***********************************************************************/
+	Text *mtfReverse = unmtf(zleDecoded);
+
+	printf("MTF reverse output:\n\t");
+	printResult(mtfReverse->text, mtfReverse->len);
+
+	/***********************************************************************
+	 * BWT REVERSE
+	************************************************************************/
+	Text *bwtReverse = unbwt(input);
+
+	printf("BWT reverse output:\n\t");
+	printResult(bwtReverse->text, bwtReverse->len);
+
 	/************************************************************************
 	 * FREE MEMORY
 	 ************************************************************************/
 
-	free(bwtResult);
+	free(bwtOutput->text);
+	free(bwtOutput);
+	free(mtfOutput->text);
 	free(mtfOutput);
-	free(mtfOutput2);
+	free(zleOutput->text);
 	free(zleOutput);
+	free(compressed->text);
 	free(compressed);
+	free(decompressed->text);
 	free(decompressed);
+	free(zleDecoded->text);
 	free(zleDecoded);
-
+	free(mtfReverse->text);
+	free(mtfReverse);
+	free(bwtReverse->text);
+	free(bwtReverse);
 }
 
 void printResult(unsigned char *const text, const size_t size)

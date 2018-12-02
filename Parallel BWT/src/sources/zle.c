@@ -2,7 +2,7 @@
 
 #define LOG2E 1.44269504089
 
-Text *zleEncoding(unsigned char *const input, const size_t inputLen)
+Text *zleEncoding(Text *const input)
 {
 	//Variables
 	size_t len, runLen;
@@ -12,11 +12,11 @@ Text *zleEncoding(unsigned char *const input, const size_t inputLen)
 	//Initialization
 	len = 0;
 	runLen = 0;
-	output = (unsigned char *) malloc(sizeof(unsigned char) * inputLen);
+	output = (unsigned char *) malloc(sizeof(unsigned char) * input->len);
 
-	for(unsigned j=0; j<inputLen; j++) {
+	for(unsigned j=0; j<input->len; j++) {
 
-		if(input[j] == 0) {							//Zeros run
+		if(input->text[j] == 0) {							//Zeros run
 			runLen++;
 			continue;
 
@@ -27,16 +27,16 @@ Text *zleEncoding(unsigned char *const input, const size_t inputLen)
 		}
 
 		//No run
-		if(input[j] == 0xFE) {						//ch = 254
+		if(input->text[j] == 0xFE) {						//ch = 254
 			output[len++] = 0xFF;
 			output[len++] = 0x00;
 
-		} else if(input[j] == 0xFF) {				//ch = 255
+		} else if(input->text[j] == 0xFF) {				//ch = 255
 			output[len++] = 0xFF;
 			output[len++] = 0x01;
 
 		} else
-			output[len++] = input[j] + 1;
+			output[len++] = input->text[j] + 1;
 
 	}
 

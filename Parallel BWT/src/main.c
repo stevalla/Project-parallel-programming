@@ -47,6 +47,10 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
+	Text *input = (Text *) malloc(sizeof(Text));
+	input->text = text;
+	input->len = inputLen;
+
 	/************************************************************************
 	 * INPUT
 	 ************************************************************************/
@@ -61,7 +65,7 @@ int main(int argc, char *argv[])
 	 * ZIP
 	 ************************************************************************/
 
-	bwtZip(text, inputLen);
+	bwtZip(input);
 
 	return 0;
 }

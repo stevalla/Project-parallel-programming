@@ -22,8 +22,7 @@ static const unsigned RANGE_THREE_FOURTH = (MAX_RANGE * 3) / 4;
 
 static const unsigned EOS = 1 << (8 * sizeof(unsigned char));
 
-unsigned char *encodingRoutine(unsigned char *const input,
-							   const size_t inputLen)
+Text *encodingRoutine(Text *const input)
 {
 	Encoder * en;
 	Interval currentInt;
@@ -35,16 +34,16 @@ unsigned char *encodingRoutine(unsigned char *const input,
 	out = (IOBuffer *) malloc(sizeof(IOBuffer));
 	model = (Model *) malloc(sizeof(Model));
 	o = (IOHelper *) malloc(sizeof(IOHelper));
-	o->text = (unsigned char *) malloc(sizeof(unsigned char)*inputLen);
+	o->text = (unsigned char *) malloc(sizeof(unsigned char)*input->len);
 	o->index = 0;
 
 	initEncoder(en);
 	initModel(model, EOS + 1);
 	initIOBuffer(out);
 
-	for(unsigned i=0; i<inputLen; i++) {
+	for(unsigned i=0; i<input->len; i++) {
 
-		findInterval(&currentInt, model, input[i]);
+		findInterval(&currentInt, model, input->text[i]);
 
 		encodeSymbol(&en->low, &en->high, en->range, currentInt);
 
@@ -58,11 +57,12 @@ unsigned char *encodingRoutine(unsigned char *const input,
 
 	finishEncoding(en, out, o);
 
-	unsigned char *output = (unsigned char *)
-							 malloc(sizeof(unsigned char) * o->index);
+	Text *output = (Text *) malloc(sizeof(Text));
+	output->text = (unsigned char *) malloc(sizeof(unsigned char)*o->index);
+	output->len = o->index;
 
 	for(unsigned i=0; i<o->index; i++)
-		output[i] = o->text[i];
+		output->text[i] = o->text[i];
 
 	free(o->text);
 	free(o);
