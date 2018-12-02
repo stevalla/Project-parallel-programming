@@ -1,11 +1,11 @@
 #include "../headers/suffixTree.h"
 
-#include "../headers/bwt.h"
-
-Node *buildSuffixTree(short *input, int *phases, size_t inputLen)
+Node *buildSuffixTree(short *const in,
+					  int *const phases,
+					  const size_t inLen)
 {
 	//Variables
-	ActivePoint *ap = (ActivePoint *) malloc(sizeof(ActivePoint));
+	ActivePoint ap;
 	Node *root;
 	int remainder = 0;	//Counts how many suffixes we still need to insert
 	int labelLen = 0;
@@ -17,28 +17,24 @@ Node *buildSuffixTree(short *input, int *phases, size_t inputLen)
 	root = createNode(-1, endRoot, NULL);
 
 	//Initialization of the active point
-	ap->activeNode = root;
-	ap->activeEdge = -1;
-	ap->activeLen = 0;
+	ap.activeNode = root;
+	ap.activeEdge = -1;
+	ap.activeLen = 0;
 
-	//Append the sentinel
-	initText(input, inputLen);
+	for(*phases=0; *phases < inLen; (*phases)++) {
 
-	for(*phases=0; *phases<=inputLen; (*phases)++) {
 		remainder++;
-		applyExtensions(input, &remainder, endLeaf, ap, root);
+		applyExtensions(in, &remainder, endLeaf, &ap, root);
 	}
 
 	(*endLeaf)--;
 
-	addSuffixIndex(root, labelLen, input, inputLen);
-
-	free(ap);
+	addSuffixIndex(root, labelLen, in, inLen);
 
 	return root;
 }
 
-Node *createNode(int start, int *end, Node *root)
+Node *createNode(const int start, int *const end, Node *const root)
 {
 	Node *node = (Node *) malloc(sizeof(Node));
 
@@ -52,22 +48,22 @@ Node *createNode(int start, int *end, Node *root)
 	return node;
 }
 
-HashChildren *findChildren(ActivePoint *ap, short *inputText)
+HashChildren *findChildren(ActivePoint *const ap, short *const input)
 {
 	HashChildren *hashChild;
 	int key;
 
-	key = (int)inputText[ap->activeEdge];
+	key = (int)input[ap->activeEdge];
 	HASH_FIND_INT(ap->activeNode->children, &key, hashChild);
 
 	return hashChild;
 }
 
-void applyExtensions(short *input,
-					 int *remainder,
-					 int *endLeaf,
-					 ActivePoint *ap,
-					 Node *root)
+void applyExtensions(short *const input,
+					 int *const remainder,
+					 int *const endLeaf,
+					 ActivePoint *const ap,
+					 Node *const root)
 {
 	Node *child;
 	Node *newest = NULL;
@@ -94,7 +90,6 @@ void applyExtensions(short *input,
 			if(walkDown(ap, child))
 				continue;	//restart the loop with the child as activeNode
 
-
 			//Rule 3
 			if(input[child->start + ap->activeLen] == input[*endLeaf]) {
 				ap->activeLen++;
@@ -118,46 +113,51 @@ void applyExtensions(short *input,
 	}
 }
 
-Node *createInternalNode(ActivePoint *ap,
-						 Node *root,
-						 HashChildren *hashChild,
-						 int *endLeaf,
-						 short *inputText)
+Node *createInternalNode(ActivePoint *const ap,
+						 Node *const root,
+						 HashChildren *const child,
+						 int *const endLeaf,
+						 short *const input)
 {
-	Node *oldChild = hashChild->node;
+	Node *oldChild = child->node;
 	int *endInternalNode = (int *) malloc(sizeof(int));
 	Node *internalNode;
 
-	HASH_DEL(ap->activeNode->children, hashChild);
+	HASH_DEL(ap->activeNode->children, child);
 
 	//Create internal node and attach to its parent
 	*endInternalNode = oldChild->start + ap->activeLen - 1;
 	internalNode = createNode(oldChild->start, endInternalNode, root);
 
 	//Attach the old child to the internal node and the last one to its parent
-	hashChild->node->start += ap->activeLen;
-	hashChild->firstChar = inputText[hashChild->node->start];
-	addNewChild(internalNode, ap->activeNode, inputText);
-	HASH_ADD_INT(internalNode->children, firstChar, hashChild);
+	child->node->start += ap->activeLen;
+	child->firstChar = input[child->node->start];
+	addNewChild(internalNode, ap->activeNode, input);
+	HASH_ADD_INT(internalNode->children, firstChar, child);
 
 	//Create new leaf from the internal node
-	createLeaf(endLeaf, internalNode, root, inputText);
+	createLeaf(endLeaf, internalNode, root, input);
 
 	return internalNode;
 }
 
-void addNewChild(Node *child, Node *parent, short *inputText)
+void addNewChild(Node *const child,
+				 Node *const parent,
+				 short *const input)
 {
 	HashChildren *hash = (HashChildren *) malloc(sizeof(HashChildren));
 	hash->node = child;
-	hash->firstChar = inputText[child->start];
+	hash->firstChar = input[child->start];
 	HASH_ADD_INT(parent->children, firstChar, hash);
 }
 
-void createLeaf(int *endLeaf, Node *parent, Node *root, short *inputText)
+void createLeaf(int *const endLeaf,
+				Node *const parent,
+				Node *const root,
+				short *const input)
 {
 	Node *child = createNode(*endLeaf, endLeaf, root);
-	addNewChild(child, parent, inputText);
+	addNewChild(child, parent, input);
 }
 
 //Free the hash table that contains the children of a node
@@ -180,7 +180,9 @@ void deleteNode(Node *node)
 	free(node);
 }
 
-void checkSuffixLinkNeeded(Node *node, Node *newest, Node *root)
+void checkSuffixLinkNeeded(Node *const node,
+						   Node *newest,
+						   Node *const root)
 {
 	/*
 	 * Update suffix link if newest is pointing to a node,
@@ -199,7 +201,7 @@ void checkSuffixLinkNeeded(Node *node, Node *newest, Node *root)
 }
 
 //Apply skip/count trick to walk down the tree quickly
-int walkDown(ActivePoint *ap, Node *currentNode)
+int walkDown(ActivePoint *const ap, Node *const currentNode)
 {
 	int edgeLength = getEdgeLen(currentNode);
 	if(ap->activeLen >= edgeLength) {
@@ -213,7 +215,10 @@ int walkDown(ActivePoint *ap, Node *currentNode)
 	return 0;
 }
 
-void updateAP(ActivePoint *ap, Node *root, int phases, int remainder)
+void updateAP(ActivePoint *const ap,
+			  Node *const root,
+			  const int phases,
+			  const int remainder)
 {
 	if(ap->activeNode == root && ap->activeLen > 0) {
 
@@ -225,29 +230,28 @@ void updateAP(ActivePoint *ap, Node *root, int phases, int remainder)
 }
 
 //DFS traversal to set the suffix indexes of the leaves
-void addSuffixIndex(Node *node, int labelLen, short *inputText, size_t inputLen)
+void addSuffixIndex(Node *const node,
+					const int labelLen,
+					short *const input,
+					const size_t inputLen)
 {
-	HashChildren *hashChild;
+	HashChildren *child;
 	int num_children = HASH_COUNT(node->children);
 
 	if(num_children == 0) {
-		node->suffixIndex = (inputLen + 1) - labelLen;
+		node->suffixIndex = inputLen - labelLen;
 		return;
 	}
 
-	for(hashChild=node->children; hashChild!=NULL; hashChild=hashChild->hh.next)
-		addSuffixIndex(hashChild->node,
-				labelLen + getEdgeLen(hashChild->node), inputText, inputLen);
+	for(child=node->children; child!=NULL; child=child->hh.next)
+		addSuffixIndex(child->node,
+				labelLen + getEdgeLen(child->node), input, inputLen);
 }
 
 
-int getEdgeLen(Node *node)
+int getEdgeLen(Node *const node)
 {
 	return *(node->end) - (node->start) + 1;
 }
 
-//Add a sentinel at the end of the text for the transformation
-void initText(short *text, size_t len)
-{
-	text[len] = 256;
-}
+

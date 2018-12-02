@@ -6,15 +6,13 @@
 #include <string.h>
 
 
-typedef char* String;
-
 //Linked list containing the table of symbols
-typedef struct ListOfSymbols
+typedef struct SymbolsList
 {
-	int symbol;
-	struct ListOfSymbols *next;
+	unsigned char symbol;
+	struct SymbolsList *next;
 
-} ListOfSymbols;
+} SymbolsList;
 
 /*
  * This structure keeps track of the position
@@ -25,23 +23,23 @@ typedef struct ListOfSymbols
  */
 typedef struct MtfAux
 {
-	int pos;
-	ListOfSymbols *prev;
+	unsigned char pos;
+	SymbolsList *prev;
 
 } MtfAux;
 
 
-MtfAux *search(ListOfSymbols *, int, MtfAux *);
+void search(SymbolsList *const, const unsigned char, MtfAux *const);
 
-short *mtfEncoding(short *, int, size_t);
+unsigned char *mtf(unsigned char *const, const int, const size_t);
 
-ListOfSymbols *moveToFrontElement(ListOfSymbols *, MtfAux *);
+SymbolsList *mvtElement(SymbolsList *const, MtfAux *const);
 
-ListOfSymbols *moveToFrontElement2(ListOfSymbols *, MtfAux *);
+SymbolsList *mvtElement2(SymbolsList *const, MtfAux *const);
 
-ListOfSymbols *initListOfSymbols();
+SymbolsList *initListOfSymbols(void);
 
-void freeListOfSymbols(ListOfSymbols *);
+void freeListOfSymbols(SymbolsList *);
 
 
 #endif

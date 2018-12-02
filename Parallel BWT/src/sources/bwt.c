@@ -1,37 +1,49 @@
 #include "../headers/bwt.h"
 
-ResultBwt *bwtTransformation(short *input, size_t inputLen)
+unsigned char *bwtTransformation(unsigned char *const in,
+								 const size_t inputLen)
 {
+	const size_t inLen = inputLen + 1;
 	int phases = 0;
-	Node *suffixTree = buildSuffixTree(input, &phases, inputLen);
+	short *input;
 
-	return getBWT(input, suffixTree, inputLen);
+	//Append the sentinel
+	input = initText(in, inLen);
+
+	Node *suffixTree = buildSuffixTree(input, &phases, inLen);
+
+	return getBWT(input, suffixTree, inLen);
 }
 
-ResultBwt *getBWT(short *input, Node *root, size_t inputLen)
+unsigned char *getBWT(short *const input,
+				 	  Node *const root,
+					  const size_t inputLen)
 {
-	int *suffixArray = (int *) malloc(sizeof(int)*(inputLen+1));
-	int i;
-	ResultBwt *result;
+	short *suffixArray;
+	int i, index;
+	unsigned char *result;
 
 	i = 0;
-	result = (ResultBwt *) malloc(sizeof(ResultBwt));
-	result->text = (short *) malloc(sizeof(short)*(inputLen+2));
+	suffixArray = (short *) malloc(sizeof(short)*(inputLen));
+	result = (unsigned char *) malloc(sizeof(unsigned char)*(inputLen + 8));
 
 	createSuffixArray(root, &i, suffixArray, input);
 
-	for(i=0; i<=inputLen; i++) {
-		int index = suffixArray[i];
+	for(i=0; i<inputLen; i++) {
+		index = suffixArray[i];
 
-		//Store the BWT text
-		if(index == 0)
-			result->text[i] = input[inputLen];
-		else
-			result->text[i] = input[suffixArray[i] - 1];
+		if(index == 0) {			//Index of the sentinel character
 
-		//Store the row of the original string
-		if(input[inputLen] == result->text[i])
-			result->index = i;
+			result[i + 8] = 0;		//Dummy character
+			encodeIndex(i, result, 4);
+
+		} else if(index == 1) {		//Index of first character
+
+			result[i + 8] = input[0];
+			encodeIndex(i, result, 0);
+
+		} else
+			result[i + 8] = input[index - 1];
 	}
 
 	free(suffixArray);
@@ -40,9 +52,12 @@ ResultBwt *getBWT(short *input, Node *root, size_t inputLen)
 }
 
 //Lexicographic DFS traversal to create the suffix array
-void createSuffixArray(Node *node, int *i, int suffixArray[], short *inputText)
+void createSuffixArray(Node *const node,
+					   int *const i,
+					   short *const suffixArray,
+					   short *const input)
 {
-	HashChildren *hashChild;
+	HashChildren *child;
 	int num_children = HASH_COUNT(node->children);
 
 	if(num_children == 0) {
@@ -54,15 +69,41 @@ void createSuffixArray(Node *node, int *i, int suffixArray[], short *inputText)
 
 	HASH_SORT(node->children, sortNodesByFirstChar);
 
-	for(hashChild=node->children; hashChild!=NULL; hashChild=hashChild->hh.next)
-		createSuffixArray(hashChild->node, i, suffixArray, inputText);
+	for(child=node->children; child!=NULL; child=child->hh.next)
+		createSuffixArray(child->node, i, suffixArray, input);
 
 	deleteNode(node);
 }
 
-int sortNodesByFirstChar(HashChildren *el1, HashChildren *el2)
+int sortNodesByFirstChar(HashChildren *const el1, HashChildren *const el2)
 {
 	if(el1->firstChar < el2->firstChar)			return -1;
 	else if(el1->firstChar > el2->firstChar)	return  1;
 	else 										return  0;
+}
+
+//Add a sentinel at the end of the text for the transformation
+short *initText(unsigned char *const text, const size_t len)
+{
+	short *input = (short *) malloc(sizeof(short)*(len));
+	int i;
+
+	for(i=0; i<len-1; i++)
+		input[i] = text[i];
+
+	input[i] = SENTINEL;
+
+	return input;
+}
+
+
+unsigned char decomposeUnsigned(unsigned ul, int n) {
+    return (ul >> (24 - 8 * n)) & 0xFF;
+}
+
+void encodeIndex(const unsigned index, unsigned char *const output, int j)
+{
+	for(unsigned i=0; i<4; i++) {
+		output[j++] = decomposeUnsigned(index, i);
+	}
 }

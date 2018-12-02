@@ -7,13 +7,14 @@
 
 #include "../extern/uthash.h"
 
-typedef char* String;
+#define SENTINEL 256;
+
 typedef struct Node Node;
 
 //To maintain the list of children of each node.
 typedef struct HashChildren
 {
-    short firstChar;	    			/* key */
+	short firstChar;	    			/* key */
     Node *node;				   			/* value */
     UT_hash_handle hh;         			/* makes this structure hash table */
 
@@ -41,35 +42,35 @@ typedef struct ActivePoint
 } ActivePoint;
 
 
-Node *buildSuffixTree(short *, int *, size_t);
+Node *buildSuffixTree(short *const , int *const , const size_t);
 
-void applyExtensions(short *, int *, int *, ActivePoint *, Node *);
+void applyExtensions(short *const , int *const , int *const,
+					 ActivePoint *const , Node *const);
 
-int getEdgeLen(Node *);
+int getEdgeLen(Node *const);
 
-void initText(short *, size_t);
+Node *createNode(const int, int *const, Node *const);
 
-Node *createNode(int, int *, Node *);
+void updateAP(ActivePoint *const, Node *const, const int, const int);
 
-void updateAP(ActivePoint *, Node *, int, int);
+int walkDown(ActivePoint *const, Node *const);
 
-int walkDown(ActivePoint *, Node *);
+void checkSuffixLinkNeeded(Node *const, Node *, Node *const);
 
-void checkSuffixLinkNeeded(Node *, Node *, Node *);
+Node *createInternalNode(ActivePoint *const, Node *const,
+						 HashChildren *const, int *const, short *const);
 
-Node *createInternalNode(ActivePoint *, Node *, HashChildren *, int *, short *);
+void createLeaf(int *const, Node *const, Node *const, short *const);
 
-void createLeaf(int *, Node *, Node *, short *);
+void addSuffixIndex(Node *const, const int, short *const, const size_t);
 
-void addSuffixIndex(Node *, int, short *, size_t);
-
-void addNewChild(Node *, Node *, short *);
+void addNewChild(Node *const, Node *const, short *const);
 
 void deleteChildren(HashChildren *);
 
 void deleteNode(Node *);
 
-HashChildren *findChildren(ActivePoint *, short *);
+HashChildren *findChildren(ActivePoint *const, short *const);
 
 
 #endif

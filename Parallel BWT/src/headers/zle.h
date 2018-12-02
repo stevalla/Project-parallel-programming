@@ -10,15 +10,16 @@
 typedef struct ZeroRun
 {
 	int len;
-	short *encoded;
+	unsigned char *encoded;
 
 } ZeroRun;
 
-ZeroRun *zleEncoding(short *, int);
+ZeroRun *zleEncoding(unsigned char *const, const size_t);
 
-void countZeroRun(double, short *, int *);
+void countZeroRun(const double, unsigned char *const ,
+				  size_t *const);
 
-short *decToBin(int, int);
+unsigned *decToBin(size_t, const size_t);
 
 
 #endif

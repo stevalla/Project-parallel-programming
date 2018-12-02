@@ -16,60 +16,66 @@ STATIC_ASSERT(range_times_freq_not_overflow,
 STATIC_ASSERT(range_one_fourth_contains_freqs,
 		BITS_RANGE >= FREQUENCY_BITS + 2);
 
-static const unsigned RANGE_BITS = BITS_RANGE;
-static const unsigned RANGE_MIN	= 0;
-static const unsigned RANGE_MAX = MAX_RANGE;
-static const unsigned RANGE_HALF = MAX_RANGE / 2;
-static const unsigned RANGE_ONE_FOURTH = MAX_RANGE / 4;
+static const unsigned         RANGE_BITS = BITS_RANGE;
+static const unsigned          RANGE_MIN = 0;
+static const unsigned          RANGE_MAX = MAX_RANGE;
+static const unsigned         RANGE_HALF = MAX_RANGE / 2;
+static const unsigned   RANGE_ONE_FOURTH = MAX_RANGE / 4;
 static const unsigned RANGE_THREE_FOURTH = (MAX_RANGE * 3) / 4;
 
 static const unsigned EOS = 1 << (8 * sizeof(unsigned char));
 static const unsigned CONTINUATION_BIT = 0;
 
-void encodingRoutine(FILE *const input)
+unsigned char *encodingRoutine(unsigned char *const input,
+							   const size_t inputLen)
 {
 	Encoder * en;
 	Interval currentInt;
 	IOBuffer * out;
 	Model * model;
-	FILE * output;
-	unsigned char sym;
+	IOHelper *o;
 
 	en = (Encoder *) malloc(sizeof(Encoder));
 	out = (IOBuffer *) malloc(sizeof(IOBuffer));
 	model = (Model *) malloc(sizeof(Model));
-	output = fopen("encoded.zip", "wb");
-	if(output == NULL)
-		printf("Could not open output file");
-
+	o = (IOHelper *) malloc(sizeof(IOHelper));
+	o->text = (unsigned char *) malloc(sizeof(unsigned char)*inputLen);
+	o->index = 0;
 
 	initEncoder(en);
 	initModel(model, EOS + 1);
 	initIOBuffer(out);
 
-	while(fread(&sym, sizeof(sym), 1, input) > 0) {
+	for(unsigned i=0; i<inputLen; i++) {
 
-		findInterval(&currentInt, model, sym);
+		findInterval(&currentInt, model, input[i]);
 
 		encodeSymbol(&en->low, &en->high, en->range, currentInt);
 
-		checkForOutputBit(en, out, output);
+		checkForOutputBit(en, out, o);
 
 	}
 
 	findInterval(&currentInt, model, EOS);
 	encodeSymbol(&en->low, &en->high, en->range, currentInt);
-	checkForOutputBit(en, out, output);
+	checkForOutputBit(en, out, o);
 
-	finishEncoding(en, out, output);
+	finishEncoding(en, out, o);
 
+	unsigned char *output = (unsigned char *)
+							 malloc(sizeof(unsigned char) * o->index);
+
+	for(unsigned i=0; i<o->index; i++)
+		output[i] = o->text[i];
+
+	free(o->text);
+	free(o);
 	free(en);
 	free(out);
 	free(model->freq);
 	free(model);
 
-	fclose(output);
-	fclose(input);
+	return output;
 }
 
 
@@ -114,10 +120,10 @@ void initEncoder(Encoder *const en)
 
 }
 
-void initIOBuffer(IOBuffer *const out)
+void initIOBuffer(IOBuffer *const buf)
 {
-	out->buf = 0;
-	out->bufBits = 0;
+	buf->buf = 0;
+	buf->bufBits = 0;
 
 }
 
@@ -133,20 +139,22 @@ void findInterval(Interval *const interval,
 }
 
 
-void checkForOutputBit(Encoder *const en, IOBuffer *const out, FILE *const f)
+void checkForOutputBit(Encoder *const en,
+					   IOBuffer *const out,
+					   IOHelper *const o)
 {
 
 	for(;;) {
 
 		if(en->high <= RANGE_HALF) {
 
-			outputBits(en, 0, out, f);
+			outputBits(en, 0, out, o);
 			en->low  = 2 * en->low;
 			en->high = 2 * en->high;
 
 		} else if(en->low >= RANGE_HALF) {
 
-			outputBits(en, 1, out, f);
+			outputBits(en, 1, out, o);
 			en->low  = 2 * (en->low  - RANGE_HALF);
 			en->high = 2 * (en->high - RANGE_HALF);
 
@@ -189,7 +197,7 @@ void updateModel(Model *const model, const unsigned ch)
 
 void outputBit(IOBuffer *const out,
 			   const unsigned bit,
-			   FILE *const f)
+			   IOHelper *const o)
 {
 	assert(bit == 0 || bit == 1);
 
@@ -197,7 +205,8 @@ void outputBit(IOBuffer *const out,
 	if(BUF_BITS == out->bufBits) {
 
 		(void) BUF_BITS;
-		fwrite(&out->buf, sizeof(out->buf), 1, f);
+		o->text[o->index] = out->buf;
+		o->index++;
 		out->buf = 0;
 		out->bufBits = 0;
 	}
@@ -207,79 +216,94 @@ void outputBit(IOBuffer *const out,
 void outputBits(Encoder *const en,
 		 	 	const unsigned bit,
 				IOBuffer *const out,
-				FILE *const f)
+				IOHelper *const o)
 {
 
 	assert(bit == 0 || bit == 1);
-	outputBit(out, bit, f);
+	outputBit(out, bit, o);
 
 	for(const unsigned inv = !bit; en->underflow > 0; --en->underflow)
-		outputBit(out, inv, f);
+		outputBit(out, inv, o);
 
 }
 
 
-void finishEncoding(Encoder *const en, IOBuffer *const out, FILE *const f)
+void finishEncoding(Encoder *const en,
+					IOBuffer *const out,
+					IOHelper *const o)
 {
 	if(RANGE_MIN == en->low && en->underflow == 0) {
 		assert(RANGE_HALF < en->high);
 		if(RANGE_MAX != en->high)
-			outputBits(en, 0, out, f);
+			outputBits(en, 0, out, o);
 
 	} else if (RANGE_MAX == en->high && en->underflow == 0) {
 		assert(RANGE_HALF > en->low);
 		if (en->low != 0)
-			outputBits(en, 1, out, f);
+			outputBits(en, 1, out, o);
 
 	} else {
 		if (en->low != RANGE_MIN && en->high != RANGE_MAX)
 			++en->underflow;
-		outputBits(en, RANGE_ONE_FOURTH <= en->low, out, f);
+		outputBits(en, RANGE_ONE_FOURTH <= en->low, out, o);
 	}
 
 	if (out->bufBits != 0) {
 		(void) BUF_BITS;
-		fwrite(&out->buf, sizeof(out->buf), 1, f);
+		o->text[o->index] = out->buf;
+		o->index++;
 	}
 
 }
 
-void decodingRoutine(FILE *const input)
+unsigned char *decodingRoutine(unsigned char *const input)
 {
-	FILE * out;
-	Decoder * de;
-	Model * model;
-	IOBuffer * in;
+	Decoder *de;
+	Model *model;
+	IOBuffer *inBuf;
 	Interval currentInt;
+	IOHelper *in, *o;
+	unsigned char *output;
 	unsigned ch;
-
 
 	de = (Decoder *) malloc(sizeof(Decoder));
 	model = (Model *) malloc(sizeof(Model));
-	in = (IOBuffer *) malloc(sizeof(IOBuffer));
-	out = fopen("decoded.txt", "wb");
+	inBuf = (IOBuffer *) malloc(sizeof(IOBuffer));
+	in = (IOHelper *) malloc(sizeof(IOHelper));
+	in->text = input;
+	in->index = 0;
+	o = (IOHelper *) malloc(sizeof(IOHelper));
+	o->index = 0;
+	o->text = (unsigned char *)
+			   malloc(sizeof(unsigned char) * MAX_CHUNK_SIZE);
 
 	initDecoder(de);
 	initModel(model, EOS + 1);
-	initIOBuffer(in);
+	initIOBuffer(inBuf);
 
-	while((ch = decodeSymbol(de, model, &currentInt, in, input)) != EOS) {
-		const unsigned char sym = (unsigned char) ch;
-		fwrite(&sym, sizeof(sym), 1, out);
+	while((ch = decodeSymbol(de, model, &currentInt, inBuf, in)) != EOS) {
+		o->text[o->index] = (unsigned char) ch;
+		o->index++;
 	}
 
+	output = (unsigned char *) malloc(sizeof(unsigned char) * o->index);
+	for(unsigned i=0; i<o->index; i++)
+		output[i] = o->text[i];
 
+	free(o->text);
+	free(o);
+	free(in);
 	free(de);
 	free(model->freq);
 	free(model);
-	free(in);
+	free(inBuf);
 
-	fclose(input);
-	fclose(out);
-
+	return output;
 }
 
-void updateInterval(Decoder *const de, IOBuffer *const in, FILE *const f)
+void updateInterval(Decoder *const de,
+					IOBuffer *const inBuf,
+					IOHelper *const in)
 {
 	for(;;) {
 
@@ -303,7 +327,7 @@ void updateInterval(Decoder *const de, IOBuffer *const in, FILE *const f)
 		} else
 			break;
 
-		de->value = de->value << 1 | inputBit(de, in, f);
+		de->value = de->value << 1 | inputBit(de, inBuf, in);
 		assert(de->value >= 0 && de->value < RANGE_MAX);
 	}
 
@@ -313,13 +337,13 @@ void updateInterval(Decoder *const de, IOBuffer *const in, FILE *const f)
 unsigned decodeSymbol(Decoder *const de,
 					  Model *const model,
 					  Interval *const interval,
-					  IOBuffer *const in,
-					  FILE *const input)
+					  IOBuffer *const inBuf,
+					  IOHelper *const in)
 {
 	if(de->valueBits == 0) {
 
 		for(unsigned i = RANGE_BITS; i > 0; i--)
-			de->value = de->value << 1 | inputBit(de, in, input);
+			de->value = de->value << 1 | inputBit(de, inBuf, in);
 
 		de->valueBits = RANGE_BITS;
 	}
@@ -330,29 +354,39 @@ unsigned decodeSymbol(Decoder *const de,
 	const unsigned ch = findChar(de, interval, model);
 
 	encodeSymbol(&de->low, &de->high, de->range, *interval);
-	updateInterval(de, in, input);
+	updateInterval(de, inBuf, in);
 
 	return ch;
 }
 
-unsigned inputBit(Decoder *const de, IOBuffer *const in, FILE *const f)
+unsigned inputBit(Decoder *const de,
+				  IOBuffer *const inBuf,
+				  IOHelper *const in)
 {
 	if(de->fin)
 		return CONTINUATION_BIT;
 
-	if(in->bufBits == 0) {
+	if(inBuf->bufBits == 0) {
 
-		in->bufBits = (8 * fread(&in->buf, sizeof(in->buf), 1, f));
-		if(in->bufBits == 0) {
+		inBuf->buf = in->text[in->index];
+
+		if((in->text + in->index) != NULL)
+			inBuf->bufBits = 8;
+		else
+			inBuf->bufBits = 0;
+
+		in->index++;
+
+		if(inBuf->bufBits == 0) {
 			de->fin = !de->fin;
 			return CONTINUATION_BIT;
 		}
 	}
 
-	const unsigned bit = in->buf >> (BUF_BITS - 1);
+	const unsigned bit = inBuf->buf >> (BUF_BITS - 1);
 	assert(bit == 0 || bit == 1);
-	in->buf <<= 1;
-	--in->bufBits;
+	inBuf->buf <<= 1;
+	--inBuf->bufBits;
 
 	return bit;
 }
@@ -378,6 +412,7 @@ unsigned findChar(Decoder *const de,
 	for(unsigned i=0; i<last; i++) {
 
 		if(model->freq[i] <= freq && model->freq[i + 1] > freq) {
+
 			interval->lowCount = model->freq[i];
 			interval->highCount = model->freq[i + 1];
 			interval->scale = model->freq[last];
@@ -389,7 +424,6 @@ unsigned findChar(Decoder *const de,
 
 	assert(!"Bad range");
 	return -1;
-
 }
 
 

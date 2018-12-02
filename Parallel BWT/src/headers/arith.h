@@ -7,6 +7,7 @@
 
 #define POW_2(N)			(1 << (N))
 #define BUF_BITS			(8 * sizeof(unsigned char))
+#define MAX_CHUNK_SIZE      (5 * 1048576)
 /*
  * Number of bits to represent arithmetic values.
  * This value is exact and the maximum is
@@ -75,17 +76,24 @@ typedef struct Model
 
 } Model;
 
+typedef struct IOHelper
+{
+	unsigned char *text;
+	int index;
+
+} IOHelper;
+
 /*
  * encoding functions
  */
 void initEncoder(Encoder *const);
 
-void encodingRoutine(FILE *const);
+unsigned char *encodingRoutine(unsigned char *const, const size_t);
 
 void encodeSymbol(unsigned *const, unsigned *const,
 				  const unsigned, const Interval);
 
-void finishEncoding(Encoder *const, IOBuffer *const, FILE *const);
+void finishEncoding(Encoder *const, IOBuffer *const, IOHelper *const);
 
 /*
  * Model functions
@@ -104,32 +112,34 @@ unsigned findChar(Decoder *const, Interval *const, Model *const);
 
 void initIOBuffer(IOBuffer *);
 
-void checkForOutputBit(Encoder *const, IOBuffer *const, FILE *const);
+void checkForOutputBit(Encoder *const, IOBuffer *const, IOHelper *const);
 
-void outputBits(Encoder *const, const unsigned, IOBuffer *const, FILE *const);
+void outputBits(Encoder *const, const unsigned,
+				IOBuffer *const, IOHelper *const);
 
-void outputBit(IOBuffer *const, const unsigned, FILE *);
+void outputBit(IOBuffer *const, const unsigned, IOHelper *);
 
-void updateInterval(Decoder *const, IOBuffer *const, FILE *const);
+void updateInterval(Decoder *const, IOBuffer *const,
+		IOHelper *const);
 
 /*
  * Decoder functions
  */
 void initDecoder(Decoder *const);
 
-void decodingRoutine(FILE *const);
+unsigned char *decodingRoutine(unsigned char *const);
 
 unsigned decodeSymbol(Decoder *const, Model *const, Interval *const,
-		IOBuffer *const, FILE *const);
+					  IOBuffer *const, IOHelper *const);
 
-unsigned inputBit(Decoder *const, IOBuffer *const, FILE *const);
+unsigned inputBit(Decoder *const, IOBuffer *const,
+				  IOHelper *const);
 
 static inline
 unsigned scaleFrequencies(const unsigned v,
 						  const unsigned range,
 						  const unsigned scale)
 {
-//	printf("v=%d, scale=%d, range=%d\n", v, scale, range);
 	return (((unsigned)v + 1) * scale - 1) / range;
 }
 

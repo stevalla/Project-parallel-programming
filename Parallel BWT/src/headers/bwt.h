@@ -9,22 +9,21 @@
 #include "suffixTree.h"
 
 
-//Hold the bwt text and the index of the original string in the bwt
-typedef struct ResultBwt
-{
-	short *text;
-	int index;
+unsigned char *bwtTransformation(unsigned char *const, const size_t);
 
-} ResultBwt;
+void createSuffixArray(Node *const, int *const,
+					   short *const, short *const);
 
+unsigned char *getBWT(short *const, Node *const, const size_t);
 
-ResultBwt *bwtTransformation(short *, size_t);
+int sortNodesByFirstChar(HashChildren *const, HashChildren *const);
 
-void createSuffixArray(Node *, int *, int[], short *);
+short *initText(unsigned char *const, const size_t);
 
-ResultBwt *getBWT(short *, Node *, size_t);
+// Return a vector<unsigned char> that represents u big-endian.
+void encodeIndex(const unsigned, unsigned char *const, int);
 
-int sortNodesByFirstChar(HashChildren *, HashChildren *);
-
+// Return the nth big-endian byte of an unsigned int. 0 <= n <= 3
+unsigned char decomposeUnsigned(unsigned ,int);
 
 #endif

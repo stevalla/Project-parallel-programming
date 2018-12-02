@@ -1,70 +1,69 @@
 #include "../headers/mtf.h"
 
-#define SIZE_SYMBOLS_LIST 255
+#define SIZE_SYMBOLS_LIST 256
 
-short *mtfEncoding(short *inputText, int option, size_t inputLen)
+unsigned char *mtf(unsigned char *const input,
+			  	   const int option,
+				   const size_t inputLen)
 {
 	//Variables
 	int i;
-	ListOfSymbols *symbols;
-	short *mtfOutput = (short *) malloc(sizeof(short)*inputLen);
-	MtfAux *mtfAux = (MtfAux *) malloc(sizeof(MtfAux));
+	SymbolsList *symbols;
+	unsigned char *output = (unsigned char *)
+							 malloc(sizeof(unsigned char)*inputLen);
+	MtfAux mtfAux;
 
 	symbols = initListOfSymbols();
 
 	for(i=0; i<inputLen; i++) {
 
-		//The sentinel character is not moved on
-		if(inputText[i] > 255) {
-			mtfOutput[i] = inputText[i];
-			continue;
-		}
-
-		mtfAux = search(symbols, inputText[i], mtfAux);
-		mtfOutput[i] = mtfAux->pos;
+		search(symbols, input[i], &mtfAux);
+		output[i] = mtfAux.pos;
 
 		if(option == 1)
-			symbols = moveToFrontElement(symbols, mtfAux);
+			symbols = mvtElement(symbols, &mtfAux);
 		else
-			symbols = moveToFrontElement2(symbols, mtfAux);
+			symbols = mvtElement2(symbols, &mtfAux);
 	}
 
-	free(mtfAux);
 	freeListOfSymbols(symbols);
 
-	return mtfOutput;
+	return output;
 }
 
-MtfAux *search(ListOfSymbols *symbols, int byte, MtfAux *mtfAux)
+void search(SymbolsList *const symbols,
+			const unsigned char byte,
+			MtfAux *const mtfAux)
 {
-	ListOfSymbols *curr, *prev;
-	int i=0;
+	SymbolsList *curr, *prev;
+	int i;
 
 	//If the char is at the head of the list
 	if(symbols->symbol == byte) {
-		mtfAux->pos = i;
+		mtfAux->pos = 0;
 		mtfAux->prev = NULL;
-		return mtfAux;
+		return;
 	}
 
 	//Otherwise
-	i++;
-	for(curr=symbols->next, prev=symbols; curr!=NULL; curr=curr->next, prev=prev->next) {
+	i = 1;
+	prev=symbols;
+	for(curr=symbols->next; curr!=NULL; curr=curr->next) {
 		if(curr->symbol == byte) {
 			mtfAux->pos = i;
 			mtfAux->prev = prev;
 			break;
 		}
 		i++;
+		prev=prev->next;
 	}
-
-	return mtfAux;
 }
 
-ListOfSymbols *moveToFrontElement(ListOfSymbols *symbols, MtfAux *mtfAux)
+SymbolsList *mvtElement(SymbolsList *const symbols,
+						MtfAux *const mtfAux)
 {
 
-	ListOfSymbols *current;
+	SymbolsList *current;
 
 	if(mtfAux->prev != NULL) {
 
@@ -75,9 +74,11 @@ ListOfSymbols *moveToFrontElement(ListOfSymbols *symbols, MtfAux *mtfAux)
 
 		//Re-insert it at the head of the list
 		current->next = symbols;
+
+		return current;
 	}
 
-	return current;
+	return symbols;
 }
 
 /*
@@ -86,10 +87,11 @@ ListOfSymbols *moveToFrontElement(ListOfSymbols *symbols, MtfAux *mtfAux)
  *
  * This aims to have more sequences of zeros.
  */
-ListOfSymbols *moveToFrontElement2(ListOfSymbols *symbols, MtfAux *mtfAux)
+SymbolsList *mvtElement2(SymbolsList *const symbols,
+						 MtfAux *const mtfAux)
 {
 
-	ListOfSymbols *current;
+	SymbolsList *current;
 
 	if(mtfAux->prev != NULL && mtfAux->prev != symbols) {
 
@@ -102,7 +104,6 @@ ListOfSymbols *moveToFrontElement2(ListOfSymbols *symbols, MtfAux *mtfAux)
 		current->next = symbols->next;
 		symbols->next = current;
 
-		return symbols;
 
 	} else if(mtfAux->prev == symbols) {
 
@@ -110,28 +111,29 @@ ListOfSymbols *moveToFrontElement2(ListOfSymbols *symbols, MtfAux *mtfAux)
 		symbols->next = current->next;
 		current->next = symbols;
 
+		return current;
 	}
 
-	return current;
+	return symbols;
 }
 
 //Populate the list of symbols with characters from 0 to 255
-ListOfSymbols *initListOfSymbols()
+SymbolsList *initListOfSymbols()
 {
-	ListOfSymbols *symbols, *tmp;
+	SymbolsList *symbols, *tmp;
 	int i=0;
 
-	symbols = (ListOfSymbols *) malloc(sizeof(ListOfSymbols));
+	symbols = (SymbolsList *) malloc(sizeof(SymbolsList));
 
-	symbols->symbol = i;
+	symbols->symbol = (unsigned char)i;
 	tmp = symbols;
 
 	for(i=1; i<SIZE_SYMBOLS_LIST; i++) {
 
-		tmp->next = (ListOfSymbols *) malloc(sizeof(ListOfSymbols));
+		tmp->next = (SymbolsList *) malloc(sizeof(SymbolsList));
 
 		tmp = tmp->next;
-		tmp->symbol = i;
+		tmp->symbol = (unsigned char)i;
 	}
 
 	tmp->next = NULL;
@@ -139,9 +141,19 @@ ListOfSymbols *initListOfSymbols()
 	return symbols;
 }
 
-void freeListOfSymbols(ListOfSymbols *symbols)
+void printList(SymbolsList *const symbols)
 {
-	ListOfSymbols *tmp;
+	SymbolsList *tmp = symbols;
+
+	while(tmp != NULL) {
+		printf("%d\n", tmp->symbol);
+		tmp = tmp->next;
+	}
+}
+
+void freeListOfSymbols(SymbolsList *symbols)
+{
+	SymbolsList *tmp;
 
 	while(symbols != NULL) {
 		tmp = symbols->next;

@@ -1,67 +1,75 @@
 #include "../headers/zle.h"
 
-#define MAX_LENGTH 2000
 #define LOG2E 1.44269504089
 
-ZeroRun *zleEncoding(short *input, int lenText)
+ZeroRun *zleEncoding(unsigned char *const input, const size_t inputLen)
 {
 	//Variables
-	int j, runLen, totalLen;
-	short output[MAX_LENGTH];
+	size_t len, runLen;
+	unsigned char *output;
 	ZeroRun *result;
 
 	//Initialization
-	totalLen = 0;
+	len = 0;
 	runLen = 0;
-	j = 0;
+	output = (unsigned char *) malloc(sizeof(unsigned char) * inputLen);
 
-	while(lenText > 0) {
+	for(unsigned j=0; j<inputLen; j++) {
 
-		if(input[j] != 0 && runLen != 0) { 			//End of zeros run
+		if(input[j] == 0) {							//Zeros run
+			runLen++;
+			continue;
 
-			countZeroRun(runLen + 1, &output[0], &totalLen);
-
-			output[totalLen++] = input[j] + 1;
+		} else if(runLen != 0) {					//End of zeros run
+			countZeroRun(runLen + 1, &output[0], &len);
 			runLen = 0;								//Restart the zeros counter
 
-		} else if(input[j] != 0)     				//No run
-			output[totalLen++] = input[j] + 1;
+		}
 
-		else										//Zeros run
-			runLen++;
+		//No run
+		if(input[j] == 0xFE) {						//ch = 254
+			output[len++] = 0xFF;
+			output[len++] = 0x00;
 
-		j++;
-		lenText--;
+		} else if(input[j] == 0xFF) {				//ch = 255
+			output[len++] = 0xFF;
+			output[len++] = 0x00;
+
+		} else
+			output[len++] = input[j] + 1;
+
 	}
 
 	if(runLen != 0)
-		countZeroRun(runLen + 1, &output[0], &totalLen);
+		countZeroRun(runLen + 1, &output[0], &len);
 
 	result = (ZeroRun *) malloc(sizeof(ZeroRun));
 	result->encoded = output;
-	result->len = totalLen;
+	result->len = len;
 
 	return result;
 }
 
-void countZeroRun(double runLen, short *output, int *totalLen)
+void countZeroRun(const double runLen,
+				  unsigned char *const output,
+				  size_t *const len)
 {
 	int k;
-	short *zeroRun;
+	unsigned *zeroRun;
 
-	int binarySize = (log(runLen) * LOG2E) + 1;
+	const int binarySize = (log(runLen) * LOG2E) + 1;
 
 	zeroRun = decToBin(runLen, binarySize);
 
 	for(k=0; k<binarySize-1; k++)
-		output[(*totalLen)++] = zeroRun[k];
+		output[(*len)++] = zeroRun[k];
 
 	free(zeroRun);
 }
 
-short *decToBin(int runLen, int size)
+unsigned *decToBin(size_t runLen, const size_t size)
 {
-	short *binary = (short *) malloc(sizeof(short)*(size-1));
+	unsigned *binary = (unsigned *) malloc(sizeof(unsigned)*(size-1));
 	int index = 0;
 
 	while(runLen > 1) {
