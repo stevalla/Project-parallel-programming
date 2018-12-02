@@ -63,7 +63,7 @@ void bwtZip(Text *const input)
 	/***********************************************************************
 	 * BWT REVERSE
 	************************************************************************/
-	Text *bwtReverse = unbwt(input);
+	Text *bwtReverse = unbwt(mtfReverse);
 
 	printf("BWT reverse output:\n\t");
 	printResult(bwtReverse->text, bwtReverse->len);
@@ -84,8 +84,6 @@ void bwtZip(Text *const input)
 	free(decompressed);
 	free(zleDecoded->text);
 	free(zleDecoded);
-	free(mtfReverse->text);
-	free(mtfReverse);
 	free(bwtReverse->text);
 	free(bwtReverse);
 }

@@ -97,15 +97,3 @@ short *initText(unsigned char *const text, const size_t len)
 
 	return input;
 }
-
-
-unsigned char decomposeUnsigned(unsigned ul, int n) {
-    return (ul >> (24 - 8 * n)) & 0xFF;
-}
-
-void encodeIndex(const unsigned index, unsigned char *const output, int j)
-{
-	for(unsigned i=0; i<4; i++) {
-		output[j++] = decomposeUnsigned(index, i);
-	}
-}
