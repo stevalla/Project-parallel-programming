@@ -1,7 +1,7 @@
 #include "../headers/bwtUnzip.h"
 
 
-void bwtUnzip(Text *const input)
+Text *bwtUnzip(Text *const input)
 {
 
 	/***********************************************************************
@@ -9,38 +9,37 @@ void bwtUnzip(Text *const input)
 	 ***********************************************************************/
 	Text *decompressed = decodingRoutine(input);
 
-	printf("Arithmetic decoding output:\n\t");
-	printResult(decompressed->text, decompressed->len);
+//	printf("Arithmetic decoding output:\n\t");
+//	printResult(decompressed->text, decompressed->len);
 
 	/***********************************************************************
 	 * ZLE DECODING
 	 ***********************************************************************/
 	Text *zleDecoded = zleDecoding(decompressed);
 
-	printf("ZLE decoding output:\n\t");
-	printResult(zleDecoded->text, zleDecoded->len);
+//	printf("ZLE decoding output:\n\t");
+//	printResult(zleDecoded->text, zleDecoded->len);
 
 	/***********************************************************************
 	 * MTF REVERSE
 	 ***********************************************************************/
 	Text *mtfReverse = unmtf(zleDecoded);
 
-	printf("MTF reverse output:\n\t");
-	printResult(mtfReverse->text, mtfReverse->len);
+//	printf("MTF reverse output:\n\t");
+//	printResult(mtfReverse->text, mtfReverse->len);
 
 	/***********************************************************************
 	 * BWT REVERSE
 	 ***********************************************************************/
 	Text *bwtReverse = unbwt(mtfReverse);
 
-	printf("BWT reverse output:\n\t");
-	printResult(bwtReverse->text, bwtReverse->len);
+//	printf("BWT reverse output:\n\t");
+//	printResult(bwtReverse->text, bwtReverse->len);
 
 	/***********************************************************************
 	 * OUTPUT
 	 ***********************************************************************/
-	printf("Input string:\n\t%s\n", bwtReverse->text);
+//	printf("Input string:\n\t%s\n", bwtReverse->text);
 
-	free(bwtReverse->text);
-	free(bwtReverse);
+	return bwtReverse;
 }

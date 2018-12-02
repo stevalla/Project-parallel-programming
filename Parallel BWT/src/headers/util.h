@@ -26,4 +26,14 @@ void encodeIndex(const unsigned, unsigned char *const, int);
 // the 4 bytes starting at location n.
 unsigned readUL(unsigned char *const, size_t);
 
+long fileSize(FILE *);
+
+unsigned char *readFile(FILE *, long);
+
+void writeFile(FILE *, Text *const);
+
+FILE *openFileRB(char *const);
+
+FILE *openFileWB(char *const);
+
 #endif

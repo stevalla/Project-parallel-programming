@@ -11,7 +11,7 @@
 #include "unarith.h"
 #include "bwtZip.h"
 
-void bwtUnzip(Text *);
+Text *bwtUnzip(Text *const);
 
 
 #endif
