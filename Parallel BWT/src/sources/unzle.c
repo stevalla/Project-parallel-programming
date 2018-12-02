@@ -50,7 +50,8 @@ Text *zleDecoding(Text *const input)
 	for(unsigned i=0; i<len; i++)
 		output->text[i] = out[i];
 
-//	free(input);
+	free(input->text);
+	free(input);
 
 	return output;
 }

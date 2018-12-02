@@ -22,6 +22,8 @@ Text *unmtf(Text *input)
 	}
 
 	freeListOfSymbols(symbols);
+	free(input->text);
+	free(input);
 
 	return output;
 }

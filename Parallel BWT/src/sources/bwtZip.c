@@ -37,17 +37,6 @@ Text *bwtZip(Text *const input)
 	printResult(compressed->text, compressed->len);
 
 
-	/************************************************************************
-	 * FREE MEMORY
-	 ************************************************************************/
-
-	free(bwtOutput->text);
-	free(bwtOutput);
-	free(mtfOutput->text);
-	free(mtfOutput);
-	free(zleOutput->text);
-	free(zleOutput);
-
 	return compressed;
 }
 

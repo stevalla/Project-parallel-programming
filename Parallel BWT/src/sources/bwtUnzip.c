@@ -41,14 +41,6 @@ void bwtUnzip(Text *const input)
 	 ***********************************************************************/
 	printf("Input string:\n\t%s\n", bwtReverse->text);
 
-	/***********************************************************************
-	 * FREE MEMORY
-	 ***********************************************************************/
-
-	free(decompressed->text);
-	free(decompressed);
-	free(zleDecoded->text);
-	free(zleDecoded);
 	free(bwtReverse->text);
 	free(bwtReverse);
 }

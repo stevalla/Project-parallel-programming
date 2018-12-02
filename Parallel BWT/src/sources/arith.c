@@ -70,6 +70,8 @@ Text *encodingRoutine(Text *const input)
 	free(out);
 	free(model->freq);
 	free(model);
+	free(input->text);
+	free(input);
 
 	return output;
 }

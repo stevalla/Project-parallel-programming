@@ -22,6 +22,8 @@ Text *mtf(Text *const input)
 	}
 
 	freeListOfSymbols(symbols);
+	free(input->text);
+	free(input);
 
 	return output;
 }

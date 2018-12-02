@@ -47,6 +47,9 @@ Text *zleEncoding(Text *const input)
 	result->text = output;
 	result->len = len;
 
+	free(input->text);
+	free(input);
+
 	return result;
 }
 
