@@ -78,42 +78,6 @@ SymbolsList *mvtElement(SymbolsList *const symbols,
 	return symbols;
 }
 
-/*
- * Optimize version, each symbol is move to position 0 only if
- * it is in position 1, otherwise it is moved to position 1.
- *
- * This aims to have more sequences of zeros.
- */
-SymbolsList *mvtElement2(SymbolsList *const symbols,
-						 MtfAux *const mtfAux)
-{
-
-	SymbolsList *current;
-
-	if(mtfAux->prev != NULL && mtfAux->prev != symbols) {
-
-		current = mtfAux->prev->next;
-
-		//Delete element from the list of symbols
-		mtfAux->prev->next = mtfAux->prev->next->next;
-
-		//Re-insert it at the position 1 of the list
-		current->next = symbols->next;
-		symbols->next = current;
-
-
-	} else if(mtfAux->prev == symbols) {
-
-		current = mtfAux->prev->next;
-		symbols->next = current->next;
-		current->next = symbols;
-
-		return current;
-	}
-
-	return symbols;
-}
-
 //Populate the list of symbols with characters from 0 to 255
 SymbolsList *initListOfSymbols()
 {

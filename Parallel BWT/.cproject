@@ -49,6 +49,8 @@
                                 								
                                 <option id="gnu.c.compiler.option.misc.other.710200757" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0  " valueType="string"/>
                                 								
+                                <option id="gnu.c.compiler.option.debugging.codecov.1282591386" superClass="gnu.c.compiler.option.debugging.codecov" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+                                								
                                 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.294630679" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
                                 							
                             </tool>

@@ -15,6 +15,8 @@ Node *buildSuffixTree(short *const in,
 	//Initialization of the root (special node with suffixLink NULL)
 	*endRoot = -1;
 	root = createNode(-1, endRoot, NULL);
+//	root->children = (HashChildren *) malloc(sizeof(HashChildren));
+//	root->children = NULL;
 
 	//Initialization of the active point
 	ap.activeNode = root;
@@ -50,13 +52,13 @@ Node *createNode(const int start, int *const end, Node *const root)
 
 HashChildren *findChildren(ActivePoint *const ap, short *const input)
 {
-	HashChildren *hashChild;
+	HashChildren *child;
 	int key;
 
 	key = (int)input[ap->activeEdge];
-	HASH_FIND_INT(ap->activeNode->children, &key, hashChild);
+	HASH_FIND_INT(ap->activeNode->children, &key, child);
 
-	return hashChild;
+	return child;
 }
 
 void applyExtensions(short *const input,
@@ -169,14 +171,17 @@ void deleteChildren(HashChildren *children)
 		HASH_DEL(children, current);
 		free(current);
 	}
+
+	free(children);
 }
 
 //Delete by free all the memory allocated for a node
 void deleteNode(Node *node)
 {
-	if(node->suffixIndex == -1)
+	if(node->suffixIndex == -1) {
+		deleteChildren(node->children);
 		free(node->end);
-	deleteChildren(node->children);
+	}
 	free(node);
 }
 

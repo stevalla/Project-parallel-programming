@@ -9,6 +9,9 @@ Text *bwtTransformation(Text *const in)
 	//Append the sentinel
 	input = initText(in->text, bwtLen);
 
+	free(in->text);
+	free(in);
+
 	Node *suffixTree = buildSuffixTree(input, &phases, bwtLen);
 
 	return getBWT(input, suffixTree, bwtLen);
@@ -31,6 +34,11 @@ Text *getBWT(short *const input,
 
 	createSuffixArray(root, &i, suffixArray, input);
 
+	for(int i=0; i<inputLen; i++)
+		printf("%d %c", suffixArray[i], input[suffixArray[i]]);
+
+	printf("\n");
+
 	for(i=0; i<inputLen; i++) {
 		index = suffixArray[i];
 
@@ -49,6 +57,7 @@ Text *getBWT(short *const input,
 	}
 
 	free(suffixArray);
+	free(input);
 
 	return output;
 }

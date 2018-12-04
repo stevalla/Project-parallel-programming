@@ -11,81 +11,74 @@
 
 int main(int argc, char *argv[])
 {
-//	unsigned char text[] = "abracadabraabracadabra";
-//	int inputLen = strlen((char *)text);
-//
-//	if(inputLen > 2000) {
-//		printf("Size too big.\n");
-//		return 0;
-//	}
-//	/************************************************************************
-//	 * INPUT
-//	 ************************************************************************/
-//
-//	printf("Input string:\n\t%s\n", text);
-//
-//	printf("Input:\n\t");
-//	printResult(text, inputLen);
+	unsigned char text[] = "abracadabraabracadabra";
+	int inputLen = strlen((char *)text);
 
+	if(inputLen > 2000) {
+		printf("Size too big.\n");
+		return 0;
+	}
+	/************************************************************************
+	 * INPUT
+	 ************************************************************************/
 
-	//Variables
-	FILE *in, *out;
+	printf("Input string:\n\t%s\n", text);
+
+	printf("Input:\n\t");
+	printResult(text, inputLen);
+
+	Text *inputt = (Text *) malloc(sizeof(Text));
+	inputt->text = text;
+	inputt->len = inputLen;
 
 	/************************************************************************
 	 * ZIP
 	 ************************************************************************/
+	char *const inputFile = "input.txt";
+	char *const encodedFile = "encoded.zip";
+
 	puts("ZIP");
 
-	in = openFileRB("input.png");
-
 	Text *inZip = (Text *) malloc(sizeof(Text));
-	inZip->len = fileSize(in);
-	inZip->text = readFile(in, inZip->len);
+	inZip->len = fileSize(inputFile);
+	inZip->text = readFile(inputFile, inZip->len);
 
-	fclose(in);
+	inZip->len--;
 
 	Text *compressed = bwtZip(inZip);
 
 	puts("Finish zip.");
 
-	out = openFileWB("encoded.zip");
+	writeFile(encodedFile, compressed);
 
-	writeFile(out, compressed);
-
-	fclose(out);
 	free(compressed->text);
 	free(compressed);
-	free(inZip->text);
-	free(inZip);
 
 	/************************************************************************
 	 * UNZIP
 	 ************************************************************************/
+	char *const inputDecFile = "encoded.zip";
+	char *const decodedFile = "decoded.txt";
+
 	puts("UNZIP");
 
-	in = openFileRB("encoded.zip");
-
 	Text *inUnzip = (Text *) malloc(sizeof(Text));
-	inUnzip->len = fileSize(in);
-	inUnzip->text = readFile(in, inUnzip->len);
-
-	fclose(in);
+	inUnzip->len = fileSize(inputDecFile);
+	inUnzip->text = readFile(inputDecFile, inUnzip->len);
 
 	Text *decompressed = bwtUnzip(inUnzip);
 
 	puts("Finish unzip phase.");
 
-	out = openFileWB("decoded.png");
+	writeFile(decodedFile, decompressed);
 
-	writeFile(out, decompressed);
-
-	fclose(out);
 	free(decompressed->text);
 	free(decompressed);
-	free(inUnzip->text);
-	free(inUnzip);
 
-	puts("Closing..");
+	puts("Comparing..\n");
+
+	printf("%d",
+		compareFiles(inputFile, decodedFile, fileSize(inputFile)));
 
 	return 0;
 }

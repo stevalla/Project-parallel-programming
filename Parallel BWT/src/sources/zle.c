@@ -72,7 +72,7 @@ void countZeroRun(const double runLen,
 
 unsigned *decToBin(size_t runLen, const size_t size)
 {
-	unsigned *binary = (unsigned *) malloc(sizeof(unsigned)*(size-1));
+	unsigned *binary = (unsigned *) malloc(sizeof(unsigned)*(size - 1));
 	int index = 0;
 
 	while(runLen > 1) {

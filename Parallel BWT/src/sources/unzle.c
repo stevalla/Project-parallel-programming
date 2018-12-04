@@ -7,7 +7,7 @@ Text *zleDecoding(Text *const input)
 	Text *output;
 	unsigned char out[MAX_CHUNK_SIZE];
 	unsigned char *runLen = (unsigned char *)
-							malloc(sizeof(unsigned char));
+							malloc(sizeof(unsigned char)*input->len);
 
 	len = 0;
 	j = 0;
@@ -52,6 +52,7 @@ Text *zleDecoding(Text *const input)
 
 	free(input->text);
 	free(input);
+	free(runLen);
 
 	return output;
 }

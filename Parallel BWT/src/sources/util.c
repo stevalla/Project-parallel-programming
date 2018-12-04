@@ -23,31 +23,37 @@ unsigned readUL(unsigned char *const input, size_t n)
 	return ret;
 }
 
-long fileSize(FILE *f)
+long fileSize(char *const filename)
 {
+	FILE *f = openFileRB(filename);
+
 	long origin = ftell(f);
 	fseek(f, 0, SEEK_END);
 	long size = ftell(f);
 	fseek(f, origin, SEEK_SET);
 
+	fclose(f);
+
 	return size;
 }
 
-unsigned char *readFile(FILE *f, long size)
+unsigned char *readFile(char *const filename, long size)
 {
+	FILE *f = openFileRB(filename);
 	unsigned char *input = (unsigned char *)
 							malloc(sizeof(unsigned char)*size);
 
 	if(fread(&input[0], 1, size, f) != size) {
 
 		printf("Error opening the file.\n");
+		fclose(f);
 		return NULL;
 
 	} else {
-
 		fclose(f);
 		return input;
 	}
+
 }
 
 FILE *openFileRB(char *const filename)
@@ -92,8 +98,45 @@ FILE *openFileWB(char *const filename)
 	}
 }
 
-void writeFile(FILE *out, Text *const result)
+void writeFile(char *const filename, Text *const result)
 {
+	FILE *f = openFileWB(filename);
+
 	for(unsigned i=0; i<result->len; i++)
-		fputc(result->text[i], out);
+		fputc(result->text[i], f);
+
+	fclose(f);
+}
+
+int compareFiles(char *const file1, char *const file2, long size)
+{
+	FILE *f1 = openFileRB(file1);
+	FILE *f2 = openFileRB(file2);
+	unsigned char ch1, ch2;
+	int result;
+
+	while(size > 0) {
+		fread(&ch1, sizeof(ch1), 1, f1);
+		fread(&ch2, sizeof(ch2), 1, f2);
+		printf("ch1=%d!=ch2=%d\n", ch1, ch2);
+
+		if(ch1 != ch2) {
+			printf("ch1=%d!=ch2=%d\n", ch1, ch2);
+			result = 0;
+			break;
+		}
+		size--;
+		puts("ciao");
+	}
+
+	if(feof(f1) && feof(f2))
+		result = 1;
+	else
+		result = 0;
+
+
+	fclose(f1);
+	fclose(f2);
+
+	return result;
 }
