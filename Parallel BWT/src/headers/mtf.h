@@ -32,7 +32,7 @@ typedef struct MtfAux
 
 void search(SymbolsList *const, const unsigned char, MtfAux *const);
 
-Text *mtf(Text *const);
+Text mtf(const Text);
 
 SymbolsList *mvtElement(SymbolsList *const, MtfAux *const);
 

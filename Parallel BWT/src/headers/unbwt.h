@@ -7,6 +7,6 @@
 
 #include "util.h"
 
-Text *unbwt(Text *);
+Text unbwt(Text);
 
 #endif

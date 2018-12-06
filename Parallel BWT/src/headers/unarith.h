@@ -26,18 +26,18 @@ typedef struct Decoder
  */
 void initDecoder(Decoder *const);
 
-Text *decodingRoutine(Text *const);
+Text decodingRoutine(const Text);
 
 unsigned decodeSymbol(Decoder *const, Model *const, Interval *const,
-					  IOBuffer *const, IOHelper *const);
+					  IOBuffer *const, IOHelper *const, size_t);
 
 unsigned inputBit(Decoder *const, IOBuffer *const,
-				  IOHelper *const);
+				  IOHelper *const, size_t);
 
 unsigned findChar(Decoder *const, Interval *const, Model *const);
 
 void updateInterval(Decoder *const, IOBuffer *const,
-		IOHelper *const);
+		IOHelper *const, size_t);
 
 static inline
 unsigned scaleFrequencies(const unsigned v,

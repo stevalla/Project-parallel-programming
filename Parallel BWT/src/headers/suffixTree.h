@@ -14,7 +14,7 @@ typedef struct Node Node;
 //To maintain the list of children of each node.
 typedef struct HashChildren
 {
-	short firstChar;	    			/* key */
+	unsigned firstChar;	    			/* key */
     Node *node;				   			/* value */
     UT_hash_handle hh;         			/* makes this structure hash table */
 
@@ -42,9 +42,9 @@ typedef struct ActivePoint
 } ActivePoint;
 
 
-Node *buildSuffixTree(short *const , int *const , const size_t);
+Node *buildSuffixTree(unsigned *const , int *const , const size_t);
 
-void applyExtensions(short *const , int *const , int *const,
+void applyExtensions(unsigned *const , int *const , int *const,
 					 ActivePoint *const , Node *const);
 
 int getEdgeLen(Node *const);
@@ -55,22 +55,22 @@ void updateAP(ActivePoint *const, Node *const, const int, const int);
 
 int walkDown(ActivePoint *const, Node *const);
 
-void checkSuffixLinkNeeded(Node *const, Node *, Node *const);
+void addSuffixLink(Node *const, Node **, Node *const);
 
 Node *createInternalNode(ActivePoint *const, Node *const,
-						 HashChildren *const, int *const, short *const);
+						 HashChildren **const, int *const, unsigned *const);
 
-void createLeaf(int *const, Node *const, Node *const, short *const);
+void createLeaf(int *const, Node *const, Node *const, unsigned *const);
 
-void addSuffixIndex(Node *const, const int, short *const, const size_t);
+void addSuffixIndex(Node *const, const int, unsigned *const, const size_t);
 
-void addNewChild(Node *const, Node *const, short *const);
+void addNewChild(Node *const, Node *const, unsigned *const);
 
-void deleteChildren(HashChildren *);
+void deleteChildren(HashChildren **);
 
 void deleteNode(Node *);
 
-HashChildren *findChildren(ActivePoint *const, short *const);
+HashChildren *findChildren(ActivePoint *const, unsigned *const);
 
 
 #endif

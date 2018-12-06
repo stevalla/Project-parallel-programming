@@ -11,7 +11,7 @@
 #include "arith.h"
 
 
-Text *bwtZip(Text *const);
+Text bwtZip(const Text);
 
 void printResult(unsigned char *const, const size_t);
 

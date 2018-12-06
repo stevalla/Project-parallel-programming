@@ -10,16 +10,16 @@
 #include "util.h"
 
 
-Text *bwtTransformation(Text *const);
+Text bwtTransformation(const Text);
 
 void createSuffixArray(Node *const, int *const,
-					   short *const, short *const);
+					   int *const, unsigned *const);
 
-Text *getBWT(short *const, Node *const, const size_t);
+Text getBWT(unsigned *const, Node *const, const size_t);
 
 int sortNodesByFirstChar(HashChildren *const, HashChildren *const);
 
-short *initText(unsigned char *const, const size_t);
+unsigned *initText(unsigned char *const, const size_t);
 
 
 #endif

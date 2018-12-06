@@ -1,22 +1,23 @@
 #include "../headers/unzle.h"
 
-Text *zleDecoding(Text *const input)
+Text zleDecoding(const Text input)
 {
 	int j;
 	size_t len;
-	Text *output;
+	Text output;
 	unsigned char out[MAX_CHUNK_SIZE];
 	unsigned char *runLen = (unsigned char *)
-							malloc(sizeof(unsigned char)*input->len);
+							malloc(sizeof(unsigned char)*input.len);
 
 	len = 0;
 	j = 0;
 	runLen[j] = 255;
 
-	for(unsigned i=0; i<input->len; i++) {
+	printf("LEN %d\n", input.len);
+	for(unsigned i=0; i<input.len; i++) {
 
-		if(input->text[i] <= 1) {				//Count zeros run
-			runLen[j++] = input->text[i];
+		if(input.text[i] <= 1) {				//Count zeros run
+			runLen[j++] = input.text[i];
 			runLen[j] = 255;
 			continue;
 
@@ -27,8 +28,8 @@ Text *zleDecoding(Text *const input)
 			j = 0;
 		}
 
-		if(input->text[i] == 0xFF) {
-			const unsigned nextByte = input->text[++i];
+		if(input.text[i] == 0xFF) {
+			const unsigned nextByte = input.text[++i];
 
 			if(nextByte == 0x00)
 				out[len++] = 0xFE;
@@ -37,21 +38,21 @@ Text *zleDecoding(Text *const input)
 				out[len++] = 0xFF;
 
 		} else
-			out[len++] = input->text[i] - 1;
+			out[len++] = input.text[i] - 1;
+
+//		printf("i = %d\n", i);
 	}
 
 	if(runLen[0] <= 1)
 		convertBinToDec(runLen, out, &len);
 
-	output = (Text *) (malloc(sizeof(Text)));
-	output->len = len;
-	output->text = (unsigned char *) malloc(sizeof(unsigned char) * len);
+	output.len = len;
+	output.text = (unsigned char *) malloc(sizeof(unsigned char) * len);
 
 	for(unsigned i=0; i<len; i++)
-		output->text[i] = out[i];
+		output.text[i] = out[i];
 
-	free(input->text);
-	free(input);
+	free(input.text);
 	free(runLen);
 
 	return output;
@@ -69,6 +70,8 @@ void convertBinToDec(unsigned char *runLen,
 
 	dec += POW_2(i);
 
-	for(i=0; i<dec-1; i++)
+	for(i=0; i<dec-1; i++) {
 		out[(*index)++] = 0;
+//		printf("index %d\n", *index);
+	}
 }

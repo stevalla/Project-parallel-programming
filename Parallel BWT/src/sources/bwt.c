@@ -1,59 +1,51 @@
 #include "../headers/bwt.h"
 
-Text *bwtTransformation(Text *const in)
+Text bwtTransformation(const Text in)
 {
-	const size_t bwtLen = in->len + 1;
+	const size_t bwtLen = in.len + 1;
 	int phases = 0;
-	short *input;
+	unsigned *input;
 
 	//Append the sentinel
-	input = initText(in->text, bwtLen);
+	input = initText(in.text, bwtLen);
 
-	free(in->text);
-	free(in);
+	free(in.text);
 
 	Node *suffixTree = buildSuffixTree(input, &phases, bwtLen);
 
 	return getBWT(input, suffixTree, bwtLen);
 }
 
-Text *getBWT(short *const input,
-			 Node *const root,
-			 const size_t inputLen)
+Text getBWT(unsigned *const input,
+			Node *const root,
+			const size_t inputLen)
 {
-	short *suffixArray;
+	int *suffixArray;
 	int i, index;
-	Text *output;
+	Text output;
 
 	i = 0;
-	suffixArray = (short *) malloc(sizeof(short)*(inputLen));
-	output = (Text *) malloc(sizeof(Text));
-	output->len = inputLen + 8;
-	output->text = (unsigned char *)
-			malloc(sizeof(unsigned char)*(output->len));
+	suffixArray = (int *) malloc(sizeof(int)*(inputLen));
+	output.len = inputLen + 8;
+	output.text = (unsigned char *)
+			malloc(sizeof(unsigned char)*(output.len));
 
 	createSuffixArray(root, &i, suffixArray, input);
 
-	for(int i=0; i<inputLen; i++)
-		printf("%d %c", suffixArray[i], input[suffixArray[i]]);
-
-	printf("\n");
 
 	for(i=0; i<inputLen; i++) {
 		index = suffixArray[i];
 
 		if(index == 0) {			//Index of the sentinel character
-
-			output->text[i + 8] = 0;		//Dummy character
-			encodeIndex(i, output->text, 4);
+			output.text[i + 8] = 0;		//Dummy character
+			encodeIndex(i, output.text, 4);
 
 		} else if(index == 1) {		//Index of first character
-
-			output->text[i + 8] = input[0];
-			encodeIndex(i, output->text, 0);
+			output.text[i + 8] = input[0];
+			encodeIndex(i, output.text, 0);
 
 		} else
-			output->text[i + 8] = input[index - 1];
+			output.text[i + 8] = input[index - 1];
 	}
 
 	free(suffixArray);
@@ -65,15 +57,14 @@ Text *getBWT(short *const input,
 //Lexicographic DFS traversal to create the suffix array
 void createSuffixArray(Node *const node,
 					   int *const i,
-					   short *const suffixArray,
-					   short *const input)
+					   int *const suffixArray,
+					   unsigned *const input)
 {
 	HashChildren *child;
 	int num_children = HASH_COUNT(node->children);
 
 	if(num_children == 0) {
-		suffixArray[*i] = node->suffixIndex;
-		(*i)++;
+		suffixArray[(*i)++] = node->suffixIndex;
 		deleteNode(node);
 		return;
 	}
@@ -94,9 +85,9 @@ int sortNodesByFirstChar(HashChildren *const el1, HashChildren *const el2)
 }
 
 //Add a sentinel at the end of the text for the transformation
-short *initText(unsigned char *const text, const size_t len)
+unsigned *initText(unsigned char *const text, const size_t len)
 {
-	short *input = (short *) malloc(sizeof(short)*(len));
+	unsigned *input = (unsigned *) malloc(sizeof(unsigned)*(len));
 	int i;
 
 	for(i=0; i<len-1; i++)

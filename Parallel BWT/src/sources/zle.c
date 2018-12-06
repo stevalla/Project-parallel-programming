@@ -2,21 +2,21 @@
 
 #define LOG2E 1.44269504089
 
-Text *zleEncoding(Text *const input)
+Text zleEncoding(const Text input)
 {
 	//Variables
 	size_t len, runLen;
 	unsigned char *output;
-	Text *result;
+	Text result;
 
 	//Initialization
 	len = 0;
 	runLen = 0;
-	output = (unsigned char *) malloc(sizeof(unsigned char) * input->len);
+	output = (unsigned char *) malloc(sizeof(unsigned char) * input.len*2);
 
-	for(unsigned j=0; j<input->len; j++) {
+	for(unsigned j=0; j<input.len; j++) {
 
-		if(input->text[j] == 0) {							//Zeros run
+		if(input.text[j] == 0) {							//Zeros run
 			runLen++;
 			continue;
 
@@ -27,28 +27,26 @@ Text *zleEncoding(Text *const input)
 		}
 
 		//No run
-		if(input->text[j] == 0xFE) {						//ch = 254
+		if(input.text[j] == 0xFE) {						//ch = 254
 			output[len++] = 0xFF;
 			output[len++] = 0x00;
 
-		} else if(input->text[j] == 0xFF) {				//ch = 255
+		} else if(input.text[j] == 0xFF) {				//ch = 255
 			output[len++] = 0xFF;
 			output[len++] = 0x01;
 
 		} else
-			output[len++] = input->text[j] + 1;
+			output[len++] = input.text[j] + 1;
 
 	}
 
 	if(runLen != 0)
 		countZeroRun(runLen + 1, &output[0], &len);
 
-	result = (Text *) malloc(sizeof(Text));
-	result->text = output;
-	result->len = len;
+	result.text = output;
+	result.len = len;
 
-	free(input->text);
-	free(input);
+	free(input.text);
 
 	return result;
 }

@@ -7,7 +7,7 @@
 
 #include "mtf.h"
 
-Text *unmtf(Text *);
+Text unmtf(const Text);
 
 unsigned char searchSymbol(SymbolsList *const, const unsigned char,
 						   MtfAux *);

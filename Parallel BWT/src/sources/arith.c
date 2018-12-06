@@ -22,7 +22,7 @@ static const unsigned RANGE_THREE_FOURTH = (MAX_RANGE * 3) / 4;
 
 static const unsigned EOS = 1 << (8 * sizeof(unsigned char));
 
-Text *encodingRoutine(Text *const input)
+Text encodingRoutine(const Text input)
 {
 	Encoder * en;
 	Interval currentInt;
@@ -34,16 +34,16 @@ Text *encodingRoutine(Text *const input)
 	out = (IOBuffer *) malloc(sizeof(IOBuffer));
 	model = (Model *) malloc(sizeof(Model));
 	o = (IOHelper *) malloc(sizeof(IOHelper));
-	o->text = (unsigned char *) malloc(sizeof(unsigned char)*input->len);
+	o->text = (unsigned char *) malloc(sizeof(unsigned char)*input.len*2);
 	o->index = 0;
 
 	initEncoder(en);
 	initModel(model, EOS + 1);
 	initIOBuffer(out);
 
-	for(unsigned i=0; i<input->len; i++) {
+	for(unsigned i=0; i<input.len; i++) {
 
-		findInterval(&currentInt, model, input->text[i]);
+		findInterval(&currentInt, model, input.text[i]);
 
 		encodeSymbol(&en->low, &en->high, en->range, currentInt);
 
@@ -57,12 +57,12 @@ Text *encodingRoutine(Text *const input)
 
 	finishEncoding(en, out, o);
 
-	Text *output = (Text *) malloc(sizeof(Text));
-	output->text = (unsigned char *) malloc(sizeof(unsigned char)*o->index);
-	output->len = o->index;
+	Text output;
+	output.text = (unsigned char *) malloc(sizeof(unsigned char)*o->index);
+	output.len = o->index;
 
 	for(unsigned i=0; i<o->index; i++)
-		output->text[i] = o->text[i];
+		output.text[i] = o->text[i];
 
 	free(o->text);
 	free(o);
@@ -70,8 +70,7 @@ Text *encodingRoutine(Text *const input)
 	free(out);
 	free(model->freq);
 	free(model);
-	free(input->text);
-	free(input);
+	free(input.text);
 
 	return output;
 }
@@ -85,14 +84,14 @@ void encodeSymbol(unsigned *const low,
 
 	assert(*high <= MAX_RANGE);
 	assert(*low < *high);
-	assert(range == *high - *low);
+	assert(range == *high - *low + 1);
 	assert(interval.lowCount < interval.highCount);
 	assert(interval.highCount <= interval.scale);
 	assert(interval.scale <= MAX_FREQUENCY);
 	assert(range >= interval.scale);
 
-	*high = *low + ((range * interval.highCount) / interval.scale);
-	*low  = *low + ((range * interval.lowCount)  / interval.scale);
+	*high = *low + range * interval.highCount / interval.scale;
+	*low  = *low + range * interval.lowCount  / interval.scale;
 }
 
 
@@ -113,7 +112,7 @@ void initEncoder(Encoder *const en)
 
 	en->low = RANGE_MIN;
 	en->high = RANGE_MAX;
-	en->range = RANGE_MAX - RANGE_MIN;
+	en->range = RANGE_MAX - RANGE_MIN + 1;
 	en->underflow = 0;
 
 }
@@ -167,7 +166,7 @@ void checkForOutputBit(Encoder *const en,
 			break;
 	}
 
-	en->range = en->high - en->low;
+	en->range = en->high - en->low + 1;
 }
 
 
@@ -175,7 +174,7 @@ void updateModel(Model *const model, const unsigned ch)
 {
 	assert(ch >= 0 && ch < model->size - 1);
 
-	for(unsigned i=ch+1; i<model->size; i++)
+	for(unsigned i=ch + 1; i<model->size; i++)
 		++model->freq[i];
 
 	if(MAX_FREQUENCY > model->freq[model->size - 1])
@@ -203,8 +202,8 @@ void outputBit(IOBuffer *const out,
 	if(BUF_BITS == out->bufBits) {
 
 		(void) BUF_BITS;
-		o->text[o->index] = out->buf;
-		o->index++;
+		o->text[o->index++] = out->buf;
+//		printf("Out: %d\n", o->text[o->index-1]);
 		out->buf = 0;
 		out->bufBits = 0;
 	}
@@ -247,9 +246,9 @@ void finishEncoding(Encoder *const en,
 	}
 
 	if (out->bufBits != 0) {
-		(void) BUF_BITS;
-		o->text[o->index] = out->buf;
-		o->index++;
+		(void) out->bufBits;
+		o->text[o->index++] = out->buf;
+		printf("Finish %d\n", o->text[o->index-1]);
 	}
 
 }

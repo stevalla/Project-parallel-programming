@@ -7,7 +7,7 @@
 
 #include "util.h"
 
-Text *zleDecoding(Text *const);
+Text zleDecoding(const Text);
 
 void convertBinToDec(unsigned char *, unsigned char *, size_t *);
 

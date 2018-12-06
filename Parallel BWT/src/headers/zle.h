@@ -9,7 +9,7 @@
 #include "util.h"
 
 
-Text *zleEncoding(Text *const);
+Text zleEncoding(const Text);
 
 void countZeroRun(const double, unsigned char *const ,
 				  size_t *const);

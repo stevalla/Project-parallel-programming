@@ -1,7 +1,7 @@
 #include "../headers/util.h"
 
-unsigned char decomposeUnsigned(unsigned ul, int n) {
-    return (ul >> (24 - 8 * n)) & 0xFF;
+unsigned char decomposeUnsigned(unsigned u, int n) {
+    return (u >> (24 - 8 * n)) & 0xFF;
 }
 
 void encodeIndex(const unsigned index, unsigned char *const output, int j)
@@ -11,7 +11,7 @@ void encodeIndex(const unsigned index, unsigned char *const output, int j)
 	}
 }
 
-unsigned readUL(unsigned char *const input, size_t n)
+unsigned readUnsigned(unsigned char *const input, size_t n)
 {
 	unsigned ret = 0;
 
@@ -45,7 +45,7 @@ unsigned char *readFile(char *const filename, long size)
 
 	if(fread(&input[0], 1, size, f) != size) {
 
-		printf("Error opening the file.\n");
+		printf("Error reading the file %s.\n", filename);
 		fclose(f);
 		return NULL;
 
@@ -98,45 +98,41 @@ FILE *openFileWB(char *const filename)
 	}
 }
 
-void writeFile(char *const filename, Text *const result)
+void writeFile(char *const filename, const Text result)
 {
 	FILE *f = openFileWB(filename);
 
-	for(unsigned i=0; i<result->len; i++)
-		fputc(result->text[i], f);
+	if(fwrite(&result.text[0], 1, result.len, f) != result.len ||
+			  ferror(f)) {
+		printf("Error writing the file %s.\n", filename);
+		fclose(f);
 
-	fclose(f);
+	} else
+		fclose(f);
 }
 
-int compareFiles(char *const file1, char *const file2, long size)
+int compareFiles(char *const file1, char *const file2, long size1, long size2)
 {
-	FILE *f1 = openFileRB(file1);
-	FILE *f2 = openFileRB(file2);
-	unsigned char ch1, ch2;
-	int result;
+	if(size1 > size2) {
+		printf("The two files have different sizes %d %d.\n",size1, size2);
+	} else if(size1 < size2)
+		return 2;
 
-	while(size > 0) {
-		fread(&ch1, sizeof(ch1), 1, f1);
-		fread(&ch2, sizeof(ch2), 1, f2);
-		printf("ch1=%d!=ch2=%d\n", ch1, ch2);
-
-		if(ch1 != ch2) {
-			printf("ch1=%d!=ch2=%d\n", ch1, ch2);
+	unsigned char *f1 = readFile(file1, size1);
+	unsigned char *f2 = readFile(file2, size2);
+	int result = 1;
+	int i = 0;
+	printf("size1 %d size2 %d\n", size1, size2);
+	while(i++ < size1) {
+		if(f1[i - 1] != f2[i - 1]) {
+			printf("ch1=%d!=ch2=%d i = %d\n", f1[i-1], f2[i-1], i-1);
 			result = 0;
 			break;
 		}
-		size--;
-		puts("ciao");
 	}
 
-	if(feof(f1) && feof(f2))
-		result = 1;
-	else
-		result = 0;
-
-
-	fclose(f1);
-	fclose(f2);
+	free(f1);
+	free(f2);
 
 	return result;
 }

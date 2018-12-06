@@ -10,22 +10,24 @@ static const unsigned RANGE_THREE_FOURTH = (MAX_RANGE * 3) / 4;
 static const unsigned CONTINUATION_BIT = 0;
 static const unsigned EOS = 1 << (8 * sizeof(unsigned char));
 
-Text *decodingRoutine(Text *const input)
+Text decodingRoutine(const Text input)
 {
 	Decoder *de;
 	Model *model;
 	IOBuffer *inBuf;
 	Interval currentInt;
 	IOHelper *in, *o;
-	Text *result;
+	Text result;
 	unsigned ch;
+	size_t inputLen;
 
 	de = (Decoder *) malloc(sizeof(Decoder));
 	model = (Model *) malloc(sizeof(Model));
 	inBuf = (IOBuffer *) malloc(sizeof(IOBuffer));
 	in = (IOHelper *) malloc(sizeof(IOHelper));
-	in->text = input->text;
+	in->text = input.text;
 	in->index = 0;
+	inputLen = input.len;
 	o = (IOHelper *) malloc(sizeof(IOHelper));
 	o->index = 0;
 	o->text = (unsigned char *)
@@ -35,18 +37,22 @@ Text *decodingRoutine(Text *const input)
 	initModel(model, EOS + 1);
 	initIOBuffer(inBuf);
 
-	while((ch = decodeSymbol(de, model, &currentInt, inBuf, in)) != EOS) {
-		o->text[o->index] = (unsigned char) ch;
-		o->index++;
-	}
+	while((ch = decodeSymbol(de, model, &currentInt, inBuf, in, inputLen)) != EOS) {
+		o->text[o->index++] = (unsigned char) ch;
+		if(o->index < 101) {
+//			printf("Index: %d Text = %d\n", o->index-1, o->text[o->index-1]);
+		}
 
-	result = (Text *) malloc(sizeof(Text));
-	result->len = o->index;
-	result->text = (unsigned char *)
+	}
+	if(ch == EOS)
+		printf("Index: %d %d\n", o->index, ch);
+
+	result.len = o->index;
+	result.text = (unsigned char *)
 			malloc(sizeof(unsigned char) * o->index);
 
 	for(unsigned i=0; i<o->index; i++)
-		result->text[i] = o->text[i];
+		result.text[i] = o->text[i];
 
 	free(o->text);
 	free(o);
@@ -55,13 +61,15 @@ Text *decodingRoutine(Text *const input)
 	free(model->freq);
 	free(model);
 	free(inBuf);
+	free(input.text);
 
 	return result;
 }
 
 void updateInterval(Decoder *const de,
 					IOBuffer *const inBuf,
-					IOHelper *const in)
+					IOHelper *const in,
+					size_t inputLen)
 {
 	for(;;) {
 
@@ -85,23 +93,24 @@ void updateInterval(Decoder *const de,
 		} else
 			break;
 
-		de->value = de->value << 1 | inputBit(de, inBuf, in);
+		de->value = de->value << 1 | inputBit(de, inBuf, in, inputLen);
 		assert(de->value >= 0 && de->value < RANGE_MAX);
 	}
 
-	de->range = de->high - de->low;
+	de->range = de->high - de->low + 1;
 }
 
 unsigned decodeSymbol(Decoder *const de,
 					  Model *const model,
 					  Interval *const interval,
 					  IOBuffer *const inBuf,
-					  IOHelper *const in)
+					  IOHelper *const in,
+					  size_t inputLen)
 {
 	if(de->valueBits == 0) {
 
 		for(unsigned i = RANGE_BITS; i > 0; i--)
-			de->value = de->value << 1 | inputBit(de, inBuf, in);
+			de->value = de->value << 1 | inputBit(de, inBuf, in, inputLen);
 
 		de->valueBits = RANGE_BITS;
 	}
@@ -112,28 +121,29 @@ unsigned decodeSymbol(Decoder *const de,
 	const unsigned ch = findChar(de, interval, model);
 
 	encodeSymbol(&de->low, &de->high, de->range, *interval);
-	updateInterval(de, inBuf, in);
+	updateInterval(de, inBuf, in, inputLen);
 
 	return ch;
 }
 
 unsigned inputBit(Decoder *const de,
 				  IOBuffer *const inBuf,
-				  IOHelper *const in)
+				  IOHelper *const in,
+				  size_t inputLen)
 {
 	if(de->fin)
 		return CONTINUATION_BIT;
 
 	if(inBuf->bufBits == 0) {
 
-		inBuf->buf = in->text[in->index];
-
-		if((in->text + in->index) != NULL)
+		if(in->index < inputLen) {
+			inBuf->buf = in->text[in->index];
 			inBuf->bufBits = 8;
-		else
+			in->index++;
+		} else
 			inBuf->bufBits = 0;
 
-		in->index++;
+
 
 		if(inBuf->bufBits == 0) {
 			de->fin = !de->fin;
@@ -156,7 +166,7 @@ void initDecoder(Decoder *const de)
 	de->fin = 0;
 	de->low = RANGE_MIN;
 	de->high= RANGE_MAX;
-	de->range = RANGE_MAX - RANGE_MIN;
+	de->range = RANGE_MAX - RANGE_MIN + 1;
 }
 
 unsigned findChar(Decoder *const de,

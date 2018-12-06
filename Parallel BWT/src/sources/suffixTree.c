@@ -1,6 +1,6 @@
 #include "../headers/suffixTree.h"
 
-Node *buildSuffixTree(short *const in,
+Node *buildSuffixTree(unsigned *const in,
 					  int *const phases,
 					  const size_t inLen)
 {
@@ -15,15 +15,15 @@ Node *buildSuffixTree(short *const in,
 	//Initialization of the root (special node with suffixLink NULL)
 	*endRoot = -1;
 	root = createNode(-1, endRoot, NULL);
-//	root->children = (HashChildren *) malloc(sizeof(HashChildren));
-//	root->children = NULL;
+
+	printf("Input Len: %d\n", inLen);
 
 	//Initialization of the active point
 	ap.activeNode = root;
 	ap.activeEdge = -1;
 	ap.activeLen = 0;
-
 	for(*phases=0; *phases < inLen; (*phases)++) {
+//		printf("\n\nPhase: %d\n", *phases);
 
 		remainder++;
 		applyExtensions(in, &remainder, endLeaf, &ap, root);
@@ -31,6 +31,7 @@ Node *buildSuffixTree(short *const in,
 
 	(*endLeaf)--;
 
+//	printTree(root, in);
 	addSuffixIndex(root, labelLen, in, inLen);
 
 	return root;
@@ -50,18 +51,36 @@ Node *createNode(const int start, int *const end, Node *const root)
 	return node;
 }
 
-HashChildren *findChildren(ActivePoint *const ap, short *const input)
+HashChildren *findChildren(ActivePoint *const ap, unsigned *const input)
 {
 	HashChildren *child;
 	int key;
 
-	key = (int)input[ap->activeEdge];
+	key = input[ap->activeEdge];
 	HASH_FIND_INT(ap->activeNode->children, &key, child);
 
 	return child;
 }
 
-void applyExtensions(short *const input,
+void printTree(Node *node, unsigned *input)
+{
+	HashChildren *child;
+	int numChildren = HASH_COUNT(node->children);
+
+	if(numChildren == 0) {
+		printf("\tLeaf: %d %d %d %d\n",
+				node->start, *node->end, input[node->start], input[*node->end]);
+		return;
+	}
+	printf("Internal node: %d %d %d %d\n",
+			node->start, *node->end, input[node->start], input[*node->end]);
+	printf("Num children %d\n", numChildren);
+	for(child=node->children; child!=NULL; child=child->hh.next) {
+		printTree(child->node, input);
+	}
+}
+
+void applyExtensions(unsigned *const input,
 					 int *const remainder,
 					 int *const endLeaf,
 					 ActivePoint *const ap,
@@ -73,19 +92,28 @@ void applyExtensions(short *const input,
 
 	while(*remainder) {
 
-		if(ap->activeLen == 0)
+//		printf("Remainder: %d\n", *remainder);
+
+		if(ap->activeLen == 0) {
 			ap->activeEdge = *endLeaf;
+//			printf("Active edge = 0, new active edge = %d\n",
+//					ap->activeEdge);
+		}
 
 		hashChild = findChildren(ap, input);
 
 		if(hashChild == NULL) {
-
+//			printf("Rule 2:\n");
 			//Apply rule 2 and create a new leaf
 			createLeaf(endLeaf, ap->activeNode, root, input);
-			checkSuffixLinkNeeded(ap->activeNode, newest, root);
+			if(newest != NULL) {
+				addSuffixLink(ap->activeNode, &newest, root);
+//				printf("Newest: %d %d\n", newest->start, *newest->end);
+			}
+
 
 		} else {
-
+//			printf("Found children\n");
 			child = hashChild->node;
 
 			//Walk down the tree
@@ -94,8 +122,11 @@ void applyExtensions(short *const input,
 
 			//Rule 3
 			if(input[child->start + ap->activeLen] == input[*endLeaf]) {
+//				printf("Rule 3 %d %d\n", input[child->start + ap->activeLen],
+//						input[*endLeaf]);
 				ap->activeLen++;
-				checkSuffixLinkNeeded(ap->activeNode, newest, root);
+				if(newest != NULL && ap->activeNode != root)
+					addSuffixLink(ap->activeNode, &newest, root);
 				break;	//Move on to next phase
 			}
 
@@ -103,40 +134,46 @@ void applyExtensions(short *const input,
 			 * Rule 2 apply to an internal node,
 			 * activePoint in the middle of an edge.
 			 */
-			Node *internalNode = createInternalNode(ap, root, hashChild,
+//			printf("Rule 2 internal node\n");
+			Node *internalNode = createInternalNode(ap, root, &hashChild,
 					endLeaf, input);
-			checkSuffixLinkNeeded(internalNode, newest, root);
+			if(newest != NULL)
+				addSuffixLink(internalNode, &newest, root);
 			newest = internalNode;
 
 		}
 
 		(*remainder)--;
 		updateAP(ap, root, *endLeaf, *remainder);
+//		printf("End of extension.\n");
+//		printTree(root, input);
+//		puts("\n");
 	}
 }
 
 Node *createInternalNode(ActivePoint *const ap,
 						 Node *const root,
-						 HashChildren *const child,
+						 HashChildren **const child,
 						 int *const endLeaf,
-						 short *const input)
+						 unsigned *const input)
 {
-	Node *oldChild = child->node;
+	Node *oldChild = (*child)->node;
 	int *endInternalNode = (int *) malloc(sizeof(int));
 	Node *internalNode;
 
-	HASH_DEL(ap->activeNode->children, child);
+	HASH_DEL(ap->activeNode->children, *child);
 
 	//Create internal node and attach to its parent
 	*endInternalNode = oldChild->start + ap->activeLen - 1;
 	internalNode = createNode(oldChild->start, endInternalNode, root);
 
 	//Attach the old child to the internal node and the last one to its parent
-	child->node->start += ap->activeLen;
-	child->firstChar = input[child->node->start];
+	(*child)->node->start += ap->activeLen;
+	(*child)->firstChar = input[(*child)->node->start];
 	addNewChild(internalNode, ap->activeNode, input);
-	HASH_ADD_INT(internalNode->children, firstChar, child);
+	HASH_ADD_INT(internalNode->children, firstChar, *child);
 
+//	printf("Create internal node %d %d\n", internalNode->start, *endInternalNode);
 	//Create new leaf from the internal node
 	createLeaf(endLeaf, internalNode, root, input);
 
@@ -145,7 +182,7 @@ Node *createInternalNode(ActivePoint *const ap,
 
 void addNewChild(Node *const child,
 				 Node *const parent,
-				 short *const input)
+				 unsigned *const input)
 {
 	HashChildren *hash = (HashChildren *) malloc(sizeof(HashChildren));
 	hash->node = child;
@@ -156,38 +193,37 @@ void addNewChild(Node *const child,
 void createLeaf(int *const endLeaf,
 				Node *const parent,
 				Node *const root,
-				short *const input)
+				unsigned *const input)
 {
 	Node *child = createNode(*endLeaf, endLeaf, root);
 	addNewChild(child, parent, input);
+//	printf("Create leaf to parent: %d\n", *parent->end);
 }
 
 //Free the hash table that contains the children of a node
-void deleteChildren(HashChildren *children)
+void deleteChildren(HashChildren **children)
 {
 	HashChildren *current, *tmp;
 
-	HASH_ITER(hh, children, current, tmp) {
-		HASH_DEL(children, current);
+	HASH_ITER(hh, *children, current, tmp) {
+		HASH_DEL(*children, current);
 		free(current);
 	}
-
-	free(children);
 }
 
 //Delete by free all the memory allocated for a node
 void deleteNode(Node *node)
 {
 	if(node->suffixIndex == -1) {
-		deleteChildren(node->children);
+		deleteChildren(&node->children);
 		free(node->end);
 	}
 	free(node);
 }
 
-void checkSuffixLinkNeeded(Node *const node,
-						   Node *newest,
-						   Node *const root)
+void addSuffixLink(Node *const node,
+				   Node **newest,
+				   Node *const root)
 {
 	/*
 	 * Update suffix link if newest is pointing to a node,
@@ -199,10 +235,14 @@ void checkSuffixLinkNeeded(Node *const node,
 	 * The only node with suffixLink null is the root and all the other
 	 * nodes have the root as default suffixLink, so no need to update.
 	 */
-	if(newest != NULL && *node->end != -1 && node->children != NULL) {
-		newest->suffixLink = node;
-		newest = NULL;
-	}
+	(*newest)->suffixLink = node;
+//	printf("Suffix link added from node %d %d to %d %d\n",
+//			(*newest)->start,
+//			*(*newest)->end,
+//			node->start,
+//			*node->end);
+	*newest = NULL;
+
 }
 
 //Apply skip/count trick to walk down the tree quickly
@@ -213,7 +253,10 @@ int walkDown(ActivePoint *const ap, Node *const currentNode)
 		ap->activeEdge += edgeLength;
 		ap->activeLen -= edgeLength;
 		ap->activeNode = currentNode;
-
+//		printf("Walkdown\n");
+//		printf("New AP: node %d len %d edge %d\n", *ap->activeNode->end,
+//												 ap->activeLen,
+//												 ap->activeEdge);
 		return 1;
 	}
 
@@ -226,18 +269,19 @@ void updateAP(ActivePoint *const ap,
 			  const int remainder)
 {
 	if(ap->activeNode == root && ap->activeLen > 0) {
-
 		ap->activeLen--;
 		ap->activeEdge = phases - remainder + 1;
-
-	} else if(ap->activeNode != root)
+//		printf("Update ap len %d edge %d", ap->activeLen, ap->activeEdge);
+	} else if(ap->activeNode != root) {
 		ap->activeNode = ap->activeNode->suffixLink;
+//		printf("Follow suffix link ap node = %d", *ap->activeNode->end);
+	}
 }
 
 //DFS traversal to set the suffix indexes of the leaves
 void addSuffixIndex(Node *const node,
 					const int labelLen,
-					short *const input,
+					unsigned *const input,
 					const size_t inputLen)
 {
 	HashChildren *child;

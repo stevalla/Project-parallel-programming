@@ -1,29 +1,28 @@
 #include "../headers/unmtf.h"
 
 
-Text *unmtf(Text *input)
+Text unmtf(const Text input)
 {
 	SymbolsList *symbols;
-	Text *output = (Text *) malloc(sizeof(Text));
+	Text output;
 	MtfAux mtfAux;
 
-	output->len = input->len;
-	output->text = (unsigned char *) malloc(sizeof(unsigned char)*input->len);
+	output.len = input.len;
+	output.text = (unsigned char *) malloc(sizeof(unsigned char)*input.len);
 
 	symbols = initListOfSymbols();
 
-	for(unsigned i=0; i<input->len; i++) {
+	for(unsigned i=0; i<input.len; i++) {
 
-		output->text[i] = searchSymbol(symbols, input->text[i], &mtfAux);
+		output.text[i] = searchSymbol(symbols, input.text[i], &mtfAux);
 
-		if(input->text[i] != 0)
+		if(input.text[i] != 0)
 			symbols = mvtElement(symbols, &mtfAux);
 
 	}
 
 	freeListOfSymbols(symbols);
-	free(input->text);
-	free(input);
+	free(input.text);
 
 	return output;
 }
