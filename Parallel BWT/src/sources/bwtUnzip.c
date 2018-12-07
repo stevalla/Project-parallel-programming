@@ -26,7 +26,7 @@ Text bwtUnzip(const Text input)
 	 ***********************************************************************/
 	Text bwtReverse = unbwt(mtfReverse);
 
-	puts("\t-BWT reverse finished");
+	puts("\t-BWT reverse finished\n");
 
 	return bwtReverse;
 }

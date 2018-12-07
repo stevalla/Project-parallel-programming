@@ -37,15 +37,8 @@ Text decodingRoutine(const Text input)
 	initModel(model, EOS + 1);
 	initIOBuffer(inBuf);
 
-	while((ch = decodeSymbol(de, model, &currentInt, inBuf, in, inputLen)) != EOS) {
+	while((ch = decodeSymbol(de, model, &currentInt, inBuf, in, inputLen)) != EOS)
 		o->text[o->index++] = (unsigned char) ch;
-		if(o->index < 101) {
-//			printf("Index: %d Text = %d\n", o->index-1, o->text[o->index-1]);
-		}
-
-	}
-	if(ch == EOS)
-		printf("Index: %d %d\n", o->index, ch);
 
 	result.len = o->index;
 	result.text = (unsigned char *)

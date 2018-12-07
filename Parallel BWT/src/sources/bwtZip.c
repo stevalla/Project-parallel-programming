@@ -3,32 +3,45 @@
 
 Text bwtZip(const Text input)
 {
+	clock_t start, end;
 
 	/***********************************************************************
 	 * BWT TRANSFORMATION
 	************************************************************************/
+	start = clock();
 	Text bwtOutput = bwtTransformation(input);
+	end = clock();
 
-	puts("\t-BWT finished");
+	printf("\t-BWT finished                    TIME %fms\n",
+			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 
 	/***********************************************************************
 	 * MTF TRANSFORMATION
 	 ***********************************************************************/
+	start = clock();
 	Text mtfOutput = mtf(bwtOutput);
+	end = clock();
 
-	puts("\t-MTF finished");
+	printf("\t-MTF finished                    TIME %fms\n",
+			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 	/***********************************************************************
 	 * ZLE ENCODING
 	 ***********************************************************************/
+	start = clock();
 	Text zleOutput = zleEncoding(mtfOutput);
+	end = clock();
 
-	puts("\t-ZLE finished");
+	printf("\t-ZLE finished                    TIME %fms\n",
+			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 	/**********************************************************************
 	* ARITHMETIC ENCODING
 	***********************************************************************/
+	start = clock();
 	Text compressed = encodingRoutine(zleOutput);
+	end = clock();
 
-	puts("\t-Arithmetic coding finished");
+	printf("\t-Arithmetic coding finished      TIME %fms\n\n",
+			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 
 	return compressed;
 }
@@ -47,6 +60,8 @@ void compress(FILE *input, FILE *output)
 			free(inZip.text);
 			break;
 		}
+
+		printf("Block size %ld BYTE\n", inZip.len);
 
 		if(inZip.len < MIN_CHUNK_SIZE) {
 			compressed = inZip;

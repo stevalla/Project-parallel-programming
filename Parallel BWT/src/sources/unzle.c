@@ -14,7 +14,6 @@ Text zleDecoding(const Text input)
 	j = 0;
 	runLen[j] = 255;
 
-	printf("LEN %d\n", input.len);
 	for(unsigned i=0; i<input.len; i++) {
 
 		if(input.text[i] <= 1) {				//Count zeros run

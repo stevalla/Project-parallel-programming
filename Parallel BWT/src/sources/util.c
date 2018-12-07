@@ -121,7 +121,6 @@ int compareFiles(FILE *const file1, FILE *const file2, long size1, long size2)
 	int i = 0;
 	while(i++ < size1) {
 		if(f1[i - 1] != f2[i - 1]) {
-//			printf("ch1=%d!=ch2=%d i = %d\n", f1[i-1], f2[i-1], i-1);
 			result = 0;
 			break;
 		}

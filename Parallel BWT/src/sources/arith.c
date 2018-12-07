@@ -203,7 +203,6 @@ void outputBit(IOBuffer *const out,
 
 		(void) BUF_BITS;
 		o->text[o->index++] = out->buf;
-//		printf("Out: %d\n", o->text[o->index-1]);
 		out->buf = 0;
 		out->bufBits = 0;
 	}
@@ -248,7 +247,6 @@ void finishEncoding(Encoder *const en,
 	if (out->bufBits != 0) {
 		(void) out->bufBits;
 		o->text[o->index++] = out->buf;
-		printf("Finish %d\n", o->text[o->index-1]);
 	}
 
 }

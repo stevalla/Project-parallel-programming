@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <limits.h>
 
 #include "./headers/bwtZip.h"
 #include "./headers/bwtUnzip.h"
@@ -15,19 +10,26 @@ int main(int argc, char *argv[])
 	/************************************************************************
 	 * ZIP
 	 ************************************************************************/
-	char *const inputFile = "input.png";
+	char *const inputFile = "input.mp3";
 	char *const encodedFile = "encoded.zip";
+
+	clock_t start, end;
 
 	FILE *inputE = openFileRB(inputFile);
 	FILE *outputE = openFileWB(encodedFile);
 
-	puts("------------------ZIP------------------");
+	puts("------------------ZIP------------------\n");
 
+	start = clock();
 	compress(inputE, outputE);
+	end = clock();
 
-	puts("Finish zip.\n");
-	printf("Size original: %d comrpessed %d saved %d\n", fileSize(inputE),
+	puts("Finish zip\n");
+	printf("Size original: %ld comrpessed %ld saved %ld\n", fileSize(inputE),
 					fileSize(outputE), fileSize(inputE) - fileSize(outputE));
+
+	printf("Time for compression: %fms\n\n",
+			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 
 	fclose(inputE);
 	fclose(outputE);
@@ -36,16 +38,16 @@ int main(int argc, char *argv[])
 	 * UNZIP
 	 ************************************************************************/
 	char *const inputDecFile = "encoded.zip";
-	char *const decodedFile = "decoded.png";
+	char *const decodedFile  = "decoded.mp3";
 
 	FILE *inputD = openFileRB(inputDecFile);
 	FILE *outputD = openFileWB(decodedFile);
 
-	puts("------------------UNZIP------------------");
+	puts("------------------UNZIP------------------\n");
 
 	decompress(inputD, outputD);
 
-	puts("Finish unzip phase.\n");
+	puts("Finish unzip phase\n");
 
 	fclose(inputD);
 	fclose(outputD);
@@ -54,7 +56,7 @@ int main(int argc, char *argv[])
 	 * COMPARING
 	 ************************************************************************/
 
-	puts("------------------COMPARING------------------");
+	puts("------------------COMPARING------------------\n");
 
 	FILE *original = openFileRB(inputFile);
 	FILE *decompress = openFileRB(decodedFile);

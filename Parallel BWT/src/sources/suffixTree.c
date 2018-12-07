@@ -16,14 +16,11 @@ Node *buildSuffixTree(unsigned *const in,
 	*endRoot = -1;
 	root = createNode(-1, endRoot, NULL);
 
-	printf("Input Len: %d\n", inLen);
-
 	//Initialization of the active point
 	ap.activeNode = root;
 	ap.activeEdge = -1;
 	ap.activeLen = 0;
 	for(*phases=0; *phases < inLen; (*phases)++) {
-//		printf("\n\nPhase: %d\n", *phases);
 
 		remainder++;
 		applyExtensions(in, &remainder, endLeaf, &ap, root);
