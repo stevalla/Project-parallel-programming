@@ -5,9 +5,10 @@ Text zleDecoding(const Text input)
 	int j;
 	size_t len;
 	Text output;
-	unsigned char out[MAX_CHUNK_SIZE];
+	unsigned char *out = (unsigned char *)
+						  malloc(sizeof(unsigned char) *(MAX_CHUNK_SIZE + 9));
 	unsigned char *runLen = (unsigned char *)
-							malloc(sizeof(unsigned char)*input.len);
+							malloc(sizeof(unsigned char) * MAX_CHUNK_SIZE);
 
 	len = 0;
 	j = 0;
@@ -40,7 +41,6 @@ Text zleDecoding(const Text input)
 		} else
 			out[len++] = input.text[i] - 1;
 
-//		printf("i = %d\n", i);
 	}
 
 	if(runLen[0] <= 1)
@@ -54,6 +54,7 @@ Text zleDecoding(const Text input)
 
 	free(input.text);
 	free(runLen);
+	free(out);
 
 	return output;
 }

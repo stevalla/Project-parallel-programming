@@ -38,11 +38,11 @@ Text getBWT(unsigned *const input,
 
 		if(index == 0) {			//Index of the sentinel character
 			output.text[i + 8] = 0;		//Dummy character
-			encodeIndex(i, output.text, 4);
+			encodeUnsigned(i, output.text, 4);
 
 		} else if(index == 1) {		//Index of first character
 			output.text[i + 8] = input[0];
-			encodeIndex(i, output.text, 0);
+			encodeUnsigned(i, output.text, 0);
 
 		} else
 			output.text[i + 8] = input[index - 1];

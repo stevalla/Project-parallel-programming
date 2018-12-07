@@ -13,5 +13,7 @@
 
 Text bwtUnzip(const Text);
 
+void decompress(FILE *, FILE *);
+
 
 #endif

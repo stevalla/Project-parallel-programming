@@ -11,71 +11,56 @@
 
 int main(int argc, char *argv[])
 {
-//	unsigned char text[] = "abracadabraabracadabra";
-//	int inputLen = strlen((char *)text);
-//
-//	if(inputLen > 2000) {
-//		printf("Size too big.\n");
-//		return 0;
-//	}
-//	/************************************************************************
-//	 * INPUT
-//	 ************************************************************************/
-//
-//	printf("Input string:\n\t%s\n", text);
-//
-//	printf("Input:\n\t");
-//	printResult(text, inputLen);
-//
-//	Text *inputt = (Text *) malloc(sizeof(Text));
-//	inputt->text = text;
-//	inputt->len = inputLen;
 
 	/************************************************************************
 	 * ZIP
 	 ************************************************************************/
-	char *const inputFile = "kennedy.xls";
+	char *const inputFile = "input.png";
 	char *const encodedFile = "encoded.zip";
 
-	puts("ZIP");
+	FILE *inputE = openFileRB(inputFile);
+	FILE *outputE = openFileWB(encodedFile);
 
-	Text inZip;
-	inZip.len = fileSize(inputFile);
-	inZip.text = readFile(inputFile, inZip.len);
+	puts("------------------ZIP------------------");
 
-	Text compressed = bwtZip(inZip);
+	compress(inputE, outputE);
 
-	puts("Finish zip.");
+	puts("Finish zip.\n");
+	printf("Size original: %d comrpessed %d saved %d\n", fileSize(inputE),
+					fileSize(outputE), fileSize(inputE) - fileSize(outputE));
 
-	writeFile(encodedFile, compressed);
-
-	free(compressed.text);
+	fclose(inputE);
+	fclose(outputE);
 
 	/************************************************************************
 	 * UNZIP
 	 ************************************************************************/
 	char *const inputDecFile = "encoded.zip";
-	char *const decodedFile = "decoded.txt";
+	char *const decodedFile = "decoded.png";
 
-	puts("UNZIP");
+	FILE *inputD = openFileRB(inputDecFile);
+	FILE *outputD = openFileWB(decodedFile);
 
-	Text inUnzip;
-	inUnzip.len = fileSize(inputDecFile);
-	inUnzip.text = readFile(inputDecFile, inUnzip.len);
+	puts("------------------UNZIP------------------");
 
-	Text decompressed = bwtUnzip(inUnzip);
+	decompress(inputD, outputD);
 
-	puts("Finish unzip phase.");
+	puts("Finish unzip phase.\n");
 
-	writeFile(decodedFile, decompressed);
+	fclose(inputD);
+	fclose(outputD);
 
-	free(decompressed.text);
+	/************************************************************************
+	 * COMPARING
+	 ************************************************************************/
 
-	puts("Comparing..\n");
+	puts("------------------COMPARING------------------");
 
+	FILE *original = openFileRB(inputFile);
+	FILE *decompress = openFileRB(decodedFile);
 
-	int result = compareFiles(inputFile, decodedFile, fileSize(inputFile),
-					 fileSize(decodedFile));
+	int result = compareFiles(original, decompress,
+				 fileSize(original), fileSize(decompress));
 
 	if(result == 1)
 		printf("Compression loseless\n");
@@ -83,6 +68,9 @@ int main(int argc, char *argv[])
 		printf("Loss some data during compression.\n");
 	else
 		printf("Added some data during compression.\n");
+
+	fclose(original);
+	fclose(decompress);
 
 	return 0;
 }

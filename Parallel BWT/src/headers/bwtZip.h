@@ -13,7 +13,6 @@
 
 Text bwtZip(const Text);
 
-void printResult(unsigned char *const, const size_t);
-
+void compress(FILE *, FILE *);
 
 #endif

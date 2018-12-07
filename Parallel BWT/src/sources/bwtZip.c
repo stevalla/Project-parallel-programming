@@ -3,54 +3,68 @@
 
 Text bwtZip(const Text input)
 {
-	printf("Input:\n\t");
-//	printResult(input.text, input.len);
-	printf("input len %d\n", input.len);
 
 	/***********************************************************************
 	 * BWT TRANSFORMATION
 	************************************************************************/
 	Text bwtOutput = bwtTransformation(input);
 
-	printf("BWT output:\n\t");
-//	printResult(bwtOutput.text, bwtOutput.len);
-	printf("Bwt len %d\n", bwtOutput.len);
+	puts("\t-BWT finished");
 
 	/***********************************************************************
 	 * MTF TRANSFORMATION
 	 ***********************************************************************/
 	Text mtfOutput = mtf(bwtOutput);
 
-	printf("MTF output:\n\t");
-//	printResult(mtfOutput.text, mtfOutput.len);
-	printf("MTf len %d\n", mtfOutput.len);
-
+	puts("\t-MTF finished");
 	/***********************************************************************
 	 * ZLE ENCODING
 	 ***********************************************************************/
 	Text zleOutput = zleEncoding(mtfOutput);
 
-	printf("ZLE output:\n\t");
-//	printResult(zleOutput.text, zleOutput.len);
-	printf("ZLE len %d\n", zleOutput.len);
-
+	puts("\t-ZLE finished");
 	/**********************************************************************
 	* ARITHMETIC ENCODING
 	***********************************************************************/
 	Text compressed = encodingRoutine(zleOutput);
 
-	printf("Arithmetic coding output:\n\t");
-//	printResult(compressed.text, compressed.len);
-	printf("Arith len %d\n", compressed.len);
+	puts("\t-Arithmetic coding finished");
 
 	return compressed;
 }
 
-void printResult(unsigned char *const text, const size_t size)
+void compress(FILE *input, FILE *output)
 {
-	int i;
+	while(1) {
 
-	for(i=0; i<size; i++)
-		printf("%d ", text[i]);
-	printf("\n");
+		Text compressed, inZip;
+		unsigned char id[1];
+		unsigned char length[4];
+
+		inZip = readFile(input, MAX_CHUNK_SIZE);
+
+		if(inZip.len == 0) {
+			free(inZip.text);
+			break;
+		}
+
+		if(inZip.len < MIN_CHUNK_SIZE) {
+			compressed = inZip;
+			id[0] = 0;
+			free(inZip.text);
+
+		} else {
+			compressed = bwtZip(inZip);
+			id[0] = 1;
+		}
+
+		encodeUnsigned(compressed.len, length, 0);
+
+		writeFile(output, length, 4);
+		writeFile(output, id, 1);
+		writeFile(output, compressed.text, compressed.len);
+
+		free(compressed.text);
+	}
+
 }

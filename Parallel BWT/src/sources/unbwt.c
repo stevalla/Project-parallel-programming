@@ -4,7 +4,8 @@ Text unbwt(Text input)
 {
 	Text output;
 	unsigned primary, sentinel;
-	unsigned freqs[257], links[input.len], mapping[257];
+	unsigned *links = (unsigned *) malloc(sizeof(unsigned) * input.len);
+	unsigned freqs[257], mapping[257];
 
 	primary  = readUnsigned(input.text, 0);
 	sentinel = readUnsigned(input.text, 4);
@@ -47,6 +48,7 @@ Text unbwt(Text input)
 	}
 
 	free(input.text-8);
+	free(links);
 
 	return output;
 }

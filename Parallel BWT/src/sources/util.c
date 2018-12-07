@@ -4,7 +4,7 @@ unsigned char decomposeUnsigned(unsigned u, int n) {
     return (u >> (24 - 8 * n)) & 0xFF;
 }
 
-void encodeIndex(const unsigned index, unsigned char *const output, int j)
+void encodeUnsigned(const unsigned index, unsigned char *const output, int j)
 {
 	for(unsigned i=0; i<4; i++) {
 		output[j++] = decomposeUnsigned(index, i);
@@ -23,37 +23,33 @@ unsigned readUnsigned(unsigned char *const input, size_t n)
 	return ret;
 }
 
-long fileSize(char *const filename)
+long fileSize(FILE *const f)
 {
-	FILE *f = openFileRB(filename);
-
 	long origin = ftell(f);
 	fseek(f, 0, SEEK_END);
 	long size = ftell(f);
 	fseek(f, origin, SEEK_SET);
 
-	fclose(f);
-
 	return size;
 }
 
-unsigned char *readFile(char *const filename, long size)
+Text readFile(FILE *const f, long size)
 {
-	FILE *f = openFileRB(filename);
-	unsigned char *input = (unsigned char *)
-							malloc(sizeof(unsigned char)*size);
+	Text text;
+	text.text = (unsigned char *) malloc(sizeof(unsigned char)*size);
 
-	if(fread(&input[0], 1, size, f) != size) {
+	text.len = fread(&text.text[0], 1, size, f);
 
-		printf("Error reading the file %s.\n", filename);
+	if(text.len < 0) {
+
+		printf("Error reading the file.\n");
 		fclose(f);
-		return NULL;
+		free(text.text);
+		abort();
+		return text;
 
-	} else {
-		fclose(f);
-		return input;
-	}
-
+	} else
+		return text;
 }
 
 FILE *openFileRB(char *const filename)
@@ -65,6 +61,7 @@ FILE *openFileRB(char *const filename)
 	else {
 		printf("Error opening the file %s\n", filename);
 		abort();
+		fclose(f);
 		return NULL;
 	}
 }
@@ -94,38 +91,37 @@ FILE *openFileWB(char *const filename)
 	else {
 		printf("Error opening the file %s\n", filename);
 		abort();
+		fclose(f);
 		return NULL;
 	}
 }
 
-void writeFile(char *const filename, const Text result)
+void writeFile(FILE *const f,
+			   unsigned char *const result,
+			   long len)
 {
-	FILE *f = openFileWB(filename);
-
-	if(fwrite(&result.text[0], 1, result.len, f) != result.len ||
-			  ferror(f)) {
-		printf("Error writing the file %s.\n", filename);
+	if(fwrite(&result[0], 1, len, f) != len || ferror(f)) {
+		printf("Error writing the file.\n");
 		fclose(f);
-
-	} else
-		fclose(f);
+		free(result);
+		abort();
+	}
 }
 
-int compareFiles(char *const file1, char *const file2, long size1, long size2)
+int compareFiles(FILE *const file1, FILE *const file2, long size1, long size2)
 {
 	if(size1 > size2) {
-		printf("The two files have different sizes %d %d.\n",size1, size2);
+		printf("The two files have different sizes %ld %ld.\n",size1, size2);
 	} else if(size1 < size2)
 		return 2;
 
-	unsigned char *f1 = readFile(file1, size1);
-	unsigned char *f2 = readFile(file2, size2);
+	unsigned char *f1 = readFile(file1, size1).text;
+	unsigned char *f2 = readFile(file2, size2).text;
 	int result = 1;
 	int i = 0;
-	printf("size1 %d size2 %d\n", size1, size2);
 	while(i++ < size1) {
 		if(f1[i - 1] != f2[i - 1]) {
-			printf("ch1=%d!=ch2=%d i = %d\n", f1[i-1], f2[i-1], i-1);
+//			printf("ch1=%d!=ch2=%d i = %d\n", f1[i-1], f2[i-1], i-1);
 			result = 0;
 			break;
 		}
