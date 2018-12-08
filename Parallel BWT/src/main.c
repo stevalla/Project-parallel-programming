@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	printf("Size original: %ld comrpessed %ld saved %ld\n", fileSize(inputE),
 					fileSize(outputE), fileSize(inputE) - fileSize(outputE));
 
-	printf("Time for compression: %fms\n\n",
+	printf("Time for compression: %f ms\n\n",
 			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 
 	fclose(inputE);

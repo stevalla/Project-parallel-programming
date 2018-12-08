@@ -12,7 +12,7 @@ Text bwtZip(const Text input)
 	Text bwtOutput = bwtTransformation(input);
 	end = clock();
 
-	printf("\t-BWT finished                    TIME %fms\n",
+	printf("\t-BWT finished                    TIME %f ms\n",
 			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 
 	/***********************************************************************
@@ -22,7 +22,7 @@ Text bwtZip(const Text input)
 	Text mtfOutput = mtf(bwtOutput);
 	end = clock();
 
-	printf("\t-MTF finished                    TIME %fms\n",
+	printf("\t-MTF finished                    TIME %f ms\n",
 			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 	/***********************************************************************
 	 * ZLE ENCODING
@@ -31,7 +31,7 @@ Text bwtZip(const Text input)
 	Text zleOutput = zleEncoding(mtfOutput);
 	end = clock();
 
-	printf("\t-ZLE finished                    TIME %fms\n",
+	printf("\t-ZLE finished                    TIME %f ms\n",
 			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 	/**********************************************************************
 	* ARITHMETIC ENCODING
@@ -40,7 +40,7 @@ Text bwtZip(const Text input)
 	Text compressed = encodingRoutine(zleOutput);
 	end = clock();
 
-	printf("\t-Arithmetic coding finished      TIME %fms\n\n",
+	printf("\t-Arithmetic coding finished      TIME %f ms\n\n",
 			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 
 	return compressed;
