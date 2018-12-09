@@ -72,6 +72,8 @@ Text encodingRoutine(const Text input)
 	free(model);
 	free(input.text);
 
+	output.id = input.id;
+
 	return output;
 }
 

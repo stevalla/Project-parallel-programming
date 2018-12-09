@@ -24,6 +24,8 @@ Text mtf(const Text input)
 	freeListOfSymbols(symbols);
 	free(input.text);
 
+	output.id = input.id;
+
 	return output;
 }
 

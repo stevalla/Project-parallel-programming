@@ -48,6 +48,8 @@ Text zleEncoding(const Text input)
 
 	free(input.text);
 
+	result.id = input.id;
+
 	return result;
 }
 

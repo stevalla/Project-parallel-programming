@@ -13,7 +13,11 @@ Text bwtTransformation(const Text in)
 
 	Node *suffixTree = buildSuffixTree(input, &phases, bwtLen);
 
-	return getBWT(input, suffixTree, bwtLen);
+	Text result = getBWT(input, suffixTree, bwtLen);
+
+	result.id = in.id;
+
+	return result;
 }
 
 Text getBWT(unsigned *const input,

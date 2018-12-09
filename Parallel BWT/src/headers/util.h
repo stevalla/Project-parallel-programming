@@ -17,6 +17,7 @@ typedef struct Text
 {
 	unsigned char *text;
 	size_t len;
+	long id;
 
 } Text;
 
