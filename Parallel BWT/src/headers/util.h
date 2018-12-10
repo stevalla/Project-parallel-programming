@@ -10,8 +10,6 @@
 
 #define POW_2(N)       (1 << (N))
 #define MAX_CHUNK_SIZE (1 * 1048576)
-#define MIN_CHUNK_SIZE  300
-
 
 typedef struct Text
 {

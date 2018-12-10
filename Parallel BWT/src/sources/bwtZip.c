@@ -64,6 +64,9 @@ void compress(FILE *input, FILE *output)
 	}
 
 	while(index < nBlocks) {
+		if(result.resultList == NULL)
+			continue;
+
 		pthread_mutex_lock(&result.mutex);
 		writeOutput(output, &index);
 		pthread_mutex_unlock(&result.mutex);
@@ -203,7 +206,7 @@ void *arithStage(void *arg)
 	}
 
 	printf("ARITH THREAD:\tArithmetic coding finished      TIME %f ms\n",
-		(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
+	  (((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
@@ -246,6 +249,7 @@ void insertInOrderResult(Text res)
 			prec->next = curr;
 		}
 	}
+
 }
 
 void initBuffer(Buffer *buf)
@@ -265,10 +269,10 @@ void freeBuffer(Buffer *buf)
 
 void writeOutput(FILE *output, int *index)
 {
-	ResultList *curr;
+	ResultList *curr, *tmp;
 	unsigned char length[4];
 
-	for(curr = result.resultList; curr != NULL; curr = curr->next) {
+	for(curr = result.resultList; curr != NULL; ) {
 
 		if(curr->result.id != *index)
 			break;
@@ -281,8 +285,13 @@ void writeOutput(FILE *output, int *index)
 		printf("MAIN THREAD:\tWrite block %ld\n", curr->result.id);
 
 		(*index)++;
-		free(curr);
+		free(curr->result.text);
+
+		tmp = curr;
+		curr = curr->next;
+		free(tmp);
 	}
 
-	result.resultList = curr;
+	if(curr != NULL)
+		result.resultList = curr;
 }

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	/************************************************************************
 	 * ZIP
 	 ************************************************************************/
-	char *const inputFile = "Examples/input.mp3";
+	char *const inputFile = "Examples/input.jpg";
 	char *const encodedFile = "Examples/encoded.bwt";
 
 	clock_t start, end;
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	 * UNZIP
 	 ************************************************************************/
 	char *const inputDecFile = "Examples/encoded.bwt";
-	char *const decodedFile  = "Examples/decoded.mp3";
+	char *const decodedFile  = "Examples/decoded.jpg";
 
 	FILE *inputD = openFileRB(inputDecFile);
 	FILE *outputD = openFileWB(decodedFile);
