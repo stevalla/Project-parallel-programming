@@ -1,31 +1,29 @@
 #include "../headers/bwtZip.h"
 
-Buffer read, bwt, arith;
-ResultList *result;
-int flag, flag2, flag3;
+Buffer readin, bwt, arith;
+Result result;
+int nBlocks;
 
-struct timespec timeout = {.tv_nsec = 0, .tv_sec = 5};
+struct timespec timeout = {.tv_nsec = 500000000, .tv_sec = 0};
 
 void compress(FILE *input, FILE *output)
 {
-	int i = 0;
+	int i = 0, index = 0, flag = 0;
 	pthread_t threads[NUM_THREADS];
+	pthread_attr_t attr;
 	Text inZip;
 
-	initBuffer(&read);
+	nBlocks = ceil((float)fileSize(input) / (float)MAX_CHUNK_SIZE);
+	initBuffer(&readin);
 	initBuffer(&bwt);
 	initBuffer(&arith);
-	result = NULL;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	result.resultList = NULL;
+	pthread_mutex_init(&result.mutex, NULL);
 	flag = 0;
-	flag2 = 0;
-	flag3 = 0;
 
-	pthread_create(&threads[0], NULL, bwtStage, NULL);
-	pthread_create(&threads[1], NULL, mtfZleStage, NULL);
-	pthread_create(&threads[2], NULL, arithStage, NULL);
-
-
-	while(1) {
+	for(int j=0; j<3; j++) {
 
 		inZip = readFile(input, MAX_CHUNK_SIZE);
 
@@ -36,85 +34,112 @@ void compress(FILE *input, FILE *output)
 
 		inZip.id = i++;
 
-		printf("Block id %d size %ld BYTE\n", inZip.id, inZip.len);
-
-		pthread_mutex_lock(&read.mutex);
-		enqueue(inZip, read.queue);
-		pthread_cond_broadcast(&read.cond);
-		pthread_mutex_unlock(&read.mutex);
-
+		enqueue(inZip, readin.queue);
 	}
 
-	for(int i=0; i<NUM_THREADS; i++)
-		pthread_join(threads[i], NULL);
+	printf("Number of blocks: %d\n", nBlocks);
 
-	writeOutput(output);
+	pthread_create(&threads[0], &attr, bwtStage, NULL);
+	pthread_create(&threads[1], &attr, bwtStage, NULL);
+	pthread_create(&threads[2], &attr, bwtStage, NULL);
+	pthread_create(&threads[3], &attr, mtfZleStage, NULL);
+	pthread_create(&threads[4], &attr, mtfZleStage, NULL);
+	pthread_create(&threads[5], &attr, arithStage, NULL);
+	pthread_create(&threads[6], &attr, arithStage, NULL);
 
-	free(inZip.text);
-	freeBuffer(&read);
+	for(int j=0; j<nBlocks-3 && !flag; j++) {
+
+		sleep(1);
+
+		inZip = readFile(input, MAX_CHUNK_SIZE);
+
+		inZip.id = i++;
+
+		printf("MAIN THREAD:\tblock id %ld size %ld BYTE\n", inZip.id, inZip.len);
+
+		pthread_mutex_lock(&readin.mutex);
+		enqueue(inZip, readin.queue);
+		pthread_cond_broadcast(&readin.cond);
+		pthread_mutex_unlock(&readin.mutex);
+	}
+
+	while(index < nBlocks) {
+		pthread_mutex_lock(&result.mutex);
+		writeOutput(output, &index);
+		pthread_mutex_unlock(&result.mutex);
+		sleep(1);
+	}
+
+
+	if(flag)
+		free(inZip.text);
+	freeBuffer(&readin);
 	freeBuffer(&bwt);
 	freeBuffer(&arith);
+	pthread_mutex_destroy(&result.mutex);
 }
 
 void *bwtStage(void *arg)
 {
-	clock_t start;
+	clock_t start = clock();
 	Text bwtInput;
 
 	while(1) {
 
-		pthread_mutex_lock(&read.mutex);
+		pthread_mutex_lock(&readin.mutex);
 
-		while(empty(read.queue) && !flag)
-			pthread_cond_timedwait(&read.cond, &read.mutex, &timeout);
+		while(empty(readin.queue) && readin.queue->counter < nBlocks)
+			pthread_cond_timedwait(&readin.cond, &readin.mutex, &timeout);
 
-		if(!empty(read.queue))
-			bwtInput = dequeue(read.queue);
-		else if(flag) {
-			pthread_mutex_unlock(&read.mutex);
+		if(!empty(readin.queue))
+			bwtInput = dequeue(readin.queue);
+
+		else if(readin.queue->counter == nBlocks) {
+			pthread_mutex_unlock(&readin.mutex);
 			break;
 
 		} else {
-			pthread_mutex_unlock(&read.mutex);
+			pthread_mutex_unlock(&readin.mutex);
 			continue;
 		}
 
-		pthread_mutex_unlock(&read.mutex);
+		pthread_mutex_unlock(&readin.mutex);
 
-		start = clock();
 		Text bwtOutput = bwtTransformation(bwtInput);
-
-		printf("\t-BWT finished                    TIME %f ms\n",
-					(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 		pthread_mutex_lock(&bwt.mutex);
 		enqueue(bwtOutput, bwt.queue);
 		pthread_cond_signal(&bwt.cond);
 		pthread_mutex_unlock(&bwt.mutex);
+
+		printf("BWT THREAD:\tblock %ld completed\n", bwtOutput.id);
 	}
 
-	flag2 = 1;
+	printf("BWT THREAD:\tBWT finished                    TIME %f ms\n",
+			(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
 
 void *mtfZleStage(void *arg)
 {
-	clock_t start;
+	clock_t start = clock();
 	Text mtfInput;
 
 	while(1) {
 
 		pthread_mutex_lock(&bwt.mutex);
 
-		while(empty(bwt.queue) && !flag2)
+		while(empty(bwt.queue) && bwt.queue->counter < nBlocks)
 			pthread_cond_timedwait(&bwt.cond, &bwt.mutex, &timeout);
 
 		if(!empty(bwt.queue))
 			mtfInput = dequeue(bwt.queue);
-		else if(flag2) {
+
+		else if(bwt.queue->counter == nBlocks) {
 			pthread_mutex_unlock(&bwt.mutex);
 			break;
+
 		} else {
 			pthread_mutex_unlock(&bwt.mutex);
 			continue;
@@ -122,44 +147,42 @@ void *mtfZleStage(void *arg)
 
 		pthread_mutex_unlock(&bwt.mutex);
 
-		start = clock();
 		Text mtfOutput = mtf(mtfInput);
 
-		printf("\t-MTF finished                    TIME %f ms\n",
-					(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
+//		printf("\t-MTF finished                    TIME %f ms\n",
+//			(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
-		start = clock();
 		Text zleOutput = zleEncoding(mtfOutput);
-
-		printf("\t-ZLE finished                    TIME %f ms\n",
-					(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 		pthread_mutex_lock(&arith.mutex);
 		enqueue(zleOutput, arith.queue);
 		pthread_cond_signal(&arith.cond);
 		pthread_mutex_unlock(&arith.mutex);
+
+		printf("MTF-ZLE THREAD:\tblock %ld completed\n", zleOutput.id);
 	}
 
-	flag3 = 1;
+	printf("MTF-ZLE THREAD:\tZLE finished                    TIME %f ms\n",
+		(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
 
 void *arithStage(void *arg)
 {
-	clock_t start;
+	clock_t start = clock();
 	Text arithInput;
 
 	while(1) {
 
 		pthread_mutex_lock(&arith.mutex);
 
-		while(empty(arith.queue) && !flag3)
+		while(empty(arith.queue) && arith.queue->counter < nBlocks)
 			pthread_cond_timedwait(&arith.cond, &arith.mutex, &timeout);
 
 		if(!empty(arith.queue))
 			arithInput = dequeue(arith.queue);
-		else if(flag3) {
+		else if(arith.queue->counter == nBlocks) {
 			pthread_mutex_unlock(&arith.mutex);
 			break;
 
@@ -170,14 +193,17 @@ void *arithStage(void *arg)
 
 		pthread_mutex_unlock(&arith.mutex);
 
-		start = clock();
 		Text compressed = encodingRoutine(arithInput);
 
-		printf("\t-Arithmetic coding finished      TIME %f ms\n",
-				(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
-
+		pthread_mutex_lock(&result.mutex);
 		insertInOrderResult(compressed);
+		pthread_mutex_unlock(&result.mutex);
+
+		printf("ARITH THREAD:\tblock %ld completed\n", compressed.id);
 	}
+
+	printf("ARITH THREAD:\tArithmetic coding finished      TIME %f ms\n",
+		(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
@@ -186,19 +212,19 @@ void insertInOrderResult(Text res)
 {
 	ResultList *tmp, *curr, *prec;
 
-	tmp = result;
+	tmp = result.resultList;
 
-	if(result == NULL) {
-		result = (ResultList *) malloc(sizeof(ResultList));
-		result->result = res;
-		result->next = NULL;
+	if(result.resultList == NULL) {
+		result.resultList = (ResultList *) malloc(sizeof(ResultList));
+		result.resultList->result = res;
+		result.resultList->next = NULL;
 
-	} else if(res.id < result->result.id) {
+	} else if(res.id < result.resultList->result.id) {
 
 		curr = (ResultList *) malloc(sizeof(ResultList));
 		curr->result = res;
 		curr->next = tmp;
-		result = curr;
+		result.resultList = curr;
 
 	} else {
 
@@ -237,18 +263,26 @@ void freeBuffer(Buffer *buf)
 	pthread_cond_destroy(&buf->cond);
 }
 
-void writeOutput(FILE *output)
+void writeOutput(FILE *output, int *index)
 {
 	ResultList *curr;
 	unsigned char length[4];
 
-	for(curr = result; curr != NULL; curr = curr->next) {
+	for(curr = result.resultList; curr != NULL; curr = curr->next) {
+
+		if(curr->result.id != *index)
+			break;
 
 		encodeUnsigned(curr->result.len, length, 0);
 
 		writeFile(output, length, 4);
 		writeFile(output, curr->result.text, curr->result.len);
 
+		printf("MAIN THREAD:\tWrite block %ld\n", curr->result.id);
+
+		(*index)++;
 		free(curr);
 	}
+
+	result.resultList = curr;
 }

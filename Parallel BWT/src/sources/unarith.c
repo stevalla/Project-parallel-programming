@@ -31,7 +31,7 @@ Text decodingRoutine(const Text input)
 	o = (IOHelper *) malloc(sizeof(IOHelper));
 	o->index = 0;
 	o->text = (unsigned char *)
-			   malloc(sizeof(unsigned char) * MAX_CHUNK_SIZE);
+			   malloc(sizeof(unsigned char) * MAX_CHUNK_SIZE * 2);
 
 	initDecoder(de);
 	initModel(model, EOS + 1);

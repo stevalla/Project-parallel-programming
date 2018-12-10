@@ -36,7 +36,6 @@ Text dequeue(Queue *q)
 
 	tmp = q->front;
 	q->front = q->front->next;
-	q->counter--;
 
 	free(tmp);
 
