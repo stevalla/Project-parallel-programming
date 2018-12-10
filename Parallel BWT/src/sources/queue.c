@@ -40,5 +40,8 @@ Text dequeue(Queue *q)
 
 	free(tmp);
 
+	if(q->front == NULL)
+		q->rear = NULL;
+
 	return elem;
 }

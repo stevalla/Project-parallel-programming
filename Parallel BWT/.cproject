@@ -47,7 +47,7 @@
                                 								
                                 <option id="gnu.c.compiler.option.dialect.std.593822513" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
                                 								
-                                <option id="gnu.c.compiler.option.misc.other.710200757" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0   -fopenmp" valueType="string"/>
+                                <option id="gnu.c.compiler.option.misc.other.710200757" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0   -pthread" valueType="string"/>
                                 								
                                 <option id="gnu.c.compiler.option.debugging.codecov.1282591386" name="Generate gcov information (-ftest-coverage -fprofile-arcs)" superClass="gnu.c.compiler.option.debugging.codecov" useByScannerDiscovery="false" value="true" valueType="boolean"/>
                                 								
@@ -87,7 +87,7 @@
                             							
                             <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1111300127" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker">
                                 								
-                                <option id="gnu.c.link.option.ldflags.538110436" name="Linker flags" superClass="gnu.c.link.option.ldflags" useByScannerDiscovery="false" value="-fopenmp" valueType="string"/>
+                                <option id="gnu.c.link.option.ldflags.538110436" name="Linker flags" superClass="gnu.c.link.option.ldflags" useByScannerDiscovery="false" value="-pthread" valueType="string"/>
                                 								
                                 <option id="gnu.c.link.option.libs.183611229" name="Libraries (-l)" superClass="gnu.c.link.option.libs" useByScannerDiscovery="false" valueType="libs">
                                     									
@@ -99,7 +99,7 @@
                                 								
                                 <option id="gnu.c.link.option.debugging.prof.1092294036" name="Generate prof information (-p)" superClass="gnu.c.link.option.debugging.prof" useByScannerDiscovery="false" value="false" valueType="boolean"/>
                                 								
-                                <option id="gnu.c.link.option.debugging.gprof.538857151" name="Generate gprof information (-pg)" superClass="gnu.c.link.option.debugging.gprof" useByScannerDiscovery="false" value="false" valueType="boolean"/>
+                                <option id="gnu.c.link.option.debugging.gprof.538857151" name="Generate gprof information (-pg)" superClass="gnu.c.link.option.debugging.gprof" useByScannerDiscovery="false" value="true" valueType="boolean"/>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.c.linker.input.203795647" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
                                     									
