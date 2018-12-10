@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	 * ZIP
 	 ************************************************************************/
 	char *const inputFile = "Examples/input.png";
-	char *const encodedFile = "Examples/encoded.zip";
+	char *const encodedFile = "Examples/encoded.bwt";
 
 	clock_t start, end;
 
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	printf("Size original: %ld comrpessed %ld saved %ld\n", fileSize(inputE),
 					fileSize(outputE), fileSize(inputE) - fileSize(outputE));
 
-	printf("Time for compression: %f ms\n\n",
+	printf("Time for compression: %fms\n\n",
 			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
 
 	fclose(inputE);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	/************************************************************************
 	 * UNZIP
 	 ************************************************************************/
-	char *const inputDecFile = "Examples/encoded.zip";
+	char *const inputDecFile = "Examples/encoded.bwt";
 	char *const decodedFile  = "Examples/decoded.png";
 
 	FILE *inputD = openFileRB(inputDecFile);

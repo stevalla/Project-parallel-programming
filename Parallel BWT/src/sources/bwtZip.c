@@ -173,7 +173,7 @@ void *arithStage(void *arg)
 		start = clock();
 		Text compressed = encodingRoutine(arithInput);
 
-		printf("\t-Arithmetic coding finished      TIME %f ms\n\n",
+		printf("\t-Arithmetic coding finished      TIME %f ms\n",
 				(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 		insertInOrderResult(compressed);

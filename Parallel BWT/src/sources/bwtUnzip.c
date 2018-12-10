@@ -33,13 +33,9 @@ Text bwtUnzip(const Text input)
 
 void decompress(FILE *input, FILE *output)
 {
-
-	Text decompressed;
-	unsigned char *id;
-
 	while(1) {
 
-		Text length, inUnzip;
+		Text inUnzip, decompressed, length;
 
 		length = readFile(input, 4);
 
@@ -48,19 +44,21 @@ void decompress(FILE *input, FILE *output)
 			break;
 		}
 
-		id = readFile(input, 1).text;
+//		id = readFile(input, 1).text;
 
 		inUnzip.len = readUnsigned(length.text, 0);
 		inUnzip.text = readFile(input, inUnzip.len).text;
 
+//		if(id[0] == 0) {
+//			decompressed = inUnzip;
+//			free(inUnzip.text);
+//		} else
 		decompressed = bwtUnzip(inUnzip);
 
 		writeFile(output, decompressed.text, decompressed.len);
 
+		free(decompressed.text);
 		free(length.text);
-
+//		free(id);
 	}
-
-	free(decompressed.text);
-	free(id);
 }
