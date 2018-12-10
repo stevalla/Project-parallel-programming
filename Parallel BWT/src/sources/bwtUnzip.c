@@ -36,6 +36,7 @@ void decompress(FILE *input, FILE *output)
 	while(1) {
 
 		Text inUnzip, decompressed, length;
+		unsigned char *id;
 
 		length = readFile(input, 4);
 
@@ -53,7 +54,7 @@ void decompress(FILE *input, FILE *output)
 //			decompressed = inUnzip;
 //			free(inUnzip.text);
 //		} else
-		decompressed = bwtUnzip(inUnzip);
+			decompressed = bwtUnzip(inUnzip);
 
 		writeFile(output, decompressed.text, decompressed.len);
 
