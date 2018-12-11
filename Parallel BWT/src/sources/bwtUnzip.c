@@ -8,25 +8,25 @@ Text bwtUnzip(const Text input)
 	 ***********************************************************************/
 	Text decompressed = decodingRoutine(input);
 
-	puts("\t-Arithmetic decoding finished");
+//	puts("\t-Arithmetic decoding finished");
 	/***********************************************************************
 	 * ZLE DECODING
 	 ***********************************************************************/
 	Text zleDecoded = zleDecoding(decompressed);
 
-	puts("\t-ZLE decoding finished");
+//	puts("\t-ZLE decoding finished");
 	/***********************************************************************
 	 * MTF REVERSE
 	 ***********************************************************************/
 	Text mtfReverse = unmtf(zleDecoded);
 
-	puts("\t-MTF reverse finished");
+//	puts("\t-MTF reverse finished");
 	/***********************************************************************
 	 * BWT REVERSE
 	 ***********************************************************************/
 	Text bwtReverse = unbwt(mtfReverse);
 
-	puts("\t-BWT reverse finished\n");
+//	puts("\t-BWT reverse finished\n");
 
 	return bwtReverse;
 }

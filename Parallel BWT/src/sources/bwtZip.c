@@ -6,7 +6,7 @@ int nBlocks;
 
 struct timespec timeout = {.tv_nsec = 500000000, .tv_sec = 0};
 
-void compress(FILE *input, FILE *output)
+void compress(FILE *input, FILE *output, long chunkSize)
 {
 	int i = 0, index = 0, flag = 0;
 	pthread_t threads[NUM_THREADS];
@@ -14,7 +14,7 @@ void compress(FILE *input, FILE *output)
 	cpu_set_t cpus;
 	Text inZip;
 
-	nBlocks = ceil((float)fileSize(input) / (float)MAX_CHUNK_SIZE);
+	nBlocks = ceil((float)fileSize(input) / (float)chunkSize);
 	initBuffer(&readin);
 	initBuffer(&bwt);
 	initBuffer(&arith);
@@ -27,11 +27,11 @@ void compress(FILE *input, FILE *output)
 	CPU_ZERO(&cpus);
 	CPU_SET(0, &cpus);
 	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpus);
-	printf("MAIN THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
+//	printf("MAIN THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
 	for(int j=0; j<3; j++) {
 
-		inZip = readFile(input, MAX_CHUNK_SIZE);
+		inZip = readFile(input, chunkSize);
 
 		if(inZip.len == 0) {
 			flag = 1;
@@ -67,7 +67,7 @@ void compress(FILE *input, FILE *output)
 
 		inZip.id = i++;
 
-		printf("MAIN THREAD:\tblock id %ld size %ld BYTE\n", inZip.id, inZip.len);
+//		printf("MAIN THREAD:\tblock id %ld size %ld BYTE\n", inZip.id, inZip.len);
 
 		pthread_mutex_lock(&readin.mutex);
 		enqueue(inZip, readin.queue);
@@ -104,7 +104,7 @@ void *bwtStage(void *arg)
 	clock_t start = clock();
 	Text bwtInput;
 
-	printf("BWT THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
+//	printf("BWT THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
 	while(1) {
 
@@ -134,11 +134,11 @@ void *bwtStage(void *arg)
 		pthread_cond_signal(&bwt.cond);
 		pthread_mutex_unlock(&bwt.mutex);
 
-		printf("BWT THREAD:\tblock %ld completed\n", bwtOutput.id);
+//		printf("BWT THREAD:\tblock %ld completed\n", bwtOutput.id);
 	}
 
-	printf("BWT THREAD:\tBWT finished                    TIME %f ms\n",
-			(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
+//	printf("BWT THREAD:\tBWT finished                    TIME %f ms\n",
+//			(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
@@ -148,7 +148,7 @@ void *mtfZleStage(void *arg)
 	clock_t start = clock();
 	Text mtfInput;
 
-	printf("MTF THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
+//	printf("MTF THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
 	while(1) {
 
@@ -183,11 +183,11 @@ void *mtfZleStage(void *arg)
 		pthread_cond_signal(&arith.cond);
 		pthread_mutex_unlock(&arith.mutex);
 
-		printf("MTF-ZLE THREAD:\tblock %ld completed\n", zleOutput.id);
+//		printf("MTF-ZLE THREAD:\tblock %ld completed\n", zleOutput.id);
 	}
 
-	printf("MTF-ZLE THREAD:\tZLE finished                    TIME %f ms\n",
-		(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
+//	printf("MTF-ZLE THREAD:\tZLE finished                    TIME %f ms\n",
+//		(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
@@ -197,7 +197,7 @@ void *arithStage(void *arg)
 	clock_t start = clock();
 	Text arithInput;
 
-	printf("ARITH THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
+//	printf("ARITH THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
 	while(1) {
 
@@ -225,11 +225,11 @@ void *arithStage(void *arg)
 		insertInOrderResult(compressed);
 		pthread_mutex_unlock(&result.mutex);
 
-		printf("ARITH THREAD:\tblock %ld completed\n", compressed.id);
+//		printf("ARITH THREAD:\tblock %ld completed\n", compressed.id);
 	}
 
-	printf("ARITH THREAD:\tArithmetic coding finished      TIME %f ms\n",
-	  (((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
+//	printf("ARITH THREAD:\tArithmetic coding finished      TIME %f ms\n",
+//	  (((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
@@ -306,7 +306,7 @@ void writeOutput(FILE *output, int *index)
 		writeFile(output, length, 4);
 		writeFile(output, curr->result.text, curr->result.len);
 
-		printf("MAIN THREAD:\tWrite block %ld\n", curr->result.id);
+//		printf("MAIN THREAD:\tWrite block %ld\n", curr->result.id);
 
 		(*index)++;
 		free(curr->result.text);

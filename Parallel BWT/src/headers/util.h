@@ -6,10 +6,10 @@
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
-#include <time.h>
+#include <sys/time.h>
 
 #define POW_2(N)       (1 << (N))
-#define MAX_CHUNK_SIZE (1 * 1048576)
+#define MAX_CHUNK_SIZE (36 * 102400)
 
 typedef struct Text
 {

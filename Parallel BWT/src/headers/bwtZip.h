@@ -43,7 +43,7 @@ typedef struct Result
 } Result;
 
 
-void compress(FILE *, FILE *);
+void compress(FILE *, FILE *, const long);
 
 void writeOutput(FILE *, int *);
 
