@@ -70,8 +70,6 @@ void convertBinToDec(unsigned char *runLen,
 
 	dec += POW_2(i);
 
-	for(i=0; i<dec-1; i++) {
+	for(i=0; i<dec-1; i++)
 		out[(*index)++] = 0;
-//		printf("index %d\n", *index);
-	}
 }

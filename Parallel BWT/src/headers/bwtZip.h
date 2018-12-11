@@ -42,6 +42,7 @@ typedef struct Result
 
 } Result;
 
+
 void compress(FILE *, FILE *);
 
 void writeOutput(FILE *, int *);
@@ -59,5 +60,6 @@ void *mtfZleStage(void *);
 void *arithStage(void *);
 
 void setAffinity(cpu_set_t *, int, pthread_attr_t *);
+
 
 #endif

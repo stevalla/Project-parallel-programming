@@ -13,23 +13,28 @@ int main(int argc, char *argv[])
 	char *const inputFile = "Examples/input.mp3";
 	char *const encodedFile = "Examples/encoded.bwt";
 
-	clock_t start, end;
+	long start, end;
+	struct timeval timecheck;
 
 	FILE *inputE = openFileRB(inputFile);
 	FILE *outputE = openFileWB(encodedFile);
 
 	puts("------------------ZIP------------------\n");
 
-	start = clock();
+	//Calculate the wall time
+	gettimeofday(&timecheck, NULL);
+	start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 	compress(inputE, outputE);
-	end = clock();
+	gettimeofday(&timecheck, NULL);
+	end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 
 	puts("Finish zip\n");
-	printf("Size original: %ld comrpessed: %ld saved: %ld\n", fileSize(inputE),
-					fileSize(outputE), fileSize(inputE) - fileSize(outputE));
+	printf("Size original: %ld comrpessed: %ld saved: %ld\n",
+			fileSize(inputE),
+			fileSize(outputE),
+			fileSize(inputE) - fileSize(outputE));
 
-	printf("Time for compression: %f ms\n\n",
-			(((double)end - (double)start) / CLOCKS_PER_SEC) * 1000);
+	printf("Time for compression: %ld ms\n\n", end - start);
 
 	fclose(inputE);
 	fclose(outputE);
