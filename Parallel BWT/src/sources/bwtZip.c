@@ -61,9 +61,9 @@ void compress(FILE *input, FILE *output, long chunkSize)
 
 	for(int j=0; j<nBlocks-3 && !flag; j++) {
 
-		sleep(1);
+		usleep(250000);
 
-		inZip = readFile(input, MAX_CHUNK_SIZE);
+		inZip = readFile(input, chunkSize);
 
 		inZip.id = i++;
 
@@ -80,7 +80,7 @@ void compress(FILE *input, FILE *output, long chunkSize)
 		pthread_mutex_lock(&result.mutex);
 		writeOutput(output, &index);
 		pthread_mutex_unlock(&result.mutex);
-		sleep(1);
+		usleep(250000);
 	}
 
 

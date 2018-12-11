@@ -17,7 +17,7 @@
 #include "arith.h"
 #include "queue.h"
 
-#define NUM_THREADS 7
+#define NUM_THREADS 8
 
 typedef struct Buffer
 {
