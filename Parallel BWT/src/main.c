@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	/************************************************************************
 	 * ZIP
 	 ************************************************************************/
-	char *const inputFile = "Examples/Large_corpus/bible.txt";
+	char *const inputFile = "Examples/Silesia_corpus/dickens";
 	char *const encodedFile = "Examples/Large_corpus/encoded.bwt";
 
 	printf("Input file %s\n", inputFile);
@@ -19,10 +19,10 @@ int main(int argc, char *argv[])
 	long start, end;
 	struct timeval timecheck;
 	long a[5] = {102400, 9*102400, 18*102400, 36*102400, 50*102400};
-	int i=0, j=0;
-//	for(int j=0; j<1; j++) {
-//		printf("Chunk size: %ld\n", a[j]);
-//	for(int i=0; i<1; i++) {
+
+	for(int j=0; j<5; j++) {
+		printf("Chunk size: %ld\n", a[j]);
+	for(int i=0; i<10; i++) {
 		FILE *inputE = openFileRB(inputFile);
 		FILE *outputE = openFileWB(encodedFile);
 
@@ -44,18 +44,18 @@ int main(int argc, char *argv[])
 
 		time[i] = end - start;
 
-//		printf("Time %ld\n", time[i]);
+		printf("Time %ld\n", time[i]);
 		fclose(inputE);
 		fclose(outputE);
-//	}
+	}
 
 	long sum = 0;
-	for(int i=0; i<1; i++) {
+	for(int i=0; i<10; i++) {
 		sum += time[i];
 	}
 
-	printf("Average time for compression %f ms\n", (double)sum/1);
-//	}
+	printf("Average time for compression %f ms\n", (double)sum/10);
+	}
 	/************************************************************************
 	 * UNZIP
 	 ************************************************************************/

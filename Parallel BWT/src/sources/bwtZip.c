@@ -4,7 +4,7 @@ Buffer readin, bwt, arith;
 Result result;
 int nBlocks;
 
-struct timespec timeout = {.tv_nsec = 500000000, .tv_sec = 0};
+struct timespec timeout = {.tv_nsec = 750000000, .tv_sec = 0};
 
 void compress(FILE *input, FILE *output, long chunkSize)
 {
@@ -83,7 +83,6 @@ void compress(FILE *input, FILE *output, long chunkSize)
 		usleep(250000);
 	}
 
-
 	if(flag)
 		free(inZip.text);
 	freeBuffer(&readin);
@@ -101,7 +100,8 @@ void setAffinity(cpu_set_t *cpus, int cpu, pthread_attr_t *attr)
 
 void *bwtStage(void *arg)
 {
-	clock_t start = clock();
+	long start, end;
+	struct timeval timecheck;
 	Text bwtInput;
 
 //	printf("BWT THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
@@ -113,8 +113,13 @@ void *bwtStage(void *arg)
 		while(empty(readin.queue) && readin.queue->counter < nBlocks)
 			pthread_cond_timedwait(&readin.cond, &readin.mutex, &timeout);
 
-		if(!empty(readin.queue))
+		if(!empty(readin.queue)) {
+//			printf("BWT THREAD %lu:\t Dequeue\n", pthread_self());
+//			gettimeofday(&timecheck, NULL);
+//			start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 			bwtInput = dequeue(readin.queue);
+
+		}
 
 		else if(readin.queue->counter == nBlocks) {
 			pthread_mutex_unlock(&readin.mutex);
@@ -129,26 +134,32 @@ void *bwtStage(void *arg)
 
 		Text bwtOutput = bwtTransformation(bwtInput);
 
+//		gettimeofday(&timecheck, NULL);
+//		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+//		printf("BWT THREAD %lu:\t Finish bwt block %ld time: %f\n", pthread_self(),
+//				bwtOutput.id, (double)(end-start));
+
+
 		pthread_mutex_lock(&bwt.mutex);
+//		gettimeofday(&timecheck, NULL);
+//		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+//		printf("BWT THREAD %lu:\t Enqueue at time %f\n", pthread_self(), (double)end);
 		enqueue(bwtOutput, bwt.queue);
-		pthread_cond_signal(&bwt.cond);
+		pthread_cond_broadcast(&bwt.cond);
 		pthread_mutex_unlock(&bwt.mutex);
 
-//		printf("BWT THREAD:\tblock %ld completed\n", bwtOutput.id);
 	}
-
-//	printf("BWT THREAD:\tBWT finished                    TIME %f ms\n",
-//			(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
 
 void *mtfZleStage(void *arg)
 {
-	clock_t start = clock();
+	long start, end;
+	struct timeval timecheck;
 	Text mtfInput;
 
-//	printf("MTF THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
+//	printf("MTF-ZLE THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
 	while(1) {
 
@@ -157,8 +168,12 @@ void *mtfZleStage(void *arg)
 		while(empty(bwt.queue) && bwt.queue->counter < nBlocks)
 			pthread_cond_timedwait(&bwt.cond, &bwt.mutex, &timeout);
 
-		if(!empty(bwt.queue))
+		if(!empty(bwt.queue)) {
+//			printf("MTF-ZLE THREAD %lu:\t Dequeue\n", pthread_self());
+//			gettimeofday(&timecheck, NULL);
+//			start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 			mtfInput = dequeue(bwt.queue);
+		}
 
 		else if(bwt.queue->counter == nBlocks) {
 			pthread_mutex_unlock(&bwt.mutex);
@@ -173,28 +188,30 @@ void *mtfZleStage(void *arg)
 
 		Text mtfOutput = mtf(mtfInput);
 
-//		printf("\t-MTF finished                    TIME %f ms\n",
-//			(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
-
 		Text zleOutput = zleEncoding(mtfOutput);
 
+//		gettimeofday(&timecheck, NULL);
+//		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+//		printf("MTF-ZLE THREAD %lu:\t Finish zle block %ld time: %f\n", pthread_self(),
+//				zleOutput.id, (double)(end-start));
+
 		pthread_mutex_lock(&arith.mutex);
+//		gettimeofday(&timecheck, NULL);
+//		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+//		printf("MTF-ZLE THREAD %lu:\t Enqueue at time %f\n", pthread_self(), (double)end);
 		enqueue(zleOutput, arith.queue);
-		pthread_cond_signal(&arith.cond);
+		pthread_cond_broadcast(&arith.cond);
 		pthread_mutex_unlock(&arith.mutex);
 
-//		printf("MTF-ZLE THREAD:\tblock %ld completed\n", zleOutput.id);
 	}
-
-//	printf("MTF-ZLE THREAD:\tZLE finished                    TIME %f ms\n",
-//		(((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
 
 void *arithStage(void *arg)
 {
-	clock_t start = clock();
+	long start, end;
+	struct timeval timecheck;
 	Text arithInput;
 
 //	printf("ARITH THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
@@ -206,8 +223,13 @@ void *arithStage(void *arg)
 		while(empty(arith.queue) && arith.queue->counter < nBlocks)
 			pthread_cond_timedwait(&arith.cond, &arith.mutex, &timeout);
 
-		if(!empty(arith.queue))
+		if(!empty(arith.queue)) {
+//			printf("ARITH THREAD %lu:\t Dequeue\n", pthread_self());
+//			gettimeofday(&timecheck, NULL);
+//			start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 			arithInput = dequeue(arith.queue);
+
+		}
 		else if(arith.queue->counter == nBlocks) {
 			pthread_mutex_unlock(&arith.mutex);
 			break;
@@ -221,15 +243,19 @@ void *arithStage(void *arg)
 
 		Text compressed = encodingRoutine(arithInput);
 
+//		gettimeofday(&timecheck, NULL);
+//		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+//		printf("ARITH THREAD %lu:\t Finish arith block %ld time: %f\n", pthread_self(),
+//				compressed.id, (double)(end-start));
+
 		pthread_mutex_lock(&result.mutex);
+//		gettimeofday(&timecheck, NULL);
+//		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+//		printf("ARITH THREAD %lu:\t Enqueue at time %f\n", pthread_self(), (double)end);
 		insertInOrderResult(compressed);
 		pthread_mutex_unlock(&result.mutex);
 
-//		printf("ARITH THREAD:\tblock %ld completed\n", compressed.id);
 	}
-
-//	printf("ARITH THREAD:\tArithmetic coding finished      TIME %f ms\n",
-//	  (((double)clock() - (double)start) / (double)CLOCKS_PER_SEC) * 1000);
 
 	return 0;
 }
