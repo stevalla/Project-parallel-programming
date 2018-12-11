@@ -11,6 +11,7 @@ void compress(FILE *input, FILE *output)
 	int i = 0, index = 0, flag = 0;
 	pthread_t threads[NUM_THREADS];
 	pthread_attr_t attr;
+	cpu_set_t cpus;
 	Text inZip;
 
 	nBlocks = ceil((float)fileSize(input) / (float)MAX_CHUNK_SIZE);
@@ -22,6 +23,11 @@ void compress(FILE *input, FILE *output)
 	result.resultList = NULL;
 	pthread_mutex_init(&result.mutex, NULL);
 	flag = 0;
+
+	CPU_ZERO(&cpus);
+	CPU_SET(0, &cpus);
+	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpus);
+	printf("MAIN THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
 	for(int j=0; j<3; j++) {
 
@@ -39,12 +45,18 @@ void compress(FILE *input, FILE *output)
 
 	printf("Number of blocks: %d\n", nBlocks);
 
-	pthread_create(&threads[0], &attr, bwtStage, NULL);
-	pthread_create(&threads[1], &attr, bwtStage, NULL);
-	pthread_create(&threads[2], &attr, bwtStage, NULL);
+	for(int j=0; j<3; j++) {
+		setAffinity(&cpus, j+1, &attr);
+		pthread_create(&threads[j], &attr, bwtStage, NULL);
+	}
+
+	setAffinity(&cpus, 4, &attr);
 	pthread_create(&threads[3], &attr, mtfZleStage, NULL);
+	setAffinity(&cpus, 5, &attr);
 	pthread_create(&threads[4], &attr, mtfZleStage, NULL);
+	setAffinity(&cpus, 6, &attr);
 	pthread_create(&threads[5], &attr, arithStage, NULL);
+	setAffinity(&cpus, 7, &attr);
 	pthread_create(&threads[6], &attr, arithStage, NULL);
 
 	for(int j=0; j<nBlocks-3 && !flag; j++) {
@@ -64,8 +76,6 @@ void compress(FILE *input, FILE *output)
 	}
 
 	while(index < nBlocks) {
-		if(result.resultList == NULL)
-			continue;
 
 		pthread_mutex_lock(&result.mutex);
 		writeOutput(output, &index);
@@ -82,10 +92,19 @@ void compress(FILE *input, FILE *output)
 	pthread_mutex_destroy(&result.mutex);
 }
 
+void setAffinity(cpu_set_t *cpus, int cpu, pthread_attr_t *attr)
+{
+	CPU_ZERO(cpus);
+	CPU_SET(cpu, cpus);
+	pthread_attr_setaffinity_np(attr, sizeof(cpu_set_t), cpus);
+}
+
 void *bwtStage(void *arg)
 {
 	clock_t start = clock();
 	Text bwtInput;
+
+	printf("BWT THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
 	while(1) {
 
@@ -128,6 +147,8 @@ void *mtfZleStage(void *arg)
 {
 	clock_t start = clock();
 	Text mtfInput;
+
+	printf("MTF THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
 	while(1) {
 
@@ -175,6 +196,8 @@ void *arithStage(void *arg)
 {
 	clock_t start = clock();
 	Text arithInput;
+
+	printf("ARITH THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
 	while(1) {
 
@@ -272,7 +295,8 @@ void writeOutput(FILE *output, int *index)
 	ResultList *curr, *tmp;
 	unsigned char length[4];
 
-	for(curr = result.resultList; curr != NULL; ) {
+	curr = result.resultList;
+	while(curr != NULL) {
 
 		if(curr->result.id != *index)
 			break;
@@ -288,10 +312,9 @@ void writeOutput(FILE *output, int *index)
 		free(curr->result.text);
 
 		tmp = curr;
-		curr = curr->next;
+		curr = tmp->next;
 		free(tmp);
 	}
 
-	if(curr != NULL)
-		result.resultList = curr;
+	result.resultList = curr;
 }

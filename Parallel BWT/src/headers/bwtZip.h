@@ -1,12 +1,15 @@
 #ifndef BWT_ZIP_H
 #define BWT_ZIP_H
 
+#define _GNU_SOURCE
+#include <pthread.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
-#include <pthread.h>
+#include <sched.h>
 
 #include "bwt.h"
 #include "mtf.h"
@@ -54,5 +57,7 @@ void *bwtStage(void *);
 void *mtfZleStage(void *);
 
 void *arithStage(void *);
+
+void setAffinity(cpu_set_t *, int, pthread_attr_t *);
 
 #endif
