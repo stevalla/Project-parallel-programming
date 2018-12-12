@@ -43,15 +43,19 @@ typedef struct Result
 } Result;
 
 
+static volatile Buffer readin = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
+static volatile Buffer bwt = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
+static volatile Buffer arith = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
+
 void compress(FILE *, FILE *, const long);
 
 void writeOutput(FILE *, int *);
 
+void writeOutputArray(FILE *, int *);
+
 void insertInOrderResult(Text);
 
 void initBuffer(Buffer *);
-
-void freeBuffer(Buffer *);
 
 void *bwtStage(void *);
 

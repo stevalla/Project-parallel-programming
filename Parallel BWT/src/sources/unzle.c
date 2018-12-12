@@ -6,7 +6,7 @@ Text zleDecoding(const Text input)
 	size_t len;
 	Text output;
 	unsigned char *out = (unsigned char *)
-						  malloc(sizeof(unsigned char) *(MAX_CHUNK_SIZE + 9));
+						  malloc(sizeof(unsigned char) *(MAX_CHUNK_SIZE + 9) * 2);
 	unsigned char *runLen = (unsigned char *)
 							malloc(sizeof(unsigned char) * MAX_CHUNK_SIZE);
 

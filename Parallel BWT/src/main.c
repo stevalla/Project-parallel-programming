@@ -10,51 +10,50 @@ int main(int argc, char *argv[])
 	/************************************************************************
 	 * ZIP
 	 ************************************************************************/
-	char *const inputFile = "Examples/Silesia_corpus/dickens";
+	char *const inputFile = "Examples/Large_corpus/bible.txt";
 	char *const encodedFile = "Examples/Large_corpus/encoded.bwt";
 
 	printf("Input file %s\n", inputFile);
-	long time[40];
+	double time[40];
 
-	long start, end;
-	struct timeval timecheck;
+	struct timespec start, end;
 	long a[5] = {102400, 9*102400, 18*102400, 36*102400, 50*102400};
 
 	for(int j=0; j<5; j++) {
-		printf("Chunk size: %ld\n", a[j]);
-	for(int i=0; i<10; i++) {
+		printf("Chunk size: %ld\n", a[3]);
+	for(int i=0; i<1; i++) {
 		FILE *inputE = openFileRB(inputFile);
 		FILE *outputE = openFileWB(encodedFile);
 
-//		puts("------------------ZIP------------------\n");
 
 		//Calculate the wall time
-		gettimeofday(&timecheck, NULL);
-		start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+		clock_gettime(CLOCK_MONOTONIC, &start);
 		compress(inputE, outputE, a[j]);
-		gettimeofday(&timecheck, NULL);
-		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+		clock_gettime(CLOCK_MONOTONIC, &end);
 
-//		puts("Finish zip\n");
+		free(readin.queue);
+		free(bwt.queue);
+		free(arith.queue);
+
 		if(i==0)
 			printf("Size original: %ld comrpessed: %ld deflated: %f \% \n",
 					fileSize(inputE),
 					fileSize(outputE),
 					(1 - (double)(fileSize(outputE) / (double)fileSize(inputE))) * 100);
 
-		time[i] = end - start;
+		time[i] = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
-		printf("Time %ld\n", time[i]);
+		printf("Time %f\n", time[i]);
 		fclose(inputE);
 		fclose(outputE);
 	}
 
-	long sum = 0;
-	for(int i=0; i<10; i++) {
+	double sum = 0;
+	for(int i=0; i<1; i++) {
 		sum += time[i];
 	}
 
-	printf("Average time for compression %f ms\n", (double)sum/10);
+	printf("Average time for compression %f sec\n\n", sum/1);
 	}
 	/************************************************************************
 	 * UNZIP

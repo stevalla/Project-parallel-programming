@@ -1,10 +1,9 @@
 #include "../headers/bwtZip.h"
 
-Buffer readin, bwt, arith;
-Result result;
+Result result = {NULL, PTHREAD_MUTEX_INITIALIZER};
 int nBlocks;
 
-struct timespec timeout = {.tv_nsec = 750000000, .tv_sec = 0};
+struct timespec timeout = {.tv_nsec = 100000, .tv_sec = 0};
 
 void compress(FILE *input, FILE *output, long chunkSize)
 {
@@ -20,9 +19,11 @@ void compress(FILE *input, FILE *output, long chunkSize)
 	initBuffer(&arith);
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	result.resultList = NULL;
-	pthread_mutex_init(&result.mutex, NULL);
+//	result.text = (Text *) malloc(sizeof(Text) * nBlocks);
 	flag = 0;
+
+//	for(int j=0; j<nBlocks; j++)
+//		result.text[j].id = -1;
 
 	CPU_ZERO(&cpus);
 	CPU_SET(0, &cpus);
@@ -61,7 +62,7 @@ void compress(FILE *input, FILE *output, long chunkSize)
 
 	for(int j=0; j<nBlocks-3 && !flag; j++) {
 
-		usleep(250000);
+		usleep(2000);
 
 		inZip = readFile(input, chunkSize);
 
@@ -71,7 +72,7 @@ void compress(FILE *input, FILE *output, long chunkSize)
 
 		pthread_mutex_lock(&readin.mutex);
 		enqueue(inZip, readin.queue);
-		pthread_cond_broadcast(&readin.cond);
+		pthread_cond_signal(&readin.cond);
 		pthread_mutex_unlock(&readin.mutex);
 	}
 
@@ -80,15 +81,12 @@ void compress(FILE *input, FILE *output, long chunkSize)
 		pthread_mutex_lock(&result.mutex);
 		writeOutput(output, &index);
 		pthread_mutex_unlock(&result.mutex);
-		usleep(250000);
+		usleep(40000);
 	}
 
 	if(flag)
 		free(inZip.text);
-	freeBuffer(&readin);
-	freeBuffer(&bwt);
-	freeBuffer(&arith);
-	pthread_mutex_destroy(&result.mutex);
+//	free(result.text);
 }
 
 void setAffinity(cpu_set_t *cpus, int cpu, pthread_attr_t *attr)
@@ -114,9 +112,14 @@ void *bwtStage(void *arg)
 			pthread_cond_timedwait(&readin.cond, &readin.mutex, &timeout);
 
 		if(!empty(readin.queue)) {
+
+//			if(bwt.queue->counter == nBlocks)
+//				bwt.queue->counter++;
+
 //			printf("BWT THREAD %lu:\t Dequeue\n", pthread_self());
 //			gettimeofday(&timecheck, NULL);
 //			start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+
 			bwtInput = dequeue(readin.queue);
 
 		}
@@ -145,9 +148,8 @@ void *bwtStage(void *arg)
 //		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 //		printf("BWT THREAD %lu:\t Enqueue at time %f\n", pthread_self(), (double)end);
 		enqueue(bwtOutput, bwt.queue);
-		pthread_cond_broadcast(&bwt.cond);
+		pthread_cond_signal(&bwt.cond);
 		pthread_mutex_unlock(&bwt.mutex);
-
 	}
 
 	return 0;
@@ -169,9 +171,14 @@ void *mtfZleStage(void *arg)
 			pthread_cond_timedwait(&bwt.cond, &bwt.mutex, &timeout);
 
 		if(!empty(bwt.queue)) {
+
+//			if(bwt.queue->counter == nBlocks)
+//				bwt.queue->counter++;
+
 //			printf("MTF-ZLE THREAD %lu:\t Dequeue\n", pthread_self());
 //			gettimeofday(&timecheck, NULL);
 //			start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+
 			mtfInput = dequeue(bwt.queue);
 		}
 
@@ -200,9 +207,8 @@ void *mtfZleStage(void *arg)
 //		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 //		printf("MTF-ZLE THREAD %lu:\t Enqueue at time %f\n", pthread_self(), (double)end);
 		enqueue(zleOutput, arith.queue);
-		pthread_cond_broadcast(&arith.cond);
+		pthread_cond_signal(&arith.cond);
 		pthread_mutex_unlock(&arith.mutex);
-
 	}
 
 	return 0;
@@ -224,9 +230,14 @@ void *arithStage(void *arg)
 			pthread_cond_timedwait(&arith.cond, &arith.mutex, &timeout);
 
 		if(!empty(arith.queue)) {
+
+//			if(bwt.queue->counter == nBlocks)
+//				bwt.queue->counter++;
+
 //			printf("ARITH THREAD %lu:\t Dequeue\n", pthread_self());
 //			gettimeofday(&timecheck, NULL);
 //			start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+
 			arithInput = dequeue(arith.queue);
 
 		}
@@ -252,6 +263,7 @@ void *arithStage(void *arg)
 //		gettimeofday(&timecheck, NULL);
 //		end = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 //		printf("ARITH THREAD %lu:\t Enqueue at time %f\n", pthread_self(), (double)end);
+//		result.text[compressed.id] = compressed;
 		insertInOrderResult(compressed);
 		pthread_mutex_unlock(&result.mutex);
 
@@ -305,42 +317,57 @@ void initBuffer(Buffer *buf)
 {
 	buf->queue = (Queue *) malloc(sizeof(Queue));
 	initQueue(buf->queue);
-	pthread_mutex_init(&buf->mutex, NULL);
-	pthread_cond_init(&buf->cond, NULL);
-}
-
-void freeBuffer(Buffer *buf)
-{
-	free(buf->queue);
-	pthread_mutex_destroy(&buf->mutex);
-	pthread_cond_destroy(&buf->cond);
 }
 
 void writeOutput(FILE *output, int *index)
 {
 	ResultList *curr, *tmp;
 	unsigned char length[4];
+	int j = 0, end = -2;
 
-	curr = result.resultList;
-	while(curr != NULL) {
+	if(arith.queue->counter < nBlocks)
+		end = 1;
 
-		if(curr->result.id != *index)
+	for(curr = result.resultList; curr != NULL;) {
+
+		if((j++ == end+1) || result.resultList->result.id != *index)
 			break;
 
-		encodeUnsigned(curr->result.len, length, 0);
+		encodeUnsigned(result.resultList->result.len, length, 0);
 
 		writeFile(output, length, 4);
-		writeFile(output, curr->result.text, curr->result.len);
-
+		writeFile(output, result.resultList->result.text, result.resultList->result.len);
 //		printf("MAIN THREAD:\tWrite block %ld\n", curr->result.id);
 
 		(*index)++;
-		free(curr->result.text);
 
 		tmp = curr;
+		free(curr->result.text);
 		curr = tmp->next;
 		free(tmp);
-	}
 
+	}
 	result.resultList = curr;
 }
+
+//void writeOutputArray(FILE *output, int *index)
+//{
+//	unsigned char length[4];
+//	int i = *index;
+//
+//	for(; i<nBlocks; i++) {
+//
+//		if(result.text[i].id != *index)
+//			return;
+//
+//		encodeUnsigned(result.text[i].len, length, 0);
+//
+//		writeFile(output, length, 4);
+//		writeFile(output, result.text[i].text, result.text[i].len);
+//
+////		printf("MAIN THREAD:\tWrite block %ld\n", curr->result.id);
+//
+//		(*index)++;
+//	}
+//}
+
