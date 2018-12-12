@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	/************************************************************************
 	 * ZIP
 	 ************************************************************************/
-	char *const inputFile = "Examples/Large_corpus/bible.txt";
+	char *const inputFile = "Examples/Silesia_corpus/dickens";
 	char *const encodedFile = "Examples/Large_corpus/encoded.bwt";
 
 	printf("Input file %s\n", inputFile);
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
 	for(int j=0; j<5; j++) {
 		printf("Chunk size: %ld\n", a[3]);
-	for(int i=0; i<1; i++) {
+	for(int i=0; i<10; i++) {
 		FILE *inputE = openFileRB(inputFile);
 		FILE *outputE = openFileWB(encodedFile);
 
@@ -49,11 +49,11 @@ int main(int argc, char *argv[])
 	}
 
 	double sum = 0;
-	for(int i=0; i<1; i++) {
+	for(int i=0; i<10; i++) {
 		sum += time[i];
 	}
 
-	printf("Average time for compression %f sec\n\n", sum/1);
+	printf("Average time for compression %f sec\n\n", sum/10);
 	}
 	/************************************************************************
 	 * UNZIP

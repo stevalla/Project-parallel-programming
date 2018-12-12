@@ -17,7 +17,7 @@
 #include "arith.h"
 #include "queue.h"
 
-#define NUM_THREADS 7
+#define NUM_THREADS 9
 
 typedef struct Buffer
 {
@@ -43,9 +43,9 @@ typedef struct Result
 } Result;
 
 
-static volatile Buffer readin = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
-static volatile Buffer bwt = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
-static volatile Buffer arith = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
+static Buffer readin = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
+static Buffer bwt = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
+static Buffer arith = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
 
 void compress(FILE *, FILE *, const long);
 

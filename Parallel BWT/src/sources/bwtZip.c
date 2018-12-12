@@ -54,11 +54,15 @@ void compress(FILE *input, FILE *output, long chunkSize)
 	setAffinity(&cpus, 4, &attr);
 	pthread_create(&threads[3], &attr, mtfZleStage, NULL);
 	setAffinity(&cpus, 5, &attr);
-	pthread_create(&threads[4], &attr, mtfZleStage, NULL);
+	pthread_create(&threads[4], &attr, bwtStage, NULL);
 	setAffinity(&cpus, 6, &attr);
-	pthread_create(&threads[5], &attr, arithStage, NULL);
+	pthread_create(&threads[5], &attr, bwtStage, NULL);
 	setAffinity(&cpus, 7, &attr);
 	pthread_create(&threads[6], &attr, arithStage, NULL);
+	setAffinity(&cpus, 0, &attr);
+	pthread_create(&threads[7], &attr, bwtStage, NULL);
+//	setAffinity(&cpus, 1, &attr);
+//	pthread_create(&threads[8], &attr, mtfZleStage, NULL);
 
 	for(int j=0; j<nBlocks-3 && !flag; j++) {
 
@@ -113,15 +117,11 @@ void *bwtStage(void *arg)
 
 		if(!empty(readin.queue)) {
 
-//			if(bwt.queue->counter == nBlocks)
-//				bwt.queue->counter++;
-
 //			printf("BWT THREAD %lu:\t Dequeue\n", pthread_self());
 //			gettimeofday(&timecheck, NULL);
 //			start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 
 			bwtInput = dequeue(readin.queue);
-
 		}
 
 		else if(readin.queue->counter == nBlocks) {
@@ -171,9 +171,6 @@ void *mtfZleStage(void *arg)
 			pthread_cond_timedwait(&bwt.cond, &bwt.mutex, &timeout);
 
 		if(!empty(bwt.queue)) {
-
-//			if(bwt.queue->counter == nBlocks)
-//				bwt.queue->counter++;
 
 //			printf("MTF-ZLE THREAD %lu:\t Dequeue\n", pthread_self());
 //			gettimeofday(&timecheck, NULL);
@@ -231,17 +228,13 @@ void *arithStage(void *arg)
 
 		if(!empty(arith.queue)) {
 
-//			if(bwt.queue->counter == nBlocks)
-//				bwt.queue->counter++;
-
 //			printf("ARITH THREAD %lu:\t Dequeue\n", pthread_self());
 //			gettimeofday(&timecheck, NULL);
 //			start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
 
 			arithInput = dequeue(arith.queue);
 
-		}
-		else if(arith.queue->counter == nBlocks) {
+		} else if(arith.queue->counter == nBlocks) {
 			pthread_mutex_unlock(&arith.mutex);
 			break;
 
