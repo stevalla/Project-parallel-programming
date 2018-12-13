@@ -47,7 +47,7 @@ static Buffer readin = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZE
 static Buffer bwt = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
 static Buffer arith = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
 
-void compress(FILE *, FILE *, const long);
+void compressParallel(FILE *, FILE *, const long);
 
 void writeOutput(FILE *, int *);
 

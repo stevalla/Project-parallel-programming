@@ -14,6 +14,6 @@
 
 Text bwtZip(const Text);
 
-void compress(FILE *, FILE *, long);
+void compressSequential(FILE *, FILE *, long);
 
 #endif

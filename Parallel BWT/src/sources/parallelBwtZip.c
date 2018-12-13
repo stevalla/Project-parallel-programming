@@ -5,7 +5,7 @@ int nBlocks;
 
 struct timespec timeout = {.tv_nsec = 100000, .tv_sec = 0};
 
-void compress(FILE *input, FILE *output, long chunkSize)
+void compressParallel(FILE *input, FILE *output, long chunkSize)
 {
 	int i = 0, index = 0, flag = 0;
 	pthread_t threads[NUM_THREADS];

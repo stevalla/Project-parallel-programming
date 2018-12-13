@@ -8,8 +8,9 @@
 #include <limits.h>
 #include <sys/time.h>
 
-#define POW_2(N)       (1 << (N))
-#define MAX_CHUNK_SIZE (50 * 1024 * 1024)
+#define POW_2(N)       		(1 << (N))
+#define MAX_CHUNK_SIZE 		(50 * 1024 * 1024)
+#define DEFAULT_CHUNK_SIZE	(9  * 1024 * 1024)
 
 typedef struct Text
 {

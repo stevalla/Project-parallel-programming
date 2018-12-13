@@ -2,88 +2,123 @@
 #include "./headers/bwtUnzip.h"
 #include "./headers/util.h"
 #include "headers/parallelBwtZip.h"
+#include "headers/sequentialBwtZip.h"
 
-
-int main(int argc, char *argv[])
+void usage()
 {
+	puts("Usage:\nExample:\n\t./bwt infile-name outfile-name c/d [--compare]"
+		 "[-c chunk_size(MB)] [-m parallel/sequential]\n");
+	puts("-\tType c to compress / d to decompress");
+	puts("-\tOption '--compare' is to compare two files, "
+		 "only the two files must be specified.");
+	puts("-\tMax chunk size 5 MB. Write '-c ' before the desired chunk size.");
+	puts("-\tDefault mode: parallel. Write '-m ' before the desired running mode.");
+	puts("-\tChunk size and mode options are only for compression.\n");
 
-	/************************************************************************
-	 * ZIP
-	 ************************************************************************/
-	char *const inputFile = "Examples/input.mp4";
-	char *const encodedFile = "Examples/Large_corpus/encoded.bwt";
+}
 
-	printf("Input file %s\n", inputFile);
+int setChunkSize(char *const chunkSize)
+{
+	long size = atof(chunkSize) * 1024 * 1024;
+
+	if(size > MAX_CHUNK_SIZE) {
+		usage();
+		return 0;
+	}
+
+	return size;
+}
+
+char setMode(char *const mode)
+{
+	if(!strcmp(mode, "parallel"))
+		return 'p';
+
+	else if(!strcmp(mode, "sequential"))
+		return 's';
+
+	else {
+		usage();
+		return 0;
+	}
+}
+
+void zipMain(char *const input,
+			 char *const output,
+			 const char mode,
+			 const long chunkSize)
+{
+	struct timespec start, end;
+
+	long a[5] = {102400, 9*102400, 18*102400, 36*102400, 50*102400};
 	double time[40];
 
-	struct timespec start, end;
-	long a[5] = {102400, 9*102400, 18*102400, 36*102400, 50*102400};
-
 	for(int j=0; j<1; j++) {
-		printf("Chunk size: %ld\n", a[3]);
-	for(int i=0; i<1; i++) {
-		FILE *inputE = openFileRB(inputFile);
-		FILE *outputE = openFileWB(encodedFile);
+		printf("Chunk size: %ld\n", chunkSize);
+		for(int i=0; i<1; i++) {
 
+			FILE *inputE = openFileRB(input);
+			FILE *outputE = openFileWB(output);
+			printf("Input file %s\n", input);
 
-		//Calculate the wall time
-		clock_gettime(CLOCK_MONOTONIC, &start);
-		compress(inputE, outputE, a[2]);
-		clock_gettime(CLOCK_MONOTONIC, &end);
+			//Calculate the wall time
+			if(mode == 'p') {
+				clock_gettime(CLOCK_MONOTONIC, &start);
+				compressParallel(inputE, outputE, chunkSize);
+				clock_gettime(CLOCK_MONOTONIC, &end);
 
-		free(readin.queue);
-		free(bwt.queue);
-		free(arith.queue);
+			} else {
+				clock_gettime(CLOCK_MONOTONIC, &start);
+				compressSequential(inputE, outputE, chunkSize);
+				clock_gettime(CLOCK_MONOTONIC, &end);
+			}
 
-		if(i==0)
-			printf("Size original: %ld comrpessed: %ld deflated: %f \% \n",
-					fileSize(inputE),
-					fileSize(outputE),
-					(1 - (double)(fileSize(outputE) / (double)fileSize(inputE))) * 100);
+			free(readin.queue);
+			free(bwt.queue);
+			free(arith.queue);
 
-		time[i] = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
+			if(i==0)
+				printf("Size original: %ld comrpessed: %ld deflated: %f %% \n",
+				fileSize(inputE),
+				fileSize(outputE),
+				(1 - (double)(fileSize(outputE) / (double)fileSize(inputE))) * 100);
 
-		printf("Time %f\n", time[i]);
-		fclose(inputE);
-		fclose(outputE);
+			time[i] = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+			printf("Time %f\n", time[i]);
+			fclose(inputE);
+			fclose(outputE);
+
+		}
+		double sum = 0;
+		for(int i=0; i<1; i++) {
+			sum += time[i];
+		}
+
+		printf("Average time for compression %f sec\n\n", sum/1);
 	}
+}
 
-	double sum = 0;
-	for(int i=0; i<1; i++) {
-		sum += time[i];
-	}
-
-	printf("Average time for compression %f sec\n\n", sum/1);
-	}
-	/************************************************************************
-	 * UNZIP
-	 ************************************************************************/
-	char *const inputDecFile = "Examples/Large_corpus/encoded.bwt";
-	char *const decodedFile  = "Examples/decoded.txt";
-
-	FILE *inputD = openFileRB(inputDecFile);
-	FILE *outputD = openFileWB(decodedFile);
-
-	puts("------------------UNZIP------------------\n");
+void unzipMain(char *const input,
+			   char *const output)
+{
+	FILE *inputD = openFileRB(input);
+	FILE *outputD = openFileWB(output);
 
 	decompress(inputD, outputD);
 
-	puts("Finish unzip phase\n");
-
+	puts("Finished decompression.");
 	fclose(inputD);
 	fclose(outputD);
+}
 
-	/************************************************************************
-	 * COMPARING
-	 ************************************************************************/
-
-	puts("------------------COMPARING------------------\n");
-
-	FILE *original = openFileRB(inputFile);
-	FILE *decompress = openFileRB(decodedFile);
+void compareMain(char *const input, char *const output)
+{
+	FILE *original = openFileRB(input);
+	FILE *decompress = openFileRB(output);
 
 	int result = compareFiles(original, decompress,
-				 fileSize(original), fileSize(decompress));
+			fileSize(original), fileSize(decompress));
 
 	if(result == 1)
 		printf("Compression loseless\n");
@@ -94,6 +129,66 @@ int main(int argc, char *argv[])
 
 	fclose(original);
 	fclose(decompress);
+}
+
+int main(int argc, char *argv[])
+{
+
+	if(argc < 4 && argc != 6 && argc != 8) {
+		usage();
+		printf("%d\n", argc);
+		return 0;
+	}
+
+	long chunkSize;
+	char mode;
+
+	if(argc > 4) {
+
+		if(!strcmp(argv[4], "-c") && argc == 6) {
+
+			mode = 'p';
+			if((chunkSize = setChunkSize(argv[5])) == 0)
+				return 0;
+
+		} else if(!strcmp(argv[4], "-m") && argc == 6) {
+
+			if((mode = setMode(argv[5])) == 0)
+				return 0;
+
+			printf("%d	\n", mode);
+			chunkSize = DEFAULT_CHUNK_SIZE;
+
+		} else if(!strcmp(argv[4], "-c") && !strcmp(argv[6], "-m")) {
+
+			if((chunkSize = setChunkSize(argv[5])) == 0 ||
+			   (mode = setMode(argv[7])) == 0)
+				return 0;
+
+		} else {
+			usage();
+			return 0;
+		}
+
+	} else if(!strcmp(argv[3], "--compare")){
+		compareMain(argv[1], argv[2]);
+		return 0;
+
+	} else {
+		chunkSize = DEFAULT_CHUNK_SIZE;
+		mode = 'p';
+	}
+
+	if(!strcmp(argv[3], "c"))
+		zipMain(argv[1], argv[2], mode, chunkSize);
+
+	else if(!strcmp(argv[3], "d"))
+		unzipMain(argv[1], argv[2]);
+
+	else {
+		usage();
+		return 0;
+	}
 
 	return 0;
 }
