@@ -1,5 +1,5 @@
-#ifndef BWT_ZIP_H
-#define BWT_ZIP_H
+#ifndef PARALLEL_BWT_ZIP_H
+#define PARALLEL_BWT_ZIP_H
 
 #define _GNU_SOURCE
 #include <pthread.h>
@@ -17,7 +17,7 @@
 #include "arith.h"
 #include "queue.h"
 
-#define NUM_THREADS 9
+#define NUM_THREADS 8
 
 typedef struct Buffer
 {

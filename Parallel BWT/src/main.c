@@ -1,7 +1,7 @@
 
-#include "./headers/bwtZip.h"
 #include "./headers/bwtUnzip.h"
 #include "./headers/util.h"
+#include "headers/parallelBwtZip.h"
 
 
 int main(int argc, char *argv[])
@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	/************************************************************************
 	 * ZIP
 	 ************************************************************************/
-	char *const inputFile = "Examples/Silesia_corpus/dickens";
+	char *const inputFile = "Examples/input.mp4";
 	char *const encodedFile = "Examples/Large_corpus/encoded.bwt";
 
 	printf("Input file %s\n", inputFile);
@@ -19,16 +19,16 @@ int main(int argc, char *argv[])
 	struct timespec start, end;
 	long a[5] = {102400, 9*102400, 18*102400, 36*102400, 50*102400};
 
-	for(int j=0; j<5; j++) {
+	for(int j=0; j<1; j++) {
 		printf("Chunk size: %ld\n", a[3]);
-	for(int i=0; i<10; i++) {
+	for(int i=0; i<1; i++) {
 		FILE *inputE = openFileRB(inputFile);
 		FILE *outputE = openFileWB(encodedFile);
 
 
 		//Calculate the wall time
 		clock_gettime(CLOCK_MONOTONIC, &start);
-		compress(inputE, outputE, a[j]);
+		compress(inputE, outputE, a[2]);
 		clock_gettime(CLOCK_MONOTONIC, &end);
 
 		free(readin.queue);
@@ -49,11 +49,11 @@ int main(int argc, char *argv[])
 	}
 
 	double sum = 0;
-	for(int i=0; i<10; i++) {
+	for(int i=0; i<1; i++) {
 		sum += time[i];
 	}
 
-	printf("Average time for compression %f sec\n\n", sum/10);
+	printf("Average time for compression %f sec\n\n", sum/1);
 	}
 	/************************************************************************
 	 * UNZIP

@@ -1,4 +1,4 @@
-#include "../headers/bwtZip.h"
+#include "../headers/parallelBwtZip.h"
 
 Result result = {NULL, PTHREAD_MUTEX_INITIALIZER};
 int nBlocks;
@@ -30,7 +30,7 @@ void compress(FILE *input, FILE *output, long chunkSize)
 	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpus);
 //	printf("MAIN THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
-	for(int j=0; j<3; j++) {
+	for(int j=0; j<5; j++) {
 
 		inZip = readFile(input, chunkSize);
 
@@ -64,9 +64,9 @@ void compress(FILE *input, FILE *output, long chunkSize)
 //	setAffinity(&cpus, 1, &attr);
 //	pthread_create(&threads[8], &attr, mtfZleStage, NULL);
 
-	for(int j=0; j<nBlocks-3 && !flag; j++) {
+	for(int j=0; j<nBlocks-5 && !flag; j++) {
 
-		usleep(2000);
+		usleep(1000);
 
 		inZip = readFile(input, chunkSize);
 
@@ -79,13 +79,31 @@ void compress(FILE *input, FILE *output, long chunkSize)
 		pthread_cond_signal(&readin.cond);
 		pthread_mutex_unlock(&readin.mutex);
 	}
+//	puts("Ciao 0");
+
+//	for(int j=0; j<3; j++)
+//		pthread_join(threads[j], NULL);
+//	puts("ciao");
+//	pthread_join(threads[4], NULL);
+//
+//	puts("ciao");
+//
+//
+//	setAffinity(&cpus, 1, &attr);
+//	pthread_create(&threads[8], &attr, arithStage, NULL);
+//	setAffinity(&cpus, 2, &attr);
+//	pthread_create(&threads[9], &attr, arithStage, NULL);
+//	setAffinity(&cpus, 3, &attr);
+//	pthread_create(&threads[10], &attr, mtfZleStage, NULL);
+//	setAffinity(&cpus, 5, &attr);
+//	pthread_create(&threads[11], &attr, mtfZleStage, NULL);
 
 	while(index < nBlocks) {
 
 		pthread_mutex_lock(&result.mutex);
 		writeOutput(output, &index);
 		pthread_mutex_unlock(&result.mutex);
-		usleep(40000);
+		usleep(1000);
 	}
 
 	if(flag)
@@ -105,6 +123,12 @@ void *bwtStage(void *arg)
 	long start, end;
 	struct timeval timecheck;
 	Text bwtInput;
+	pthread_attr_t attr;
+	cpu_set_t cpus;
+	pthread_t thread;
+
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
 //	printf("BWT THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
@@ -151,6 +175,20 @@ void *bwtStage(void *arg)
 		pthread_cond_signal(&bwt.cond);
 		pthread_mutex_unlock(&bwt.mutex);
 	}
+//	if(j++ <3 && sched_getcpu() != 0)  {
+//		setAffinity(&cpus, sched_getcpu(), &attr);
+//		pthread_create(&thread, &attr, arithStage, NULL);
+//		puts("ciao arith");
+//	} else if(sched_getcpu() != 0) {
+//		setAffinity(&cpus, sched_getcpu(), &attr);
+//		pthread_create(&thread, &attr, mtfZleStage, NULL);
+//		puts("ciao mtf");
+//	}
+//	puts("ciao 0");
+//	puts("Ciao bwt");
+
+	setAffinity(&cpus, sched_getcpu(), &attr);
+	pthread_create(&thread, &attr, mtfZleStage, NULL);
 
 	return 0;
 }
@@ -160,6 +198,12 @@ void *mtfZleStage(void *arg)
 	long start, end;
 	struct timeval timecheck;
 	Text mtfInput;
+	pthread_attr_t attr;
+	cpu_set_t cpus;
+	pthread_t thread;
+
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
 //	printf("MTF-ZLE THREAD %lu on CPU %d\n", pthread_self(), sched_getcpu());
 
@@ -208,6 +252,8 @@ void *mtfZleStage(void *arg)
 		pthread_mutex_unlock(&arith.mutex);
 	}
 
+	setAffinity(&cpus, sched_getcpu(), &attr);
+	pthread_create(&thread, &attr, arithStage, NULL);
 	return 0;
 }
 
