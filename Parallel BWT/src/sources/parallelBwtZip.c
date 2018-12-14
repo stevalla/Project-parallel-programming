@@ -44,13 +44,13 @@ void compressParallel(FILE *input,
 
 		inZip.id = i++;
 
-		if(inZip.len < MIN_CHUNK_SIZE) {
-			result.text[inZip.id] = inZip;
+		if(inZip.len == 0) {
 			flag = 1;
 			break;
 		}
 
-		if(inZip.len == 0) {
+		if(inZip.len < MIN_CHUNK_SIZE) {
+			result.text[inZip.id] = inZip;
 			flag = 1;
 			break;
 		}
@@ -102,6 +102,7 @@ void compressParallel(FILE *input,
 	if(flag)
 		free(inZip.text);
 	free(result.text);
+	pthread_attr_destroy(&attr);
 }
 
 void setAffinity(cpu_set_t *const cpus,
@@ -249,6 +250,7 @@ void writeOutput(FILE *output, int *const index, const int littleChunk)
 		writeFile(output, id, 1);
 		writeFile(output, result.text[i].text, result.text[i].len);
 
+		free(result.text[i].text);
 		(*index)++;
 	}
 }
