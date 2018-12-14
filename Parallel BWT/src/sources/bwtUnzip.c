@@ -36,6 +36,7 @@ void decompress(FILE *input, FILE *output)
 	while(1) {
 
 		Text inUnzip, decompressed, length;
+		unsigned char *id;
 
 		length = readFile(input, 4);
 
@@ -44,14 +45,20 @@ void decompress(FILE *input, FILE *output)
 			break;
 		}
 
+		id = readFile(input, 1).text;
+
 		inUnzip.len = readUnsigned(length.text, 0);
 		inUnzip.text = readFile(input, inUnzip.len).text;
 
-		decompressed = bwtUnzip(inUnzip);
+		if(id[0] == 1)
+			decompressed = bwtUnzip(inUnzip);
+		else
+			decompressed = inUnzip;
 
 		writeFile(output, decompressed.text, decompressed.len);
 
 		free(decompressed.text);
 		free(length.text);
+		free(id);
 	}
 }

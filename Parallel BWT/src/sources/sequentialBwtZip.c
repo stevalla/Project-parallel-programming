@@ -32,6 +32,7 @@ void compressSequential(FILE *input, FILE *output, long chunkSize)
 
 		Text compressed, inZip;
 		unsigned char length[4];
+		unsigned char id[1];
 
 		inZip = readFile(input, chunkSize);
 
@@ -40,11 +41,19 @@ void compressSequential(FILE *input, FILE *output, long chunkSize)
 			break;
 		}
 
-		compressed = bwtZip(inZip);
+		if(inZip.len < MIN_CHUNK_SIZE) {
+			compressed = inZip;
+			id[0] = 0;
+
+		} else {
+			compressed = bwtZip(inZip);
+			id[0] = 1;
+		}
 
 		encodeUnsigned(compressed.len, length, 0);
 
 		writeFile(output, length, 4);
+		writeFile(output, id, 1);
 		writeFile(output, compressed.text, compressed.len);
 
 		free(compressed.text);

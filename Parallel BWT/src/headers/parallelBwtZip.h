@@ -36,9 +36,9 @@ typedef struct Result
 
 void compressParallel(FILE *, FILE *, const long);
 
-void writeOutput(FILE *, int *);
+void writeOutput(FILE *, int *const, const int);
 
-void initBuffer(Buffer *);
+void initBuffer(Buffer *const);
 
 void *bwtStage(void *);
 
@@ -46,7 +46,7 @@ void *mtfZleStage(void *);
 
 void *arithStage(void *);
 
-void setAffinity(cpu_set_t *, int, pthread_attr_t *);
+void setAffinity(cpu_set_t *const, const int, pthread_attr_t *const);
 
 
 #endif

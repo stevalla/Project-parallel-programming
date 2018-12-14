@@ -8,9 +8,11 @@ int nBlocks;
 
 struct timespec timeout = {.tv_nsec = 100000, .tv_sec = 0};
 
-void compressParallel(FILE *input, FILE *output, long chunkSize)
+void compressParallel(FILE *input,
+					  FILE *output,
+					  const long chunkSize)
 {
-	int i = 0, index = 0, flag = 0;
+	int i = 0, index = 0, flag = 0, littleChunk = 0;
 	pthread_t threads[NUM_THREADS];
 	pthread_attr_t attr;
 	cpu_set_t cpus;
@@ -27,6 +29,11 @@ void compressParallel(FILE *input, FILE *output, long chunkSize)
 	for(int j=0; j<nBlocks; j++)
 		result.text[j].id = -1;
 
+	if(fileSize(input) - (chunkSize * (nBlocks - 1)) < MIN_CHUNK_SIZE) {
+		nBlocks--;
+		littleChunk = 1;
+	}
+
 	CPU_ZERO(&cpus);
 	CPU_SET(0, &cpus);
 	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpus);
@@ -35,12 +42,18 @@ void compressParallel(FILE *input, FILE *output, long chunkSize)
 
 		inZip = readFile(input, chunkSize);
 
-		if(inZip.len == 0) {
+		inZip.id = i++;
+
+		if(inZip.len < MIN_CHUNK_SIZE) {
+			result.text[inZip.id] = inZip;
 			flag = 1;
 			break;
 		}
 
-		inZip.id = i++;
+		if(inZip.len == 0) {
+			flag = 1;
+			break;
+		}
 
 		enqueue(inZip, readin.queue);
 	}
@@ -71,10 +84,17 @@ void compressParallel(FILE *input, FILE *output, long chunkSize)
 		pthread_mutex_unlock(&readin.mutex);
 	}
 
+	if(littleChunk) {
+		inZip = readFile(input, chunkSize);
+		inZip.id++;
+
+		result.text[inZip.id] = inZip;
+	}
+
 	while(index < nBlocks) {
 
 		pthread_mutex_lock(&result.mutex);
-		writeOutput(output, &index);
+		writeOutput(output, &index, littleChunk);
 		pthread_mutex_unlock(&result.mutex);
 		usleep(1000);
 	}
@@ -84,7 +104,9 @@ void compressParallel(FILE *input, FILE *output, long chunkSize)
 	free(result.text);
 }
 
-void setAffinity(cpu_set_t *cpus, int cpu, pthread_attr_t *attr)
+void setAffinity(cpu_set_t *const cpus,
+				 const int cpu,
+				 pthread_attr_t *const attr)
 {
 	CPU_ZERO(cpus);
 	CPU_SET(cpu, cpus);
@@ -199,15 +221,16 @@ void *arithStage(void *arg)
 	return 0;
 }
 
-void initBuffer(Buffer *buf)
+void initBuffer(Buffer *const buf)
 {
 	buf->queue = (Queue *) malloc(sizeof(Queue));
 	initQueue(buf->queue);
 }
 
-void writeOutput(FILE *output, int *index)
+void writeOutput(FILE *output, int *const index, const int littleChunk)
 {
 	unsigned char length[4];
+	unsigned char id[1];
 	int i = *index;
 
 	for(; i<nBlocks; i++) {
@@ -217,7 +240,13 @@ void writeOutput(FILE *output, int *index)
 
 		encodeUnsigned(result.text[i].len, length, 0);
 
+		if(i == nBlocks - 1 && littleChunk)
+			id[0] = 0;
+		else
+			id[0] = 1;
+
 		writeFile(output, length, 4);
+		writeFile(output, id, 1);
 		writeFile(output, result.text[i].text, result.text[i].len);
 
 		(*index)++;
