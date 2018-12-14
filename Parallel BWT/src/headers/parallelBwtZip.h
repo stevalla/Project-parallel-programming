@@ -27,33 +27,16 @@ typedef struct Buffer
 
 } Buffer;
 
-
-typedef struct ResultList
-{
-	Text result;
-	struct ResultList *next;
-
-} ResultList;
-
 typedef struct Result
 {
-	ResultList *resultList;
+	Text *text;
 	pthread_mutex_t mutex;
 
 } Result;
 
-
-static Buffer readin = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
-static Buffer bwt = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
-static Buffer arith = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
-
 void compressParallel(FILE *, FILE *, const long);
 
 void writeOutput(FILE *, int *);
-
-void writeOutputArray(FILE *, int *);
-
-void insertInOrderResult(Text);
 
 void initBuffer(Buffer *);
 

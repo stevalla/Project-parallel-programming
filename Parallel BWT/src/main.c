@@ -48,28 +48,32 @@ void zipMain(char *const input,
 			 const char mode,
 			 const long chunkSize)
 {
+	extern Buffer readin, bwt, arith;
 	struct timespec start, end;
 
 	long a[5] = {102400, 9*102400, 18*102400, 36*102400, 50*102400};
 	double time[40];
 
-	for(int j=0; j<1; j++) {
-		printf("Chunk size: %ld\n", chunkSize);
-		for(int i=0; i<1; i++) {
+	int k = 0;
+
+	for(int j=0; j<5; j++) {
+		printf("Chunk size: %ld\n", a[j]);
+		for(int i=0; i<10; i++) {
+
+			if(k++ == 49) j = -1;
 
 			FILE *inputE = openFileRB(input);
 			FILE *outputE = openFileWB(output);
-			printf("Input file %s\n", input);
 
 			//Calculate the wall time
-			if(mode == 'p') {
+			if(mode == 'p' && k < 49) {
 				clock_gettime(CLOCK_MONOTONIC, &start);
-				compressParallel(inputE, outputE, chunkSize);
+				compressParallel(inputE, outputE, a[j]);
 				clock_gettime(CLOCK_MONOTONIC, &end);
 
 			} else {
 				clock_gettime(CLOCK_MONOTONIC, &start);
-				compressSequential(inputE, outputE, chunkSize);
+				compressSequential(inputE, outputE, a[j]);
 				clock_gettime(CLOCK_MONOTONIC, &end);
 			}
 
@@ -77,25 +81,30 @@ void zipMain(char *const input,
 			free(bwt.queue);
 			free(arith.queue);
 
-			if(i==0)
+			if(i==0) {
+				printf("Mode %c\n", mode);
+				printf("Number of blocks: %d\n",
+						(int)ceil((float)fileSize(inputE) / (float)chunkSize));
+				printf("Input file %s\n", input);
 				printf("Size original: %ld comrpessed: %ld deflated: %f %% \n",
 				fileSize(inputE),
 				fileSize(outputE),
 				(1 - (double)(fileSize(outputE) / (double)fileSize(inputE))) * 100);
+			}
 
 			time[i] = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
-			printf("Time %f\n", time[i]);
+//			printf("Time %f\n", time[i]);
 			fclose(inputE);
 			fclose(outputE);
 
 		}
 		double sum = 0;
-		for(int i=0; i<1; i++) {
+		for(int i=0; i<10; i++) {
 			sum += time[i];
 		}
 
-		printf("Average time for compression %f sec\n\n", sum/1);
+		printf("Average time for compression %f sec\n\n", sum/10);
 	}
 }
 
