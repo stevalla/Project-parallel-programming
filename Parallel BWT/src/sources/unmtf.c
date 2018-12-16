@@ -3,9 +3,8 @@
 
 Text unmtf(const Text input)
 {
-	SymbolsList *symbols;
+	SymbolsList *symbols, *aux;
 	Text output;
-	MtfAux mtfAux;
 
 	output.len = input.len;
 	output.text = (unsigned char *) malloc(sizeof(unsigned char)*input.len);
@@ -14,10 +13,10 @@ Text unmtf(const Text input)
 
 	for(unsigned i=0; i<input.len; i++) {
 
-		output.text[i] = searchSymbol(symbols, input.text[i], &mtfAux);
+		output.text[i] = searchSymbol(symbols, input.text[i], &aux);
 
 		if(input.text[i] != 0)
-			symbols = mvtElement(symbols, &mtfAux);
+			symbols = mvtElement(symbols, aux);
 
 	}
 
@@ -29,7 +28,7 @@ Text unmtf(const Text input)
 
 unsigned char searchSymbol(SymbolsList *const symbols,
 				  	  	   const unsigned char pos,
-						   MtfAux *mtfAux)
+						   SymbolsList **aux)
 {
 	SymbolsList *curr, *prev;
 	int i;
@@ -44,7 +43,7 @@ unsigned char searchSymbol(SymbolsList *const symbols,
 	for(curr=symbols->next; curr!=NULL; curr=curr->next) {
 
 		if(i == pos) {
-			mtfAux->prev = prev;
+			*aux = prev;
 			break;
 		}
 

@@ -10,6 +10,6 @@
 Text unmtf(const Text);
 
 unsigned char searchSymbol(SymbolsList *const, const unsigned char,
-						   MtfAux *);
+						   SymbolsList **);
 
 #endif

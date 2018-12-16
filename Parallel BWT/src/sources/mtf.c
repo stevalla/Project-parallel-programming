@@ -5,9 +5,9 @@
 Text mtf(const Text input)
 {
 	//Variables
-	SymbolsList *symbols;
+	SymbolsList *symbols, *aux;
 	Text output;
-	MtfAux mtfAux;
+	int tmp;
 
 	output.len = input.len;
 	output.text = (unsigned char *) malloc(sizeof(unsigned char)*input.len);
@@ -15,10 +15,16 @@ Text mtf(const Text input)
 
 	for(unsigned i=0; i<input.len; i++) {
 
-		search(symbols, input.text[i], &mtfAux);
-		output.text[i] = mtfAux.pos;
+		tmp = search(symbols, input.text[i], &aux);
 
-		symbols = mvtElement(symbols, &mtfAux);
+		if(tmp != -1)
+			output.text[i] = (unsigned char) tmp;
+		else {
+			fprintf(stderr, "Error during MTF phase.\n");
+			exit(-1);
+		}
+
+		symbols = mvtElement(symbols, aux);
 	}
 
 	freeListOfSymbols(symbols);
@@ -29,18 +35,17 @@ Text mtf(const Text input)
 	return output;
 }
 
-void search(SymbolsList *const symbols,
-			const unsigned char byte,
-			MtfAux *const mtfAux)
+int search(SymbolsList *const symbols,
+		   const unsigned char byte,
+		   SymbolsList **aux)
 {
 	SymbolsList *curr, *prev;
 	int i;
 
 	//If the char is at the head of the list
 	if(symbols->symbol == byte) {
-		mtfAux->pos = 0;
-		mtfAux->prev = NULL;
-		return;
+		*aux = NULL;
+		return 0;
 	}
 
 	//Otherwise
@@ -48,27 +53,28 @@ void search(SymbolsList *const symbols,
 	prev=symbols;
 	for(curr=symbols->next; curr!=NULL; curr=curr->next) {
 		if(curr->symbol == byte) {
-			mtfAux->pos = i;
-			mtfAux->prev = prev;
-			break;
+			*aux = prev;
+			return i;
 		}
 		i++;
 		prev=prev->next;
 	}
+
+	return -1;
 }
 
 SymbolsList *mvtElement(SymbolsList *const symbols,
-						MtfAux *const mtfAux)
+						SymbolsList *el)
 {
 
 	SymbolsList *current;
 
-	if(mtfAux->prev != NULL) {
+	if(el != NULL) {
 
-		current = mtfAux->prev->next;
+		current = el->next;
 
 		//Delete element from the list of symbols
-		mtfAux->prev->next = mtfAux->prev->next->next;
+		el->next = el->next->next;
 
 		//Re-insert it at the head of the list
 		current->next = symbols;
@@ -101,16 +107,6 @@ SymbolsList *initListOfSymbols()
 	tmp->next = NULL;
 
 	return symbols;
-}
-
-void printList(SymbolsList *const symbols)
-{
-	SymbolsList *tmp = symbols;
-
-	while(tmp != NULL) {
-		printf("%d\n", tmp->symbol);
-		tmp = tmp->next;
-	}
 }
 
 void freeListOfSymbols(SymbolsList *symbols)

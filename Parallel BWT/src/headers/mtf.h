@@ -15,28 +15,12 @@ typedef struct SymbolsList
 
 } SymbolsList;
 
-/*
- * This structure keeps track of the position
- * of the current element in the table of symbols
- * and of the previous element of it in the table
- * of symbols. This make easier perform the move
- * to front operation on the linked list of symbols.
- */
-typedef struct MtfAux
-{
-	unsigned char pos;
-	SymbolsList *prev;
 
-} MtfAux;
-
-
-void search(SymbolsList *const, const unsigned char, MtfAux *const);
+int search(SymbolsList *const, const unsigned char, SymbolsList **);
 
 Text mtf(const Text);
 
-SymbolsList *mvtElement(SymbolsList *const, MtfAux *const);
-
-SymbolsList *mvtElement2(SymbolsList *const, MtfAux *const);
+SymbolsList *mvtElement(SymbolsList *const, SymbolsList *);
 
 SymbolsList *initListOfSymbols(void);
 
