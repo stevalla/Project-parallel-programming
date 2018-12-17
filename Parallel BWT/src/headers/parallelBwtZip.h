@@ -21,7 +21,7 @@
 
 typedef struct Buffer
 {
-	Queue 		    *queue;
+	Queue 		 *queue;
 	pthread_mutex_t  mutex;
 	pthread_cond_t	 cond;
 
