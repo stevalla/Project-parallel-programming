@@ -27,13 +27,6 @@ typedef struct Buffer
 
 } Buffer;
 
-typedef struct Result
-{
-	Text *text;
-	pthread_mutex_t mutex;
-
-} Result;
-
 void compressParallel(FILE *, FILE *, const long);
 
 void writeOutput(FILE *, int *const, const int);

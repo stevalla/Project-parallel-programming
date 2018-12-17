@@ -3,7 +3,7 @@
 Buffer readin = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
 Buffer bwt = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
 Buffer arith = {NULL, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
-Result result = {NULL, PTHREAD_MUTEX_INITIALIZER};
+Text *result;
 int nBlocks;
 
 struct timespec timeout = {.tv_nsec = 100000, .tv_sec = 0};
@@ -24,10 +24,10 @@ void compressParallel(FILE *input,
 	initBuffer(&arith);
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	result.text = (Text *) malloc(sizeof(Text) * nBlocks);
+	result = (Text *) malloc(sizeof(Text) * nBlocks);
 
 	for(int j=0; j<nBlocks; j++)
-		result.text[j].id = -1;
+		result[j].id = -1;
 
 	if(fileSize(input) - (chunkSize * (nBlocks - 1)) < MIN_CHUNK_SIZE) {
 		nBlocks--;
@@ -50,7 +50,7 @@ void compressParallel(FILE *input,
 		}
 
 		if(inZip.len < MIN_CHUNK_SIZE) {
-			result.text[inZip.id] = inZip;
+			result[inZip.id] = inZip;
 			flag = 1;
 			break;
 		}
@@ -88,7 +88,7 @@ void compressParallel(FILE *input,
 		inZip = readFile(input, chunkSize);
 		inZip.id++;
 
-		result.text[inZip.id] = inZip;
+		result[inZip.id] = inZip;
 	}
 
 	while(index < nBlocks) {
@@ -98,7 +98,7 @@ void compressParallel(FILE *input,
 
 	if(flag)
 		free(inZip.text);
-	free(result.text);
+	free(result);
 	pthread_attr_destroy(&attr);
 }
 
@@ -190,7 +190,7 @@ void *arithStage(void *arg)
 
 		Text compressed = encodingRoutine(arithInput);
 
-		result.text[compressed.id] = compressed;
+		result[compressed.id] = compressed;
 	}
 	return 0;
 }
@@ -209,10 +209,10 @@ void writeOutput(FILE *output, int *const index, const int littleChunk)
 
 	for(; i<nBlocks; i++) {
 
-		if(result.text[i].id != *index)
+		if(result[i].id != *index)
 			return;
 
-		encodeUnsigned(result.text[i].len, length, 0);
+		encodeUnsigned(result[i].len, length, 0);
 
 		if(i == nBlocks - 1 && littleChunk)
 			id[0] = 0;
@@ -221,9 +221,9 @@ void writeOutput(FILE *output, int *const index, const int littleChunk)
 
 		writeFile(output, length, 4);
 		writeFile(output, id, 1);
-		writeFile(output, result.text[i].text, result.text[i].len);
+		writeFile(output, result[i].text, result[i].len);
 
-		free(result.text[i].text);
+		free(result[i].text);
 		(*index)++;
 	}
 }
