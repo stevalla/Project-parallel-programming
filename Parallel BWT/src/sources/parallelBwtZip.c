@@ -143,11 +143,8 @@ void *bwtStage(void *arg)
 void *mtfZleStage(void *arg)
 {
 	Text mtfInput;
-
 	while(1) {
-
 		pthread_mutex_lock(&bwt.mutex);
-
 		while(empty(bwt.queue) && bwt.queue->counter < nBlocks)
 			pthread_cond_timedwait(&bwt.cond, &bwt.mutex, &timeout);
 
@@ -163,7 +160,6 @@ void *mtfZleStage(void *arg)
 		pthread_mutex_unlock(&bwt.mutex);
 
 		Text mtfOutput = mtf(mtfInput);
-
 		Text zleOutput = zleEncoding(mtfOutput);
 
 		pthread_mutex_lock(&arith.mutex);
@@ -171,7 +167,6 @@ void *mtfZleStage(void *arg)
 		pthread_cond_signal(&arith.cond);
 		pthread_mutex_unlock(&arith.mutex);
 	}
-
 	return 0;
 }
 
