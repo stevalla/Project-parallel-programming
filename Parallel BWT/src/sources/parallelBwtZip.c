@@ -92,10 +92,7 @@ void compressParallel(FILE *input,
 	}
 
 	while(index < nBlocks) {
-
-		pthread_mutex_lock(&result.mutex);
 		writeOutput(output, &index, littleChunk);
-		pthread_mutex_unlock(&result.mutex);
 		usleep(1000);
 	}
 
@@ -127,16 +124,13 @@ void *bwtStage(void *arg)
 
 		if(!empty(readin.queue))
 			bwtInput = dequeue(readin.queue);
-
 		else if(readin.queue->counter == nBlocks) {
 			pthread_mutex_unlock(&readin.mutex);
 			break;
-
 		} else {
 			pthread_mutex_unlock(&readin.mutex);
 			continue;
 		}
-
 		pthread_mutex_unlock(&readin.mutex);
 
 		Text bwtOutput = bwtTransformation(bwtInput);
@@ -163,16 +157,13 @@ void *mtfZleStage(void *arg)
 
 		if(!empty(bwt.queue))
 			mtfInput = dequeue(bwt.queue);
-
 		else if(bwt.queue->counter == nBlocks) {
 			pthread_mutex_unlock(&bwt.mutex);
 			break;
-
 		} else {
 			pthread_mutex_unlock(&bwt.mutex);
 			continue;
 		}
-
 		pthread_mutex_unlock(&bwt.mutex);
 
 		Text mtfOutput = mtf(mtfInput);
@@ -200,18 +191,14 @@ void *arithStage(void *arg)
 			pthread_cond_timedwait(&arith.cond, &arith.mutex, &timeout);
 
 		if(!empty(arith.queue))
-
 			arithInput = dequeue(arith.queue);
-
 		else if(arith.queue->counter == nBlocks) {
 			pthread_mutex_unlock(&arith.mutex);
 			break;
-
 		} else {
 			pthread_mutex_unlock(&arith.mutex);
 			continue;
 		}
-
 		pthread_mutex_unlock(&arith.mutex);
 
 		Text compressed = encodingRoutine(arithInput);
