@@ -173,14 +173,10 @@ void *mtfZleStage(void *arg)
 void *arithStage(void *arg)
 {
 	Text arithInput;
-
 	while(1) {
-
 		pthread_mutex_lock(&arith.mutex);
-
 		while(empty(arith.queue) && arith.queue->counter < nBlocks)
 			pthread_cond_timedwait(&arith.cond, &arith.mutex, &timeout);
-
 		if(!empty(arith.queue))
 			arithInput = dequeue(arith.queue);
 		else if(arith.queue->counter == nBlocks) {
@@ -196,7 +192,6 @@ void *arithStage(void *arg)
 
 		result.text[compressed.id] = compressed;
 	}
-
 	return 0;
 }
 
