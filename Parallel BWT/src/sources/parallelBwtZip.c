@@ -114,11 +114,8 @@ void setAffinity(cpu_set_t *const cpus,
 void *bwtStage(void *arg)
 {
 	Text bwtInput;
-
 	while(1) {
-
 		pthread_mutex_lock(&readin.mutex);
-
 		while(empty(readin.queue) && readin.queue->counter < nBlocks)
 			pthread_cond_timedwait(&readin.cond, &readin.mutex, &timeout);
 
@@ -140,7 +137,6 @@ void *bwtStage(void *arg)
 		pthread_cond_signal(&bwt.cond);
 		pthread_mutex_unlock(&bwt.mutex);
 	}
-
 	return 0;
 }
 
