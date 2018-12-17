@@ -9,7 +9,7 @@
 #include <sys/time.h>
 
 #define POW_2(N)       		(1 << (N))
-#define MAX_CHUNK_SIZE 		(5 * 1024 * 1024)
+#define MAX_CHUNK_SIZE 	(5 * 1024 * 1024)
 #define DEFAULT_CHUNK_SIZE	(0.9  * 1024 * 1024)
 #define MIN_CHUNK_SIZE    	(300)
 
