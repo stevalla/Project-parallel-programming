@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#include <time.h>
 #include <sched.h>
 
 #include "bwt.h"

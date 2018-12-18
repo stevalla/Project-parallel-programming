@@ -1,3 +1,5 @@
+#include <time.h>
+#include <stdlib.h>
 
 #include "./headers/bwtUnzip.h"
 #include "./headers/util.h"
@@ -60,70 +62,45 @@ void zipMain(char *const input,
 {
 	extern Buffer readin, bwt, arith;
 	struct timespec start, end;
+	double time;
 
-	long a[5] = {0.1 * 1024 * 1024,
-				 0.9 * 1024 * 1024,
-				 1.8 * 1024 * 1024,
-				 3.6 * 1024 * 1024,
-				 5.0 * 1024 * 1024};
-	double time[40];
+		puts("#BWTZIP\n");
+		printf("Input file %s\n", input);
 
-//	puts("#BWTZIP\n");
-//	printf("Input file %s\n", input);
+	FILE *inputE = openFileRB(input);
+	FILE *outputE = openFileWB(output);
 
-	for(int k=0; k<1; k++)
-	for(int j=0; j<1; j++) {
-		printf("Chunk size: %ld\n", a[j]);
-		for(int i=0; i<1; i++) {
+	//Calculate the wall time
+	if(mode == 'p') {
+		clock_gettime(CLOCK_MONOTONIC, &start);
+		compressParallel(inputE, outputE, chunkSize);
+		clock_gettime(CLOCK_MONOTONIC, &end);
 
-			FILE *inputE = openFileRB(input);
-			FILE *outputE = openFileWB(output);
+		free(readin.queue);
+		free(bwt.queue);
+		free(arith.queue);
 
-//			printf("Number of blocks: %d\n",
-//				   (int)ceil((float)fileSize(inputE) / (float)chunkSize));
-
-			//Calculate the wall time
-			if(mode == 'p' && k == 0) {
-				if(i == 0) puts("Mode p");
-				clock_gettime(CLOCK_MONOTONIC, &start);
-				compressParallel(inputE, outputE, a[j]);
-				clock_gettime(CLOCK_MONOTONIC, &end);
-
-				free(readin.queue);
-				free(bwt.queue);
-				free(arith.queue);
-
-			} else {
-				if(i == 0) puts("Mode s");
-				clock_gettime(CLOCK_MONOTONIC, &start);
-				compressSequential(inputE, outputE, a[j]);
-				clock_gettime(CLOCK_MONOTONIC, &end);
-			}
-
-			if(i==0) {
-				printf("Number of blocks: %d\n",
-						(int)ceil((float)fileSize(inputE) / (float)a[j]));
-				printf("Input file %s\n", input);
-				printf("Size original: %ld comrpessed: %ld deflated: %f %% \n",
-				fileSize(inputE),
-				fileSize(outputE),
-				(1 - (double)(fileSize(outputE) / (double)fileSize(inputE))) * 100);
-			}
-
-			time[i] = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
-
-//			printf("Time %f\n", time[i]);
-			fclose(inputE);
-			fclose(outputE);
-
-		}
-		double sum = 0;
-		for(int i=0; i<10; i++) {
-			sum += time[i];
-		}
-
-		printf("Average time for compression %f sec\n\n", sum/10);
+	} else {
+		clock_gettime(CLOCK_MONOTONIC, &start);
+		compressSequential(inputE, outputE, chunkSize);
+		clock_gettime(CLOCK_MONOTONIC, &end);
 	}
+
+	printf("Number of blocks: %d\n",
+			(int)ceil((float)fileSize(inputE) / (float)chunkSize));
+	printf("Input file %s\n", input);
+	printf("Size original: %ld comrpessed: %ld deflated: %f %% \n",
+			fileSize(inputE),
+			fileSize(outputE),
+			(1 - (double)(fileSize(outputE) / (double)fileSize(inputE))) * 100);
+
+
+	time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+	printf("Time for compression %f sex\n", time);
+	fclose(inputE);
+	fclose(outputE);
+
 	puts("------------------------------------------------------------------------------------");
 }
 

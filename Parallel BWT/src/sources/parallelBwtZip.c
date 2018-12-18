@@ -62,13 +62,13 @@ void compressParallel(FILE *input,
 		setAffinity(&cpus, j+1, &attr);
 		pthread_create(&threads[j], &attr, bwtStage, NULL);
 	}
+
 	setAffinity(&cpus, 0, &attr);
 	pthread_create(&threads[7], &attr, bwtStage, NULL);
 	setAffinity(&cpus, 6, &attr);
 	pthread_create(&threads[5], &attr, mtfZleStage, NULL);
 	setAffinity(&cpus, 7, &attr);
 	pthread_create(&threads[6], &attr, arithStage, NULL);
-
 
 	for(int j=0; j<nBlocks-6 && !flag; j++) {
 
@@ -103,9 +103,11 @@ void compressParallel(FILE *input,
 }
 
 void setAffinity(cpu_set_t *const cpus,
-				 const int cpu,
+				 int cpu,
 				 pthread_attr_t *const attr)
 {
+	cpu = cpu%8;
+
 	CPU_ZERO(cpus);
 	CPU_SET(cpu, cpus);
 	pthread_attr_setaffinity_np(attr, sizeof(cpu_set_t), cpus);
