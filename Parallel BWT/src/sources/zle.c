@@ -1,84 +1,113 @@
+/******************************************************************************
+ * Copyright (C) 2018 by Stefano Valladares                                   *
+ *                                                                            *
+ * This file is part of ParallelBWTzip.                                       *
+ *                                                                            *
+ *   ParallelBWTzip is free software: you can redistribute it and/or modify   *
+ *   it under the terms of the GNU Lesser General Public License as           *
+ *   published by the Free Software Foundation, either version 3 of the       *
+ *   License, or (at your option) any later version.                          *
+ *                                                                            *
+ *   ParallelBWTzip is distributed in the hope that it will be useful,        *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
+ *   GNU Lesser General Public License for more details.                      *
+ *                                                                            *
+ *   You should have received a copy of the GNU Lesser General Public         *
+ *   License along with ParallelBWTzip. 									  *
+ *   If not, see <http://www.gnu.org/licenses/>.     						  *
+ ******************************************************************************/
+/**
+ *
+ * @file 	zle.c
+ * @author 	Stefano Valladares, ste.valladares@live.com
+ * @date	20/12/2018
+ * @version 1.1
+ *
+ * @brief 	Source file implementing a zero length encoder.
+ *
+ */
+
 #include "../headers/zle.h"
+#include <math.h>
 
-#define LOG2E 1.44269504089
+#define LOG2E 1.44269504089		///< Log base 2 of e.
 
+/**
+ * @details		The main method of the file encodes a sequence of length N by
+ * 				compressing sequences of consecutive zeroes. Each one of that will
+ * 				be encoded in a binary number that represents the length of the
+ * 				zero-run.
+ * 				Each byte in input is encoded in an online fashion, written it down
+ * 				as soon as it is read, while each sequence of zeroes is encoded as soon
+ * 				as it ends by calling the function ::encodeZeroRun.
+ *
+ * @param[in] 	input	Sequence of bytes together with its length.
+ *
+ * @return 		The text encoded as describe above.
+ *
+ */
 Text zleEncoding(const Text input)
 {
-	//Variables
-	size_t len, runLen;
-	unsigned char *output;
-	Text result;
+	size_t runLen;
+	Text res;
 
-	//Initialization
-	len = 0;
 	runLen = 0;
-	output = (unsigned char *) malloc(sizeof(unsigned char) * input.len*2);
+	res.id = input.id;
+	res.len=0;
+	res.text = (unsigned char *)malloc(sizeof(unsigned char) * input.len*2);
 
 	for(unsigned j=0; j<input.len; j++) {
 
-		if(input.text[j] == 0) {							//Zeros run
+		if(input.text[j] == 0) {			//Zeros run
 			runLen++;
 			continue;
 
-		} else if(runLen != 0) {					//End of zeros run
-			countZeroRun(runLen + 1, &output[0], &len);
-			runLen = 0;								//Restart the zeros counter
+		} else if(runLen != 0) {			//End of zeros run
+			encodeZeroRun(runLen + 1, &res);
+			runLen = 0;
 
 		}
 
 		//No run
-		if(input.text[j] == 0xFE) {						//ch = 254
-			output[len++] = 0xFF;
-			output[len++] = 0x00;
+		if(input.text[j] == 0xFE) {			//ch = 254
+			res.text[res.len++] = 0xFF;
+			res.text[res.len++] = 0x00;
 
-		} else if(input.text[j] == 0xFF) {				//ch = 255
-			output[len++] = 0xFF;
-			output[len++] = 0x01;
+		} else if(input.text[j] == 0xFF) {	//ch = 255
+			res.text[res.len++] = 0xFF;
+			res.text[res.len++] = 0x01;
 
 		} else
-			output[len++] = input.text[j] + 1;
-
+			res.text[res.len++] = input.text[j] + 1;
 	}
 
 	if(runLen != 0)
-		countZeroRun(runLen + 1, &output[0], &len);
-
-	result.text = output;
-	result.len = len;
+		encodeZeroRun(runLen + 1, &res);
 
 	free(input.text);
 
-	result.id = input.id;
-
-	return result;
+	return res;
 }
 
-void countZeroRun(const double runLen,
-				  unsigned char *const output,
-				  size_t *const len)
+/**
+ * @details			This function encodes a sequence of zeroes of length zeroRun
+ * 					in the big-endian representation of (zeroRun + 1), eliding the
+ * 					MSB.
+ *
+ * @param[in] 		runLen	The run of zeroes to encode.
+ * @param[in,out] 	res		Pointer to the actual result.
+ *
+ */
+void encodeZeroRun(size_t runLen, Text *res)
 {
 	int k;
-	unsigned *zeroRun;
 
-	const int binarySize = (log(runLen) * LOG2E) + 1;
+	size_t binLen = (log(runLen) * LOG2E) + 1;
 
-	zeroRun = decToBin(runLen, binarySize);
-
-	for(k=0; k<binarySize-1; k++)
-		output[(*len)++] = zeroRun[k];
-
-	free(zeroRun);
-}
-
-unsigned *decToBin(size_t runLen, const size_t size)
-{
-	unsigned *binary = (unsigned *) malloc(sizeof(unsigned)*(size - 1));
-	int index = 0;
-
-	while(runLen > 1) {
-		binary[index++] = (runLen % 2);
+	for(k=0; k<binLen-1; k++) {
+		(*res).text[((*res).len)++] = runLen%2;
 		runLen /= 2;
 	}
-
-	return binary;
 }
+

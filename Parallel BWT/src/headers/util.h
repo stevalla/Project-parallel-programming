@@ -13,8 +13,7 @@
 #define DEFAULT_CHUNK_SIZE	(0.9  * 1024 * 1024)
 #define MIN_CHUNK_SIZE    	(300)
 
-typedef struct Text
-{
+typedef struct Text {
 	unsigned char *text;
 	size_t len;
 	long id;
@@ -25,22 +24,22 @@ typedef struct Text
 unsigned char decomposeUnsigned(unsigned, int);
 
 // Return a vector<unsigned char> that represents u big-endian.
-void encodeUnsigned(const unsigned, unsigned char *const, int);
+void encodeUnsigned(const unsigned, unsigned char * const, int);
 
 // Return the unsigned int encoded big-endian by
 // the 4 bytes starting at location n.
-unsigned readUnsigned(unsigned char *const, size_t);
+unsigned readUnsigned(unsigned char * const, size_t);
 
-long fileSize(FILE *const);
+long fileSize(FILE * const);
 
-Text readFile(FILE *const, long);
+Text readFile(FILE * const, long);
 
-void writeFile(FILE *const, unsigned char *const, long);
+void writeFile(FILE * const, unsigned char * const, long);
 
-FILE *openFileRB(char *const);
+FILE *openFileRB(char * const);
 
-FILE *openFileWB(char *const);
+FILE *openFileWB(char * const);
 
-int compareFiles(FILE *const, FILE *const, long, long);
+int compareFiles(FILE * const, FILE * const, long, long);
 
 #endif
