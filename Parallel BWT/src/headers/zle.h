@@ -59,15 +59,15 @@
 #include "util.h"
 
 /**
- * @brief			Performs the zero length encoding.
+ * @brief	Performs the zero length encoding.
  *
  * @param[in] 		input	Sequence of bytes together with its length.
- * @return 			The text encoded as describe above.
+ * @return 	The text encoded as describe above.
  */
 Text zleEncoding(const Text input);
 
 /**
- * @brief			Encodes and stores the zero-run in input.
+ * @brief	Encodes and stores the zero-run in input.
  *
  * @param[in] 		runLen	The run of zeroes to encode.
  * @param[in,out] 	res		Pointer to the actual result.

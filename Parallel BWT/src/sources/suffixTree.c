@@ -1,7 +1,6 @@
 #include "../headers/suffixTree.h"
 
 Node *buildSuffixTree(unsigned *const in,
-					  int *const phases,
 					  const size_t inLen)
 {
 	//Variables
@@ -9,7 +8,8 @@ Node *buildSuffixTree(unsigned *const in,
 	Node *root;
 	int remainder = 0;	//Counts how many suffixes we still need to insert
 	int labelLen = 0;
-	int *endLeaf = phases;
+	int phases;
+	int *endLeaf = &phases;
 	int *endRoot = (int *) malloc(sizeof(int));
 
 	//Initialization of the root (special node with suffixLink NULL)
@@ -20,7 +20,7 @@ Node *buildSuffixTree(unsigned *const in,
 	ap.activeNode = root;
 	ap.activeEdge = -1;
 	ap.activeLen = 0;
-	for(*phases=0; *phases < inLen; (*phases)++) {
+	for(phases=0; phases < inLen; phases++) {
 
 		remainder++;
 		applyExtensions(in, &remainder, endLeaf, &ap, root);

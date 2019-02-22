@@ -24,7 +24,7 @@
  * @date	20/12/2018
  * @version 1.1
  *
- * @brief 	Header file implementing a move to front transformation.
+ * @brief 	Header file implementing the move to front transformation.
  *
  * @details This header defines the functions needed to perform the move to
  * 			front (MTF) transformation, that is the second phase of the BWT
@@ -58,33 +58,33 @@ typedef struct SymbolsList
 } SymbolsList;
 
 /**
- * @brief			Transform the input sequence of bytes into an array of output
- * 					bytes, indices of the symbol list.
+ * @brief	Transform the input sequence of bytes into an array of output
+ * 			bytes, indices of the symbol list.
  *
  * @param[in] 		input	The input sequence of bytes together with its length.
- * @return			The transformed array of bytes.
+ * @return	The transformed array of bytes.
  */
 Text mtf(const Text input);
 
 /**
- * @brief			Returns the position of the searched byte in the list of
- * 					symbols, or -1 if the element is not found.
+ * @brief	Returns the position of the searched byte in the list of
+ * 			symbols, or -1 if the element is not found.
  *
  * @param[in] 		symbols		The list of symbols.
  * @param[in]		byte		The byte to be searched in the list.
  * @param[in,out]	aux			Pointer to the previous element of the searched
  * 								byte in the list, useful later to move ahead the
  * 								returned element.
- * @return			The position of the byte in the list of symbols.
- * 					The function returns -1 (error) if the element is not found.
+ * @return	The position of the byte in the list of symbols.
+ * 			The function returns -1 (error) if the element is not found.
  */
-int search(SymbolsList *const  symbols,
-		   const unsigned char byte,
-		   SymbolsList 		   **aux);
+int search(SymbolsList   *const  symbols,
+		   const unsigned char 	 byte,
+		   SymbolsList 		   	 **aux);
 
 /**
- * @brief			Move the element pointed by el to the front of the list
- * 					in input.
+ * @brief	Move the element pointed by el to the front of the list
+ * 			in input.
  *
  * This operation is performed only if the searched element was not at the head
  * of the list.
@@ -92,7 +92,7 @@ int search(SymbolsList *const  symbols,
  * @param[in,out]	symbols		The list of symbols.
  * @param[in] 		el			The element before the one to be moved in front of
  * 								the list.
- * @return			The current head of the list.
+ * @return	The current head of the list.
  */
 SymbolsList *mvtElement(SymbolsList *const symbols, SymbolsList *el);
 

@@ -7,8 +7,6 @@
 
 #include "../extern/uthash.h"
 
-#define SENTINEL 256;
-
 typedef struct Node Node;
 
 //To maintain the list of children of each node.
@@ -42,7 +40,7 @@ typedef struct ActivePoint
 } ActivePoint;
 
 
-Node *buildSuffixTree(unsigned *const , int *const , const size_t);
+Node *buildSuffixTree(unsigned *const, const size_t);
 
 void applyExtensions(unsigned *const , int *const , int *const,
 					 ActivePoint *const , Node *const);
