@@ -34,18 +34,13 @@
 #define LOG2E 1.44269504089		///< Log base 2 of e.
 
 /**
- * @details		The main method of the file encodes a sequence of length N by
- * 				compressing sequences of consecutive zeroes. Each one of that will
- * 				be encoded in a binary number that represents the length of the
- * 				zero-run.
- * 				Each byte in input is encoded in an online fashion, written it down
- * 				as soon as it is read, while each sequence of zeroes is encoded as soon
- * 				as it ends by calling the function ::encodeZeroRun.
- *
- * @param[in] 	input	Sequence of bytes together with its length.
- *
- * @return 		The text encoded as describe above.
- *
+ * The main method of the file encodes a sequence of length N by
+ * compressing sequences of consecutive zeroes. Each one of that will
+ * be encoded in a binary number that represents the length of the
+ * zero-run.
+ * Each byte in input is encoded in an online fashion, written it down
+ * as soon as it is read, while each sequence of zeroes is encoded as soon
+ * as it ends by calling the function ::encodeZeroRun.
  */
 Text zleEncoding(const Text input)
 {
@@ -91,13 +86,9 @@ Text zleEncoding(const Text input)
 }
 
 /**
- * @details			This function encodes a sequence of zeroes of length zeroRun
- * 					in the big-endian representation of (zeroRun + 1), eliding the
- * 					MSB.
- *
- * @param[in] 		runLen	The run of zeroes to encode.
- * @param[in,out] 	res		Pointer to the actual result.
- *
+ * This function encodes a sequence of zeroes of length zeroRun
+ * in the big-endian representation of (zeroRun + 1), eliding the
+ * MSB.
  */
 void encodeZeroRun(size_t runLen, Text *res)
 {

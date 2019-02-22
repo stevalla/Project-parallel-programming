@@ -21,14 +21,16 @@
 /**
  * @file 	zle.h
  * @author 	Stefano Valladares, ste.valladares@live.com
+ * @date	20/12/2018
+ * @version 1.1
  *
  * @brief 	Header file implementing a zero length encoder.
  *
  * @details This header defines the functions needed to perform the zero length
- * 			encoding, third phase of the BWT compression.
+ * 			encoding, third phase of the BWT compression. @n
  * 			This type of compression has been developed by D.J.Wheeler and it is a kind
  * 			of run-length encoding, that encodes sequences of zeroes in a number that
- * 			holds the length of the zero-run.
+ * 			holds the length of the zero-run. @n
  * 			Given a sequence of zeroes of length N, it converts (N + 1) to binary and
  * 			outputs the binary representation, starting from the LSB and leaving out
  * 			the MSB.<br/>
@@ -60,7 +62,6 @@
  * @brief			Performs the zero length encoding.
  *
  * @param[in] 		input	Sequence of bytes together with its length.
- *
  * @return 			The text encoded as describe above.
  */
 Text zleEncoding(const Text input);
