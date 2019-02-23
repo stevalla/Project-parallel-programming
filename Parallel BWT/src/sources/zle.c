@@ -47,9 +47,9 @@ Text zleEncoding(const Text input)
 	size_t runLen;
 	Text res;
 
-	runLen = 0;
-	res.id = input.id;
-	res.len=0;
+	runLen 	 = 0;
+	res.id 	 = input.id;
+	res.len  = 0;
 	res.text = (unsigned char *)malloc(sizeof(unsigned char) * input.len*2);
 
 	for(unsigned j=0; j<input.len; j++) {
@@ -70,8 +70,8 @@ Text zleEncoding(const Text input)
 			res.text[res.len++] = 0x00;
 
 		} else if(input.text[j] == 0xFF) {	//ch = 255
-			res.text[res.len++] = 0xFF;
-			res.text[res.len++] = 0x01;
+			res.text[res.len++]  = 0xFF;
+			res.text[res.len++]  = 0x01;
 
 		} else
 			res.text[res.len++] = input.text[j] + 1;

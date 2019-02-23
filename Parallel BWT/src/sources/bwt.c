@@ -74,7 +74,7 @@ Text getBWT(unsigned *const input,
 			Node 	 *const suffixTree)
 {
 	int *suffixArray;
-	int i, index;
+	int  i, index;
 	Text bwt;
 
 	i = 0;
@@ -140,7 +140,7 @@ void createSuffixArray(Node 	*const 	node,
 int sortNodesByFirstChar(HashChildren *const el1,
 						 HashChildren *const el2)
 {
-	if(el1->firstChar < el2->firstChar)			return -1;
+	if(     el1->firstChar < el2->firstChar)	return -1;
 	else if(el1->firstChar > el2->firstChar)	return  1;
 	else 										return  0;
 }

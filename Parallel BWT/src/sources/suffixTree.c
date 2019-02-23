@@ -33,7 +33,7 @@
  * of the input string. Finally it adds the suffix indexes to the leaves of the
  * tree and returns the root. @n
  * Basically the main function implementing the Ukkonen's algorithm is
- * ::applyExtension and is called a number of times equal to the length of
+ * ::applyExtensions and is called a number of times equal to the length of
  * the input string. Each time a new byte is processed.
  */
 Node *buildSuffixTree(unsigned *const input, const size_t inputLen)
@@ -46,11 +46,11 @@ Node *buildSuffixTree(unsigned *const input, const size_t inputLen)
 	*endRoot = -1;
 
 	//Root -> special node with suffixLink NULL, start = end = -1
-	ap.root = createNode(-1, endRoot, NULL);
-	ap.phase = &phases;
+	ap.root 	  = createNode(-1, endRoot, NULL);
+	ap.phase 	  = &phases;
 	ap.activeNode = ap.root;
 	ap.activeEdge = -1;
-	ap.activeLen = 0;
+	ap.activeLen  = 0;
 
 	for(phases=0; phases < inputLen; phases++) {
 		remainder++;
@@ -106,8 +106,8 @@ void applyExtensions(unsigned 	 *const input,
 					 int 		 *const remainder,
 					 ActivePoint *const ap)
 {
-	Node *child;
-	Node *newest = NULL;
+	Node 		 *child;
+	Node 		 *newest = NULL;
 	HashChildren *hashChild;
 
 	while(*remainder) {
@@ -163,11 +163,11 @@ Node *createNode(const int start, int *const end, Node *const root)
 {
 	Node *node = (Node *) malloc(sizeof(Node));
 
-	node->children = NULL;
-	node->suffixLink = root;
+	node->children    = NULL;
+	node->suffixLink  = root;
 	node->suffixIndex = -1;
-	node->start = start;
-	node->end = end;
+	node->start 	  = start;
+	node->end 		  = end;
 
 	return node;
 }
@@ -180,7 +180,7 @@ Node *createInternalNode(ActivePoint   *const ap,
 						 HashChildren **const child,
 						 unsigned 	   *const input)
 {
-	Node *oldChild = (*child)->node;
+	Node *oldChild 		 = (*child)->node;
 	int *endInternalNode = (int *) malloc(sizeof(int));
 	Node *internalNode;
 
@@ -197,7 +197,7 @@ Node *createInternalNode(ActivePoint   *const ap,
 	 * 	 the actual plus the active length.
 	 */
 	(*child)->node->start += ap->activeLen;
-	(*child)->firstChar = input[(*child)->node->start];
+	(*child)->firstChar    = input[(*child)->node->start];
 	addNewChild(internalNode, ap->activeNode, input);
 	HASH_ADD_INT(internalNode->children, firstChar, *child);
 
@@ -224,8 +224,8 @@ void addNewChild(Node 	  *const child,
 				 unsigned *const input)
 {
 	HashChildren *hash = (HashChildren *) malloc(sizeof(HashChildren));
-	hash->node = child;
-	hash->firstChar = input[child->start];
+	hash->node 		   = child;
+	hash->firstChar    = input[child->start];
 	HASH_ADD_INT(parent->children, firstChar, hash);
 }
 
@@ -265,10 +265,10 @@ void updateAP(ActivePoint *const ap, const int remainder)
 int walkDown(ActivePoint *const ap, Node *const currentNode)
 {
 	int edgeLength = getEdgeLen(currentNode);
-	if(ap->activeLen >= edgeLength) {
+	if(ap->activeLen   >= edgeLength) {
 		ap->activeEdge += edgeLength;
-		ap->activeLen -= edgeLength;
-		ap->activeNode = currentNode;
+		ap->activeLen  -= edgeLength;
+		ap->activeNode  = currentNode;
 		return 1;
 	}
 

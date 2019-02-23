@@ -1,5 +1,8 @@
 #include "../headers/unarith.h"
 
+#define BUF_BITS	(8 * sizeof(unsigned char))	///<
+
+//Useful values
 static const unsigned          RANGE_MIN = 0;
 static const unsigned          RANGE_MAX = MAX_RANGE;
 static const unsigned         RANGE_BITS = BITS_RANGE;
@@ -8,34 +11,34 @@ static const unsigned   RANGE_ONE_FOURTH = MAX_RANGE / 4;
 static const unsigned RANGE_THREE_FOURTH = (MAX_RANGE * 3) / 4;
 
 static const unsigned CONTINUATION_BIT = 0;
-static const unsigned EOS = 1 << (8 * sizeof(unsigned char));
+static const unsigned EOS = 1 << (8 * sizeof(unsigned char));	///< EOS = 256.
 
 Text decodingRoutine(const Text input)
 {
 	Decoder *de;
 	Model *model;
-	IOBuffer *inBuf;
+	ByteBuffer *inBuf;
 	Interval currentInt;
-	IOHelper *in, *o;
+	IOBuffer *in, *o;
 	Text result;
 	unsigned ch;
 	size_t inputLen;
 
 	de = (Decoder *) malloc(sizeof(Decoder));
 	model = (Model *) malloc(sizeof(Model));
-	inBuf = (IOBuffer *) malloc(sizeof(IOBuffer));
-	in = (IOHelper *) malloc(sizeof(IOHelper));
+	inBuf = (ByteBuffer *) malloc(sizeof(ByteBuffer));
+	in = (IOBuffer *) malloc(sizeof(IOBuffer));
 	in->text = input.text;
 	in->index = 0;
 	inputLen = input.len;
-	o = (IOHelper *) malloc(sizeof(IOHelper));
+	o = (IOBuffer *) malloc(sizeof(IOBuffer));
 	o->index = 0;
 	o->text = (unsigned char *)
 			   malloc(sizeof(unsigned char) * MAX_CHUNK_SIZE * 2);
 
 	initDecoder(de);
 	initModel(model, EOS + 1);
-	initIOBuffer(inBuf);
+	initByteBuffer(inBuf);
 
 	while((ch = decodeSymbol(de, model, &currentInt, inBuf, in, inputLen)) != EOS)
 		o->text[o->index++] = (unsigned char) ch;
@@ -60,8 +63,8 @@ Text decodingRoutine(const Text input)
 }
 
 void updateInterval(Decoder *const de,
-					IOBuffer *const inBuf,
-					IOHelper *const in,
+					ByteBuffer *const inBuf,
+					IOBuffer *const in,
 					size_t inputLen)
 {
 	for(;;) {
@@ -96,8 +99,8 @@ void updateInterval(Decoder *const de,
 unsigned decodeSymbol(Decoder *const de,
 					  Model *const model,
 					  Interval *const interval,
-					  IOBuffer *const inBuf,
-					  IOHelper *const in,
+					  ByteBuffer *const inBuf,
+					  IOBuffer *const in,
 					  size_t inputLen)
 {
 	if(de->valueBits == 0) {
@@ -120,8 +123,8 @@ unsigned decodeSymbol(Decoder *const de,
 }
 
 unsigned inputBit(Decoder *const de,
-				  IOBuffer *const inBuf,
-				  IOHelper *const in,
+				  ByteBuffer *const inBuf,
+				  IOBuffer *const in,
 				  size_t inputLen)
 {
 	if(de->fin)

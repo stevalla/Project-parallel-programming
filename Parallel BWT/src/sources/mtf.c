@@ -38,10 +38,10 @@ Text mtf(const Text input)
 	Text output;
 	int tmp;
 
-	output.id = input.id;
-	output.len = input.len;
+	output.id   = input.id;
+	output.len  = input.len;
 	output.text = (unsigned char *) malloc(sizeof(unsigned char)*input.len);
-	symbols = initListOfSymbols();
+	symbols     = initListOfSymbols();
 
 	for(unsigned i=0; i<input.len; i++) {
 
@@ -129,14 +129,14 @@ SymbolsList *initListOfSymbols()
 	SymbolsList *symbols, *tmp;
 	int i=0;
 
-	symbols = (SymbolsList *) malloc(sizeof(SymbolsList));
+	symbols 		= (SymbolsList *) malloc(sizeof(SymbolsList));
 	symbols->symbol = (unsigned char)i;
-	tmp = symbols;
+	tmp 			= symbols;
 
 	for(i=1; i<SIZE_SYMBOLS_LIST; i++) {
 
-		tmp->next = (SymbolsList *) malloc(sizeof(SymbolsList));
-		tmp = tmp->next;
+		tmp->next 	= (SymbolsList *) malloc(sizeof(SymbolsList));
+		tmp 		= tmp->next;
 		tmp->symbol = (unsigned char)i;
 	}
 	tmp->next = NULL;
