@@ -42,7 +42,6 @@
 #define BWT_H
 
 #include "suffixTree.h"
-#include "util.h"
 
 /**
  * @brief  	Returns the BWT transformation of the input text.
