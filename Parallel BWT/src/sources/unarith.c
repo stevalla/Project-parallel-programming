@@ -27,15 +27,16 @@
 
 #include "../headers/unarith.h"
 
-#define BUF_BITS	(8 * sizeof(unsigned char))	///<
+/// Number of bits of the byte buffer.
+#define BUF_BITS	(8 * sizeof(unsigned char))
 
 //Useful values
-static const unsigned          RANGE_MIN = 0;
-static const unsigned          RANGE_MAX = MAX_RANGE;
-static const unsigned         RANGE_BITS = BITS_RANGE;
-static const unsigned         RANGE_HALF = MAX_RANGE / 2;
-static const unsigned   RANGE_ONE_FOURTH = MAX_RANGE / 4;
-static const unsigned RANGE_THREE_FOURTH = (MAX_RANGE * 3) / 4;
+static const unsigned         RANGE_BITS = BITS_RANGE;			///< Bits range.
+static const unsigned          RANGE_MIN = 0;					///< Range 0/1.
+static const unsigned          RANGE_MAX = MAX_RANGE;			///< Range 1/1.
+static const unsigned         RANGE_HALF = MAX_RANGE / 2;		///< Range 1/2.
+static const unsigned   RANGE_ONE_FOURTH = MAX_RANGE / 4;		///< Range 1/4.
+static const unsigned RANGE_THREE_FOURTH = (MAX_RANGE * 3) / 4; ///< Range 3/4.
 
 /**
  * Bit used to extend encoded bit stream past its end. Currently can be set to
