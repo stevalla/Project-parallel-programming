@@ -28,7 +28,7 @@
  * 			Burrows-Wheeler compression.
  *
  * @details	This interface provides the functions needed to compress
- * 			a given file. The function ::bwtZip compress a given sequence
+ * 			a given file. The function ::bwtZip compressed a given sequence
  * 			of bytes and returns a compressed sequence of bytes. While
  * 			::compressSequential compresses an entire file, divided into
  * 			chunks of some specified size.

@@ -29,20 +29,21 @@
 
 /**
  * This function applies the four step of the BWT compression
- * in sequence to a single sequence of bytes. The main phase are:
+ * in sequence to a single sequence of bytes. @n
+ * The main phase are:
  */
 Text bwtZip(const Text input)
 {
-	///-# BWT transformation
+	///-# BWT transformation.
 	Text bwtOutput = bwtTransformation(input);
 
-	///-# MTF transformation
+	///-# MTF transformation.
 	Text mtfOutput = mtf(bwtOutput);
 
-	///-# Zero-length encoding
+	///-# Zero-length encoding.
 	Text zleOutput = zleEncoding(mtfOutput);
 
-	///-# Arithmetic compression
+	///-# Arithmetic compression.
 	Text compressed = encodingRoutine(zleOutput);
 
 	return compressed;
@@ -53,7 +54,8 @@ Text bwtZip(const Text input)
  * compressed when is read and then written in output folloring
  * its length (encoded in 4 bytes) and the id of the chunk.
  * If one chunk is smaller than ::MIN_CHUNK_SIZE the chunk is not
- * compressed for efficiency reasons.
+ * compressed for efficiency reasons. @n
+ * The id is 1 if the chunk is compressed, 0 otherwise.
  */
 void compressSequential(FILE *input, FILE *output, long chunkSize)
 {

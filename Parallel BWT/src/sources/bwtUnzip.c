@@ -1,36 +1,60 @@
+/******************************************************************************
+ * Copyright (C) 2018 by Stefano Valladares                                   *
+ *                                                                            *
+ * This file is part of ParallelBWTzip.                                       *
+ *                                                                            *
+ *   ParallelBWTzip is free software: you can redistribute it and/or modify   *
+ *   it under the terms of the GNU Lesser General Public License as           *
+ *   published by the Free Software Foundation, either version 3 of the       *
+ *   License, or (at your option) any later version.                          *
+ *                                                                            *
+ *   ParallelBWTzip is distributed in the hope that it will be useful,        *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
+ *   GNU Lesser General Public License for more details.                      *
+ *                                                                            *
+ *   You should have received a copy of the GNU Lesser General Public         *
+ *   License along with ParallelBWTzip. 									  *
+ *   If not, see <http://www.gnu.org/licenses/>.     						  *
+ ******************************************************************************/
+
+/**
+ * @file 	bwtUnzip.c
+ * @author 	Stefano Valladares, ste.valladares@live.com
+ * @date	20/12/2018
+ * @version 1.1
+ */
+
 #include "../headers/bwtUnzip.h"
 
-
+/**
+ * This function applies in reverse the four step of the BWT
+ * decompression in sequence to a single sequence of bytes. @n
+ * The main phase are:
+ */
 Text bwtUnzip(const Text input)
 {
-	/***********************************************************************
-	 * ARITHMETIC DECODING
-	 ***********************************************************************/
+	///-# Arithmetic decoding.
 	Text decompressed = decodingRoutine(input);
 
-//	puts("\t-Arithmetic decoding finished");
-	/***********************************************************************
-	 * ZLE DECODING
-	 ***********************************************************************/
+	///-# Zero-length deconding.
 	Text zleDecoded = zleDecoding(decompressed);
 
-//	puts("\t-ZLE decoding finished");
-	/***********************************************************************
-	 * MTF REVERSE
-	 ***********************************************************************/
+	///-# MTF reverse transformation.
 	Text mtfReverse = unmtf(zleDecoded);
 
-//	puts("\t-MTF reverse finished");
-	/***********************************************************************
-	 * BWT REVERSE
-	 ***********************************************************************/
+	///-# BWT reverse transformation.
 	Text bwtReverse = unbwt(mtfReverse);
-
-//	puts("\t-BWT reverse finished\n");
 
 	return bwtReverse;
 }
 
+/**
+ * The compressed file is read. First the encoded length and the id
+ * are extract from the file. Then if the id is 1 the compressed chunk
+ * of the length read before is decompressed and written out in the
+ * output file. The code is consistency with the compression version.
+ */
 void decompress(FILE *input, FILE *output)
 {
 	while(1) {
@@ -46,7 +70,6 @@ void decompress(FILE *input, FILE *output)
 		}
 
 		id = readFile(input, 1).text;
-
 		inUnzip.len = readUnsigned(length.text, 0);
 		inUnzip.text = readFile(input, inUnzip.len).text;
 
