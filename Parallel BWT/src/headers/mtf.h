@@ -42,6 +42,7 @@
  * @note	If the most recently byte is read, i.e. we have at least two consecutive
  * 			equal characters, the algorithm outputs 0 for the second one.
  */
+
 #ifndef MTF_H
 #define MTF_H
 
