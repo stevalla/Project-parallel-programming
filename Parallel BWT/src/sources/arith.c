@@ -53,7 +53,7 @@ Text encodingRoutine(const Text input)
 	ByteBuffer *byteBuf;
 	Model	   *model;
 	IOBuffer   *buffer;
-	printf("%ld\n", BUF_BITS);
+
 	en    	 	  = (Encoder *)  	 malloc(sizeof(Encoder));
 	byteBuf   	  = (ByteBuffer *) 	 malloc(sizeof(ByteBuffer));
 	model 	 	  = (Model *)    	 malloc(sizeof(Model));

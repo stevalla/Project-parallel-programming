@@ -71,7 +71,7 @@ Text mtf(const Text input);
  * @brief	Returns the position of the searched byte in the list of
  * 			symbols, or -1 if the element is not found.
  *
- * @param[in] 		symbols		The list of symbols.
+ * @param[in] 		symbols		Pointer to the head of the list of symbols.
  * @param[in]		byte		The byte to be searched in the list.
  * @param[in,out]	aux			Pointer to the previous element of the searched
  * 								byte in the list, useful later to move ahead the
@@ -90,7 +90,7 @@ int search(SymbolsList   *const  symbols,
  * This operation is performed only if the searched element was not at the head
  * of the list.
  *
- * @param[in,out]	symbols		The list of symbols.
+ * @param[in,out]	symbols		Pointer to the head of the list of symbols.
  * @param[in] 		el			The element before the one to be moved in front of
  * 								the list.
  * @return	The current head of the list.
@@ -103,7 +103,7 @@ SymbolsList *mvtElement(SymbolsList *const symbols, SymbolsList *el);
 SymbolsList *initListOfSymbols(void);
 
 /**
- * @param[in] 		symbols		The list to be freed.
+ * @param[in] 		symbols		Pointer to the head of the list to be freed.
  */
 void freeListOfSymbols(SymbolsList *symbols);
 
