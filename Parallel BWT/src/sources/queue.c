@@ -3,8 +3,8 @@
 void initQueue(Queue *q)
 {
 	q->counter = 0;
-	q->rear = NULL;
-	q->front = NULL;
+	q->rear    = NULL;
+	q->front   = NULL;
 }
 
 int empty(Queue *q)
@@ -21,7 +21,7 @@ void enqueue(Text elem, Queue *q)
 	if(!empty(q)) {
 
 		q->rear->next = new;
-		q->rear = new;
+		q->rear       = new;
 
 	} else
 		q->front = q->rear = new;
@@ -31,16 +31,15 @@ void enqueue(Text elem, Queue *q)
 
 Text dequeue(Queue *q)
 {
-	Elem *tmp;
+	Elem *tmp = q->front;
 	Text elem = q->front->elem;
 
-	tmp = q->front;
 	q->front = q->front->next;
 
 	free(tmp);
 
 	if(q->front == NULL)
-		q->rear = NULL;
+		q->rear  = NULL;
 
 	return elem;
 }

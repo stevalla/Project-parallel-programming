@@ -1,31 +1,60 @@
+/******************************************************************************
+ * Copyright (C) 2018 by Stefano Valladares                                   *
+ *                                                                            *
+ * This file is part of ParallelBWTzip.                                       *
+ *                                                                            *
+ *   ParallelBWTzip is free software: you can redistribute it and/or modify   *
+ *   it under the terms of the GNU Lesser General Public License as           *
+ *   published by the Free Software Foundation, either version 3 of the       *
+ *   License, or (at your option) any later version.                          *
+ *                                                                            *
+ *   ParallelBWTzip is distributed in the hope that it will be useful,        *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
+ *   GNU Lesser General Public License for more details.                      *
+ *                                                                            *
+ *   You should have received a copy of the GNU Lesser General Public         *
+ *   License along with ParallelBWTzip. 									  *
+ *   If not, see <http://www.gnu.org/licenses/>.     						  *
+ ******************************************************************************/
+
+/**
+ * @file 	sequentialBwtZip.c
+ * @author 	Stefano Valladares, ste.valladares@live.com
+ * @date	20/12/2018
+ * @version 1.1
+ */
+
 #include "../headers/sequentialBwtZip.h"
 
-
+/**
+ * This function applies the four step of the BWT compression
+ * in sequence to a single sequence of bytes. The main phase are:
+ */
 Text bwtZip(const Text input)
 {
-	/***********************************************************************
-	 * BWT TRANSFORMATION
-	************************************************************************/
+	///-# BWT transformation
 	Text bwtOutput = bwtTransformation(input);
 
-	/***********************************************************************
-	 * MTF TRANSFORMATION
-	 ***********************************************************************/
+	///-# MTF transformation
 	Text mtfOutput = mtf(bwtOutput);
 
-	/***********************************************************************
-	 * ZLE ENCODING
-	 ***********************************************************************/
+	///-# Zero-length encoding
 	Text zleOutput = zleEncoding(mtfOutput);
 
-	/**********************************************************************
-	* ARITHMETIC ENCODING
-	***********************************************************************/
+	///-# Arithmetic compression
 	Text compressed = encodingRoutine(zleOutput);
 
 	return compressed;
 }
 
+/**
+ * The file is read chunk by chunk until is finished. Each chunk is
+ * compressed when is read and then written in output folloring
+ * its length (encoded in 4 bytes) and the id of the chunk.
+ * If one chunk is smaller than ::MIN_CHUNK_SIZE the chunk is not
+ * compressed for efficiency reasons.
+ */
 void compressSequential(FILE *input, FILE *output, long chunkSize)
 {
 	while(1) {
