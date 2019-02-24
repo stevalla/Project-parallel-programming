@@ -35,7 +35,7 @@
 Text bwtUnzip(const Text input)
 {
 	///-# Arithmetic decoding.
-	Text decompressed = decodingRoutine(input);
+	Text decompressed = arithDecoding(input);
 
 	///-# Zero-length deconding.
 	Text zleDecoded = zleDecoding(decompressed);

@@ -1,8 +1,33 @@
-#include <time.h>
-#include <stdlib.h>
+/******************************************************************************
+ * Copyright (C) 2018 by Stefano Valladares                                   *
+ *                                                                            *
+ * This file is part of ParallelBWTzip.                                       *
+ *                                                                            *
+ *   ParallelBWTzip is free software: you can redistribute it and/or modify   *
+ *   it under the terms of the GNU Lesser General Public License as           *
+ *   published by the Free Software Foundation, either version 3 of the       *
+ *   License, or (at your option) any later version.                          *
+ *                                                                            *
+ *   ParallelBWTzip is distributed in the hope that it will be useful,        *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
+ *   GNU Lesser General Public License for more details.                      *
+ *                                                                            *
+ *   You should have received a copy of the GNU Lesser General Public         *
+ *   License along with ParallelBWTzip. 									  *
+ *   If not, see <http://www.gnu.org/licenses/>.     						  *
+ ******************************************************************************/
+
+/**
+ * @file 	main.c
+ * @author 	Stefano Valladares, ste.valladares@live.com
+ * @date	20/12/2018
+ * @version 1.1
+ *
+ * @brief	Main of the application.
+ */
 
 #include "./headers/bwtUnzip.h"
-#include "./headers/util.h"
 #include "headers/parallelBwtZip.h"
 #include "headers/sequentialBwtZip.h"
 

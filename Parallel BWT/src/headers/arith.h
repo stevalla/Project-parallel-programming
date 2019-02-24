@@ -42,7 +42,6 @@
 #ifndef ARITH_H
 #define ARITH_H
 
-#include <assert.h>
 #include "util.h"
 
 /**
@@ -94,7 +93,7 @@ typedef struct Encoder
 {
 	unsigned low;		///<	Low value of the current interval.
 	unsigned high;		///<	High value of the current interval.
-	unsigned range;		///<	Range = High - Low
+	unsigned range;		///<	Range = High - Low.
 	unsigned underflow;	///<	Keeps track of the underflow bits to be printed out.
 
 } Encoder;
