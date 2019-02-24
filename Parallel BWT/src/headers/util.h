@@ -71,7 +71,7 @@ typedef struct Text {
 unsigned char decomposeUnsigned(unsigned u, int n);
 
 /**
- * @brief	Stores in an array of <unsigned char> that represents ul big-endian.
+ * @brief	Stores in an array of unsigned char that represents ul big-endian.
  *
  * @param[in]		u			The unsigned to encode.
  * @param[out]		output		Pointer to the output unsigned char where the result
@@ -85,7 +85,7 @@ void encodeUnsigned(const unsigned u, unsigned char *const output, int outIndex)
  * @brief	Returns the unsigned encoded big endian by the 4 bytes of the input
  * 			from location n.
  *
- * @param[in]		input	Pointer to the encoded <unsigned int>.
+ * @param[in]		input	Pointer to the encoded unsigned int.
  * @param[in] 		n		The index of the first byte of the encoded unsigned.
  * @return	Returns the unsigned int encoded big-endian by the 4 bytes starting
  * 			at location n.

@@ -24,6 +24,7 @@
  * @date	20/12/2018
  * @version 1.1
  *
+ * @brief	Sourcefile implementing the Burrows-Wheeler transformation (BWT).
  */
 
 #include "../headers/bwt.h"

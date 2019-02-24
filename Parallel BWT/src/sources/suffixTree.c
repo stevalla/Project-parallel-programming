@@ -23,6 +23,9 @@
  * @author 	Stefano Valladares, ste.valladares@live.com
  * @date	20/12/2018
  * @version 1.1
+ *
+ * @brief	Source file implementing the construction of the suffix tree given
+ * 			a sequence of bytes.
  */
 
 #include "../headers/suffixTree.h"

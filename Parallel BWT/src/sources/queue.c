@@ -23,6 +23,8 @@
  * @author 	Stefano Valladares, ste.valladares@live.com
  * @date	20/12/2018
  * @version 1.1
+ *
+ * @brief 	Source file implementing a queue.
  */
 
 #include "../headers/queue.h"

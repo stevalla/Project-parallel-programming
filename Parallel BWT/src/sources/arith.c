@@ -23,6 +23,8 @@
  * @author 	Stefano Valladares, ste.valladares@live.com
  * @date	20/12/2018
  * @version 1.1
+ *
+ * @brief 	Source file implementing an arithmetic coder compressor.
  */
 
 #include "../headers/arith.h"

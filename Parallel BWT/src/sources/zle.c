@@ -25,7 +25,6 @@
  * @version 1.1
  *
  * @brief 	Source file implementing a zero length encoder.
- *
  */
 
 #include "../headers/zle.h"
