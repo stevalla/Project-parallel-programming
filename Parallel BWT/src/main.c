@@ -27,7 +27,7 @@
  * @brief	Main of the application.
  */
 
-#include "./headers/bwtUnzip.h"
+#include "headers/bwtUnzip.h"
 #include "headers/parallelBwtZip.h"
 #include "headers/sequentialBwtZip.h"
 
@@ -82,17 +82,17 @@ char setMode(char *const mode)
 
 void zipMain(char *const input,
 			 char *const output,
-			 const char mode,
-			 const long chunkSize)
+			 const char  mode,
+			 const long  chunkSize)
 {
 	extern Buffer readin, bwt, arith;
 	struct timespec start, end;
 	double time;
 
-		puts("#BWTZIP\n");
-		printf("Input file %s\n", input);
+	puts("#BWTZIP\n");
+	printf("Input file %s\n", input);
 
-	FILE *inputE = openFileRB(input);
+	FILE *inputE  = openFileRB(input);
 	FILE *outputE = openFileWB(output);
 
 	//Calculate the wall time
@@ -120,7 +120,8 @@ void zipMain(char *const input,
 			(1 - (double)(fileSize(outputE) / (double)fileSize(inputE))) * 100);
 
 
-	time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
+	time = (end.tv_sec - start.tv_sec) +
+		   (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
 	printf("Time for compression %f sex\n", time);
 	fclose(inputE);
@@ -132,7 +133,7 @@ void zipMain(char *const input,
 void unzipMain(char *const input,
 			   char *const output)
 {
-	FILE *inputD = openFileRB(input);
+	FILE *inputD  = openFileRB(input);
 	FILE *outputD = openFileWB(output);
 
 	puts("#BWTUNZIP\n");
@@ -148,13 +149,13 @@ void unzipMain(char *const input,
 
 void compareMain(char *const input, char *const output)
 {
-	FILE *original = openFileRB(input);
+	FILE *original   = openFileRB(input);
 	FILE *decompress = openFileRB(output);
 
 	puts("#BWTCOMPARE\n");
 
 	int result = compareFiles(original, decompress,
-			fileSize(original), fileSize(decompress));
+			                  fileSize(original), fileSize(decompress));
 
 	if(result == 1)
 		printf("Compression loseless\n");
